@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../../security/presentation/cubit/security_cubit.dart';
 import '../../../security/presentation/cubit/security_state.dart';
 
@@ -8,24 +9,27 @@ import '../../../security/presentation/cubit/security_state.dart';
 class BiometricSwitchTile extends StatelessWidget {
   const BiometricSwitchTile({super.key});
 
-  static String message(SecurityFeedback feedback) => switch (feedback) {
-    SecurityFeedback.turnedOn => 'Biometric lock turned on',
-    SecurityFeedback.turnedOff => 'Biometric lock turned off',
-    SecurityFeedback.unavailable =>
-      'Set up a fingerprint or face unlock on this device first',
-    SecurityFeedback.failed => 'Couldn\'t verify it\'s you. Try again.',
-  };
+  static void _announce(BuildContext context, SecurityFeedback feedback) {
+    switch (feedback) {
+      case SecurityFeedback.turnedOn:
+        context.showSuccess('Biometric lock turned on');
+      case SecurityFeedback.turnedOff:
+        context.showInfo('Biometric lock turned off');
+      case SecurityFeedback.unavailable:
+        context.showWarning(
+          'Set up a fingerprint or face unlock on this device first',
+        );
+      case SecurityFeedback.failed:
+        context.showError('Couldn\'t verify it\'s you. Try again.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SecurityCubit, SecurityState>(
       listenWhen: (previous, current) =>
           current.feedback != null && current.attempt != previous.attempt,
-      listener: (context, state) {
-        ScaffoldMessenger.of(context)
-          ..hideCurrentSnackBar()
-          ..showSnackBar(SnackBar(content: Text(message(state.feedback!))));
-      },
+      listener: (context, state) => _announce(context, state.feedback!),
       builder: (context, state) => SwitchListTile(
         value: state.enabled,
         onChanged: context.read<SecurityCubit>().setBiometricEnabled,

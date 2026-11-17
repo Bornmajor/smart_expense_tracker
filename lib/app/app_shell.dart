@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/expenses/presentation/widgets/add_expense_sheet.dart';
+import '../shared/widgets/app_snack_bar.dart';
 import 'app_routes.dart';
 
 /// Bottom navigation around the three main tabs, plus the add button.
@@ -20,9 +21,7 @@ class AppShell extends StatelessWidget {
       case AddExpenseChoice.manual:
         context.push(AppRoutes.addExpense);
       case AddExpenseChoice.scan:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt scanning is coming soon')),
-        );
+        context.showInfo('Receipt scanning is coming soon');
     }
   }
 

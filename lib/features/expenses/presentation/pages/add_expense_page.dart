@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../domain/validation/expense_validation.dart';
 import '../cubit/add_expense_cubit.dart';
 import '../cubit/add_expense_state.dart';
@@ -43,15 +44,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void _onStateChanged(BuildContext context, AddExpenseState state) {
     switch (state.status) {
       case AddExpenseStatus.saved:
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Expense saved')));
+        context.showSuccess('Expense saved');
         context.pop();
       case AddExpenseStatus.failed:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Couldn\'t save the expense. Try again.'),
-          ),
-        );
+        context.showError('Couldn\'t save the expense. Try again.');
       case AddExpenseStatus.editing || AddExpenseStatus.saving:
         break;
     }
