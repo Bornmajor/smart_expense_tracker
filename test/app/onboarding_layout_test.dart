@@ -7,9 +7,11 @@ import '../support/fakes.dart';
 import '../support/pump_app.dart';
 
 void main() {
+  const screen = Size(800, 1600);
+
   Future<void> openOnboarding(
     WidgetTester tester, {
-    Size screenSize = const Size(800, 1600),
+    Size screenSize = screen,
   }) async {
     await pumpRouterApp(
       tester,
@@ -19,34 +21,58 @@ void main() {
     await tapText(tester, 'Get started');
   }
 
-  /// Top color of the gradient on the slide that is currently shown.
-  Color gradientTopColor(WidgetTester tester) {
-    final box = tester.widget<DecoratedBox>(
-      find
-          .descendant(
-            of: find.byType(OnboardingSlideView),
-            matching: find.byType(DecoratedBox),
-          )
-          .first,
-    );
-    final gradient = (box.decoration as BoxDecoration).gradient!;
-    return (gradient as LinearGradient).colors.first;
-  }
+  /// The box that paints the background of the slide currently shown.
+  Finder slideBackground() => find
+      .descendant(
+        of: find.byType(OnboardingSlideView),
+        matching: find.byType(ColoredBox),
+      )
+      .first;
 
   group('slides', () {
-    test('each slide has its own background tint', () {
-      final light = onboardingSlides.map((s) => s.lightTint).toSet();
-      final dark = onboardingSlides.map((s) => s.darkTint).toSet();
+    test('each slide has its own bright background color', () {
+      final colors = onboardingSlides.map((s) => s.color).toSet();
 
-      expect(light, hasLength(onboardingSlides.length));
-      expect(dark, hasLength(onboardingSlides.length));
+      expect(colors, hasLength(onboardingSlides.length));
+    });
+  });
+
+  group('colors', () {
+    testWidgets('the background covers the whole screen, not just a section', (
+      tester,
+    ) async {
+      await openOnboarding(tester);
+
+      expect(tester.getSize(slideBackground()), screen);
+      expect(
+        tester.widget<ColoredBox>(slideBackground()).color,
+        onboardingSlides.first.color,
+      );
     });
 
-    test('uses the darker tint in dark mode', () {
-      final slide = onboardingSlides.first;
+    testWidgets('the whole screen changes color with each slide', (
+      tester,
+    ) async {
+      await openOnboarding(tester);
 
-      expect(slide.tint(Brightness.light), slide.lightTint);
-      expect(slide.tint(Brightness.dark), slide.darkTint);
+      for (var i = 0; i < onboardingSlides.length; i++) {
+        expect(
+          tester.widget<ColoredBox>(slideBackground()).color,
+          onboardingSlides[i].color,
+        );
+        expect(tester.getSize(slideBackground()), screen);
+        if (i < onboardingSlides.length - 1) await tapText(tester, 'Next');
+      }
+    });
+
+    testWidgets('the buttons are black on every slide', (tester) async {
+      await openOnboarding(tester);
+
+      for (var i = 0; i < onboardingSlides.length; i++) {
+        final button = tester.widget<FilledButton>(find.byType(FilledButton));
+        expect(button.style?.backgroundColor?.resolve({}), onboardingInk);
+        if (i < onboardingSlides.length - 1) await tapText(tester, 'Next');
+      }
     });
   });
 
@@ -62,15 +88,6 @@ void main() {
 
       expect(titleTop, greaterThanOrEqualTo(800));
       expect(titleTop, lessThan(800 + 40));
-    });
-
-    testWidgets('the gradient changes with each slide', (tester) async {
-      await openOnboarding(tester);
-
-      for (var i = 0; i < onboardingSlides.length; i++) {
-        expect(gradientTopColor(tester), onboardingSlides[i].lightTint);
-        if (i < onboardingSlides.length - 1) await tapText(tester, 'Next');
-      }
     });
 
     testWidgets('Skip is a secondary button just below Next', (tester) async {

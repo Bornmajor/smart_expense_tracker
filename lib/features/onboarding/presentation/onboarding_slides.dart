@@ -1,24 +1,23 @@
 import 'package:flutter/material.dart';
 
+/// Text, buttons and the progress bar on the onboarding screens are always
+/// black, in light and dark mode, because the backgrounds are bright.
+const onboardingInk = Color(0xFF0A0A0A);
+
 class OnboardingSlide {
   const OnboardingSlide({
     required this.title,
     required this.description,
     required this.image,
-    required this.lightTint,
-    required this.darkTint,
+    required this.color,
   });
 
   final String title;
   final String description;
   final String image;
 
-  /// Top color of the slide's background gradient, which fades into the page.
-  final Color lightTint;
-  final Color darkTint;
-
-  Color tint(Brightness brightness) =>
-      brightness == Brightness.dark ? darkTint : lightTint;
+  /// Fills the whole screen behind this slide.
+  final Color color;
 }
 
 const onboardingSlides = [
@@ -28,9 +27,7 @@ const onboardingSlides = [
         'Scan a receipt and SpendWise IQ reads the vendor, date, and total. '
         'Or type it in yourself. Either way, you check it before it\'s saved.',
     image: 'assets/illustrations/onboarding_scan.png',
-    // Peach
-    lightTint: Color(0xFFFFD7BF),
-    darkTint: Color(0xFF4A3024),
+    color: Color(0xFFFFE14D), // Yellow
   ),
   OnboardingSlide(
     title: 'See where your money goes',
@@ -38,9 +35,7 @@ const onboardingSlides = [
         'Spending by category and a clear summary of your month, '
         'all in one place.',
     image: 'assets/illustrations/onboarding_track.png',
-    // Mint
-    lightTint: Color(0xFFC6EDDD),
-    darkTint: Color(0xFF1F4137),
+    color: Color(0xFFDCC4FB), // Lavender
   ),
   OnboardingSlide(
     title: 'Private by design',
@@ -49,8 +44,6 @@ const onboardingSlides = [
         'Lock the app with your fingerprint or face, and export a monthly '
         'PDF or CSV.',
     image: 'assets/illustrations/onboarding_private.webp',
-    // Lavender
-    lightTint: Color(0xFFD9D3FA),
-    darkTint: Color(0xFF2E2B52),
+    color: Color(0xFFFF6B3D), // Orange
   ),
 ];

@@ -4,9 +4,10 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../onboarding_slides.dart';
 
-/// One onboarding page: a gradient area with the illustration on top, and the
-/// title and description below. The progress bar and buttons are drawn over it
-/// by the page, so they stay put while pages slide.
+/// One onboarding page. The slide's color fills the whole screen, with the
+/// illustration on top and the title and description below. The progress bar
+/// and buttons are drawn over it by the page, so they stay put while pages
+/// slide.
 ///
 /// The text area is at least half the screen. If the text (or a large font
 /// size) needs more room, it grows and the illustration shrinks, so the text
@@ -25,23 +26,15 @@ class OnboardingSlideView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final surface = context.scheme.surface;
-    final tint = slide.tint(Theme.of(context).brightness);
     final buttonsSpace =
         buttonsAreaHeight + MediaQuery.paddingOf(context).bottom;
 
-    return LayoutBuilder(
-      builder: (context, constraints) => Column(
-        children: [
-          Expanded(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [tint, surface],
-                ),
-              ),
+    return ColoredBox(
+      color: slide.color,
+      child: LayoutBuilder(
+        builder: (context, constraints) => Column(
+          children: [
+            Expanded(
               child: SafeArea(
                 bottom: false,
                 child: Padding(
@@ -60,11 +53,8 @@ class OnboardingSlideView extends StatelessWidget {
                 ),
               ),
             ),
-          ),
-          ConstrainedBox(
-            constraints: BoxConstraints(minHeight: constraints.maxHeight / 2),
-            child: ColoredBox(
-              color: surface,
+            ConstrainedBox(
+              constraints: BoxConstraints(minHeight: constraints.maxHeight / 2),
               child: Padding(
                 padding: AppSpacing.screen.copyWith(bottom: buttonsSpace),
                 child: Column(
@@ -73,20 +63,26 @@ class OnboardingSlideView extends StatelessWidget {
                     Text(
                       slide.title,
                       textAlign: TextAlign.center,
-                      style: context.text.headlineMedium,
+                      style: context.text.headlineMedium?.copyWith(
+                        color: onboardingInk,
+                        fontSize: 32,
+                        height: 1.15,
+                      ),
                     ),
                     const Gap(AppSpacing.md),
                     Text(
                       slide.description,
                       textAlign: TextAlign.center,
-                      style: context.text.bodyMedium,
+                      style: context.text.bodyLarge?.copyWith(
+                        color: onboardingInk.withValues(alpha: 0.85),
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

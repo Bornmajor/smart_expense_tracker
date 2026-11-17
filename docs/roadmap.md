@@ -4,7 +4,7 @@ What is planned, in the order we intend to build it. Items move to the README fe
 
 ## Up next
 
-1. **Onboarding redesign** (in progress): gradient background per slide, a 50/50 split between the illustration area and the text, and a secondary Skip button below Next.
+1. **Onboarding redesign** (in progress): a bright full-screen background per slide (yellow, lavender, orange) with black text and buttons, a 50/50 split between the illustration and the text, and a secondary Skip button below Next.
 2. **Release pipeline and early testers.** Fastlane run from GitHub Actions, release signing, and uploads to the Google Play internal testing track. Add testers by email and start a closed test early.
 3. **Finish the expense loop.** Edit an expense, delete with undo, group the list by day, and show the category name on each item.
 4. **Category management.** Create, rename and delete categories (name required and unique; deleting moves expenses to "Other").
