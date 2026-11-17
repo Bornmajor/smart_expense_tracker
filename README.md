@@ -25,25 +25,27 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 
 ### Planned
 
-**Capture and scan**
+**MVP: scan, track, export**
 - [ ] Welcome screen and onboarding (shown once)
 - [ ] Camera capture and gallery import for receipts
 - [ ] On-device OCR that extracts vendor, date and total
 - [ ] Review-and-edit form, auto-filled from the scan, confirmed before saving
 - [ ] Automatic category suggestion, with manual override
-
-**Track**
-- [ ] Offline-first local storage of expenses and receipt images
-- [ ] Expense list grouped by day, with edit and delete (undo)
 - [ ] Manual expense entry
-- [ ] Home dashboard with monthly total and top categories
-- [ ] Spending charts by category and by day
-- [ ] Monthly and per-category budgets with alerts
-- [ ] Search and filters (date, category, amount, vendor)
-
-**Share and secure**
-- [ ] Export monthly reports as PDF and CSV
+- [ ] Offline-first local storage of expenses
+- [ ] Expense list grouped by day, with edit and delete (undo)
+- [ ] Custom categories (create and edit)
+- [ ] Home dashboard with the monthly total and spending by category
+- [ ] Monthly report as PDF and CSV, shared or saved from the system share sheet
 - [ ] Fingerprint / Face ID lock
+
+**After the MVP**
+- [ ] Budgets with progress and alerts
+- [ ] Search and filters (date, category, amount, vendor)
+- [ ] More charts and insights
+- [ ] Recurring expenses
+- [ ] Multi-currency
+- [ ] Optional receipt attachment
 
 ## Tech stack
 
@@ -56,9 +58,14 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 | On-device OCR | `google_mlkit_text_recognition` (ML Kit) | Planned |
 | Local database | `drift` (SQLite) | Planned |
 | State management | `flutter_bloc` (Cubit), `equatable`, `bloc_test` for tests | Planned |
+| Navigation | `go_router` | Planned |
 | Charts | `fl_chart` | Planned |
 | Export | `pdf`, `printing`, `csv`, `share_plus` | Planned |
 | Biometrics | `local_auth` | Planned |
+
+## Architecture
+
+The app uses a feature-first structure with domain, data and presentation layers in each feature. See [docs/architecture.md](docs/architecture.md) for the folder layout, data flow and conventions.
 
 ## Getting started
 
