@@ -2,8 +2,10 @@
 # Same black screen in light and dark mode so the logo is always visible.
 flutter_native_splash:
   color: "#0A0A0A"
-  image: assets/branding/splash_logo.png
+  # iOS and Android 11 and older: logo with the app name below it.
+  image: assets/branding/splash_with_label.png
   android_12:
+    # Android 12+ only shows the icon (OS limitation, no text support).
     color: "#0A0A0A"
     image: assets/branding/splash_logo.png
   web: false
