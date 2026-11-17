@@ -44,6 +44,6 @@ const onboardingSlides = [
         'Lock the app with your fingerprint or face, and export a monthly '
         'PDF or CSV.',
     image: 'assets/illustrations/onboarding_private.webp',
-    color: Color(0xFFFF6B3D), // Orange
+    color: Color(0xFF8FEBBE), // Mint (13.7:1 contrast with black)
   ),
 ];
