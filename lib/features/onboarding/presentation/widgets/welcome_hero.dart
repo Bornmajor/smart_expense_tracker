@@ -19,19 +19,24 @@ class WelcomeHero extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final iconColor = context.scheme.onSurfaceVariant.withValues(alpha: 0.7);
+    // The color fills the whole area (behind the status bar), but the logo and
+    // icons stay inside the safe area, away from the notch.
     return ColoredBox(
       color: context.scheme.surfaceContainerHighest,
-      child: Stack(
-        children: [
-          for (final (alignment, icon) in _decorations)
-            Align(
-              alignment: alignment,
-              child: ExcludeSemantics(
-                child: Icon(icon, size: 30, color: iconColor),
+      child: SafeArea(
+        bottom: false,
+        child: Stack(
+          children: [
+            for (final (alignment, icon) in _decorations)
+              Align(
+                alignment: alignment,
+                child: ExcludeSemantics(
+                  child: Icon(icon, size: 30, color: iconColor),
+                ),
               ),
-            ),
-          const Center(child: AppLogo(size: 112)),
-        ],
+            const Center(child: AppLogo(size: 112)),
+          ],
+        ),
       ),
     );
   }

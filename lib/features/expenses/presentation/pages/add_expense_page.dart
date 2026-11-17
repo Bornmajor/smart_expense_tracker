@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../domain/validation/expense_validation.dart';
 import '../cubit/add_expense_cubit.dart';
 import '../cubit/add_expense_state.dart';
@@ -43,15 +44,10 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void _onStateChanged(BuildContext context, AddExpenseState state) {
     switch (state.status) {
       case AddExpenseStatus.saved:
-        ScaffoldMessenger.of(context)
-            .showSnackBar(const SnackBar(content: Text('Expense saved')));
+        context.showSuccess('Expense saved');
         context.pop();
       case AddExpenseStatus.failed:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Couldn\'t save the expense. Try again.'),
-          ),
-        );
+        context.showError('Couldn\'t save the expense. Try again.');
       case AddExpenseStatus.editing || AddExpenseStatus.saving:
         break;
     }
@@ -70,54 +66,59 @@ class _AddExpensePageState extends State<AddExpensePage> {
         final saving = state.status == AddExpenseStatus.saving;
         return Scaffold(
           appBar: AppBar(title: const Text('Add expense')),
-          body: ListView(
-            padding: AppSpacing.screen,
-            children: [
-              TextField(
-                controller: _vendor,
-                textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Vendor (optional)',
+          // The app bar handles the top; this keeps the form and the Save
+          // button clear of the gesture bar and any side notch.
+          body: SafeArea(
+            top: false,
+            child: ListView(
+              padding: AppSpacing.screen,
+              children: [
+                TextField(
+                  controller: _vendor,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: const InputDecoration(
+                    labelText: 'Vendor (optional)',
+                  ),
                 ),
-              ),
-              const Gap(AppSpacing.md),
-              TextField(
-                controller: _amount,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
+                const Gap(AppSpacing.md),
+                TextField(
+                  controller: _amount,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                  ],
+                  decoration: InputDecoration(
+                    labelText: 'Amount',
+                    errorText: _error(state, ExpenseField.amount),
+                  ),
                 ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
-                ],
-                decoration: InputDecoration(
-                  labelText: 'Amount',
-                  errorText: _error(state, ExpenseField.amount),
+                const Gap(AppSpacing.md),
+                DateField(
+                  date: _date,
+                  errorText: _error(state, ExpenseField.date),
+                  onChanged: (value) => setState(() => _date = value),
                 ),
-              ),
-              const Gap(AppSpacing.md),
-              DateField(
-                date: _date,
-                errorText: _error(state, ExpenseField.date),
-                onChanged: (value) => setState(() => _date = value),
-              ),
-              const Gap(AppSpacing.xl),
-              CategoryPicker(
-                selectedId: _categoryId,
-                errorText: _error(state, ExpenseField.category),
-                onSelected: (id) => setState(() => _categoryId = id),
-              ),
-              const Gap(AppSpacing.xxl),
-              FilledButton(
-                onPressed: saving ? null : _submit,
-                child: saving
-                    ? const SizedBox.square(
-                        dimension: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Text('Save expense'),
-              ),
-              const Gap(AppSpacing.xl),
-            ],
+                const Gap(AppSpacing.xl),
+                CategoryPicker(
+                  selectedId: _categoryId,
+                  errorText: _error(state, ExpenseField.category),
+                  onSelected: (id) => setState(() => _categoryId = id),
+                ),
+                const Gap(AppSpacing.xxl),
+                FilledButton(
+                  onPressed: saving ? null : _submit,
+                  child: saving
+                      ? const SizedBox.square(
+                          dimension: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Save expense'),
+                ),
+                const Gap(AppSpacing.xl),
+              ],
+            ),
           ),
         );
       },

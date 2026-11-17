@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../shared/widgets/app_logo.dart';
+import '../../../../shared/widgets/app_snack_bar.dart';
 import '../cubit/lock_cubit.dart';
 import '../cubit/lock_state.dart';
 
@@ -31,11 +32,7 @@ class _LockPageState extends State<LockPage> {
     return BlocConsumer<LockCubit, LockScreenState>(
       listenWhen: (previous, current) => current.status == LockStatus.failed,
       listener: (context, _) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Couldn\'t verify it\'s you. Try again.'),
-          ),
-        );
+        context.showError('Couldn\'t verify it\'s you. Try again.');
       },
       builder: (context, state) {
         final busy = state.status == LockStatus.authenticating;

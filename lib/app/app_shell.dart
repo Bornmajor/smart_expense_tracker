@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/expenses/presentation/widgets/add_expense_sheet.dart';
+import '../shared/widgets/app_snack_bar.dart';
 import 'app_routes.dart';
 
 /// Bottom navigation around the three main tabs, plus the add button.
@@ -20,9 +21,7 @@ class AppShell extends StatelessWidget {
       case AddExpenseChoice.manual:
         context.push(AppRoutes.addExpense);
       case AddExpenseChoice.scan:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Receipt scanning is coming soon')),
-        );
+        context.showInfo('Receipt scanning is coming soon');
     }
   }
 
@@ -30,7 +29,10 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final index = navigationShell.currentIndex;
     return Scaffold(
-      body: navigationShell,
+      // Sides only: each page's app bar handles the top, and the navigation
+      // bar and Scaffold handle the bottom. This keeps content out of a
+      // landscape notch.
+      body: SafeArea(top: false, bottom: false, child: navigationShell),
       floatingActionButton: index == _settingsIndex
           ? null
           : FloatingActionButton.extended(

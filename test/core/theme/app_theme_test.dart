@@ -5,6 +5,7 @@ import 'package:smart_expense_tracker/core/theme/app_semantic_colors.dart';
 import 'package:smart_expense_tracker/core/theme/app_spacing.dart';
 import 'package:smart_expense_tracker/core/theme/app_theme.dart';
 import 'package:smart_expense_tracker/core/theme/theme_x.dart';
+import 'package:smart_expense_tracker/core/utils/color_contrast.dart';
 
 void main() {
   group('AppTheme', () {
@@ -39,6 +40,44 @@ void main() {
       final style = AppTheme.light.filledButtonTheme.style!;
 
       expect(style.minimumSize!.resolve({}), const Size.fromHeight(52));
+    });
+  });
+
+  group('navigation bar contrast', () {
+    test('the selected icon stands out from its indicator in both themes', () {
+      for (final theme in [AppTheme.light, AppTheme.dark]) {
+        final nav = theme.navigationBarTheme;
+        final selected = nav.iconTheme!.resolve({WidgetState.selected})!.color!;
+
+        expect(
+          contrastRatio(selected, nav.indicatorColor!),
+          greaterThanOrEqualTo(4.5),
+          reason: '${theme.brightness} selected icon on indicator',
+        );
+      }
+    });
+
+    test('unselected icons are readable on the bar in both themes', () {
+      for (final theme in [AppTheme.light, AppTheme.dark]) {
+        final nav = theme.navigationBarTheme;
+        final unselected = nav.iconTheme!.resolve({})!.color!;
+
+        expect(
+          contrastRatio(unselected, nav.backgroundColor!),
+          greaterThanOrEqualTo(4.5),
+          reason: '${theme.brightness} unselected icon on bar',
+        );
+      }
+    });
+
+    test('the selected icon keeps the on-primary color', () {
+      for (final theme in [AppTheme.light, AppTheme.dark]) {
+        final selected = theme.navigationBarTheme.iconTheme!.resolve({
+          WidgetState.selected,
+        })!.color;
+
+        expect(selected, theme.colorScheme.onPrimary);
+      }
     });
   });
 

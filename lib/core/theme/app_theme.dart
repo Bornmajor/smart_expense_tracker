@@ -115,9 +115,19 @@ abstract final class AppTheme {
         foregroundColor: s.onSurface,
       ),
 
+      // The selected icon is drawn in onPrimary (white in light mode, black in
+      // dark mode), so the indicator behind it is the primary color (the
+      // opposite). That keeps the active tab readable in both themes.
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: s.surface,
-        indicatorColor: s.surfaceContainerHighest,
+        indicatorColor: s.primary,
+        iconTheme: WidgetStateProperty.resolveWith(
+          (states) => IconThemeData(
+            color: states.contains(WidgetState.selected)
+                ? s.onPrimary
+                : s.onSurfaceVariant,
+          ),
+        ),
         elevation: 0,
       ),
 

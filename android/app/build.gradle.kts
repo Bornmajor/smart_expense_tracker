@@ -5,7 +5,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.smart_expense_tracker"
+    namespace = "com.bornmajor.spendwiseiq"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -15,8 +15,8 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.smart_expense_tracker"
+        // Permanent once published to Google Play. Do not change it afterwards.
+        applicationId = "com.bornmajor.spendwiseiq"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

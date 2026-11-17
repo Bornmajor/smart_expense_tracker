@@ -169,6 +169,17 @@ Dependencies are passed through constructors. `app/` creates the database, datas
 - Keep a page file to layout and wiring. Move sections into `widgets/`.
 - Reusable, feature-agnostic widgets (buttons, empty states, section headers) go to `shared/widgets/`.
 
+## Safe areas and screen edges
+
+Phones have notches, rounded corners and gesture bars, so content must never sit under them. Every screen follows these rules:
+
+- A screen drawn **without an app bar** (welcome, onboarding, lock) wraps its content in `SafeArea`. A background color may fill the whole screen behind the status bar, but text, icons, images and buttons stay inside the safe area.
+- A screen with an `AppBar` already handles the top. A page in a `Scaffold` with a bottom navigation bar already handles the bottom.
+- A scrolling form outside the app shell (for example Add expense) wraps its list in `SafeArea(top: false)`, so the last button clears the gesture bar.
+- Side insets matter in landscape. The app shell wraps its body in `SafeArea(top: false, bottom: false)`.
+- Anything drawn over a page (buttons, a progress bar) applies `SafeArea` or `MediaQuery.paddingOf(context)` itself.
+- Every new screen gets a test that simulates insets. See `test/app/safe_area_test.dart` and the `safePadding` option of `pumpRouterApp`.
+
 ## Naming
 
 | Thing | File | Class |
