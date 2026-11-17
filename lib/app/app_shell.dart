@@ -30,7 +30,10 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final index = navigationShell.currentIndex;
     return Scaffold(
-      body: navigationShell,
+      // Sides only: each page's app bar handles the top, and the navigation
+      // bar and Scaffold handle the bottom. This keeps content out of a
+      // landscape notch.
+      body: SafeArea(top: false, bottom: false, child: navigationShell),
       floatingActionButton: index == _settingsIndex
           ? null
           : FloatingActionButton.extended(

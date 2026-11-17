@@ -25,8 +25,18 @@ Future<LockSession> pumpRouterApp(
   FakeBiometricAuthenticator? authenticator,
   LockSession? lockSession,
   Size screenSize = const Size(800, 1600),
+  EdgeInsets safePadding = EdgeInsets.zero,
 }) async {
   tester.view.physicalSize = screenSize;
+  // Simulates a notch and gesture bar (the device pixel ratio is 1 below).
+  final insets = FakeViewPadding(
+    left: safePadding.left,
+    top: safePadding.top,
+    right: safePadding.right,
+    bottom: safePadding.bottom,
+  );
+  tester.view.padding = insets;
+  tester.view.viewPadding = insets;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 

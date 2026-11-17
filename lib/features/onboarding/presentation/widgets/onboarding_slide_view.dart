@@ -55,29 +55,34 @@ class OnboardingSlideView extends StatelessWidget {
             ),
             ConstrainedBox(
               constraints: BoxConstraints(minHeight: constraints.maxHeight / 2),
-              child: Padding(
-                padding: AppSpacing.screen.copyWith(bottom: buttonsSpace),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      slide.title,
-                      textAlign: TextAlign.center,
-                      style: context.text.headlineMedium?.copyWith(
-                        color: onboardingInk,
-                        fontSize: 32,
-                        height: 1.15,
+              // Sides only: the bottom is already kept clear for the buttons.
+              child: SafeArea(
+                top: false,
+                bottom: false,
+                child: Padding(
+                  padding: AppSpacing.screen.copyWith(bottom: buttonsSpace),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        slide.title,
+                        textAlign: TextAlign.center,
+                        style: context.text.headlineMedium?.copyWith(
+                          color: onboardingInk,
+                          fontSize: 32,
+                          height: 1.15,
+                        ),
                       ),
-                    ),
-                    const Gap(AppSpacing.md),
-                    Text(
-                      slide.description,
-                      textAlign: TextAlign.center,
-                      style: context.text.bodyLarge?.copyWith(
-                        color: onboardingInk.withValues(alpha: 0.85),
+                      const Gap(AppSpacing.md),
+                      Text(
+                        slide.description,
+                        textAlign: TextAlign.center,
+                        style: context.text.bodyLarge?.copyWith(
+                          color: onboardingInk.withValues(alpha: 0.85),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
