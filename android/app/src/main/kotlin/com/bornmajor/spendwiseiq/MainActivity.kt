@@ -1,4 +1,4 @@
-package com.example.smart_expense_tracker
+package com.bornmajor.spendwiseiq
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 
