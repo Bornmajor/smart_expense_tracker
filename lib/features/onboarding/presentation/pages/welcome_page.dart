@@ -16,36 +16,36 @@ class WelcomePage extends StatelessWidget {
       backgroundColor: context.scheme.surface,
       body: Column(
         children: [
-          const Expanded(flex: 6, child: WelcomeHero()),
-          Expanded(
-            flex: 4,
-            child: SafeArea(
-              top: false,
-              child: Padding(
-                padding: AppSpacing.screen,
-                child: Column(
-                  children: [
-                    const Gap(AppSpacing.xl),
-                    Text(
-                      'Welcome to SpendWise IQ',
-                      textAlign: TextAlign.center,
-                      style: context.text.headlineMedium,
-                    ),
-                    const Gap(AppSpacing.md),
-                    Text(
-                      'Scan receipts, track spending, and keep everything '
-                      'private on your phone.',
-                      textAlign: TextAlign.center,
-                      style: context.text.bodyMedium,
-                    ),
-                    const Spacer(),
-                    FilledButton(
-                      onPressed: () => context.go(AppRoutes.onboarding),
-                      child: const Text('Get started'),
-                    ),
-                    const Gap(AppSpacing.xl),
-                  ],
-                ),
+          // The text area takes the height it needs and the hero fills the
+          // rest, so nothing overflows on short phones.
+          const Expanded(child: WelcomeHero()),
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: AppSpacing.screen,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Gap(AppSpacing.xl),
+                  Text(
+                    'Welcome to SpendWise IQ',
+                    textAlign: TextAlign.center,
+                    style: context.text.headlineMedium,
+                  ),
+                  const Gap(AppSpacing.md),
+                  Text(
+                    'Scan receipts, track spending, and keep everything '
+                    'private on your phone.',
+                    textAlign: TextAlign.center,
+                    style: context.text.bodyMedium,
+                  ),
+                  const Gap(AppSpacing.xxl),
+                  FilledButton(
+                    onPressed: () => context.go(AppRoutes.onboarding),
+                    child: const Text('Get started'),
+                  ),
+                  const Gap(AppSpacing.xl),
+                ],
               ),
             ),
           ),

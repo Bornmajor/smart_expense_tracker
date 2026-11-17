@@ -19,7 +19,11 @@ void main() {
         .toList();
     final scheme = AppTheme.light.colorScheme;
 
-    expect(colors, [scheme.primary, scheme.primary, scheme.outline]);
+    expect(colors, [
+      scheme.primary,
+      scheme.primary,
+      scheme.onSurface.withValues(alpha: 0.15),
+    ]);
     expect(find.bySemanticsLabel('Step 2 of 3'), findsOneWidget);
     handle.dispose();
   });

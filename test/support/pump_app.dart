@@ -24,8 +24,9 @@ Future<LockSession> pumpRouterApp(
   FakeSecurityRepository? security,
   FakeBiometricAuthenticator? authenticator,
   LockSession? lockSession,
+  Size screenSize = const Size(800, 1600),
 }) async {
-  tester.view.physicalSize = const Size(800, 1600);
+  tester.view.physicalSize = screenSize;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
 
