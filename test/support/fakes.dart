@@ -4,6 +4,7 @@ import 'package:smart_expense_tracker/features/categories/domain/entities/catego
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
+import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
 
 class FakeExpenseRepository implements ExpenseRepository {
   FakeExpenseRepository({List<Expense> initial = const []})
@@ -56,4 +57,16 @@ class ErrorExpenseRepository implements ExpenseRepository {
 class ErrorCategoryRepository implements CategoryRepository {
   @override
   Stream<List<Category>> watchAll() => Stream.error(Exception('boom'));
+}
+
+class FakeOnboardingRepository implements OnboardingRepository {
+  FakeOnboardingRepository({this._completed = false});
+
+  bool _completed;
+
+  @override
+  bool get isCompleted => _completed;
+
+  @override
+  Future<void> complete() async => _completed = true;
 }

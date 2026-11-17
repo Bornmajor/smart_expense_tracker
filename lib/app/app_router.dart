@@ -9,11 +9,35 @@ import '../features/expenses/presentation/cubit/add_expense_cubit.dart';
 import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
 import '../features/expenses/presentation/pages/add_expense_page.dart';
 import '../features/expenses/presentation/pages/expense_list_page.dart';
+import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
+import '../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../features/onboarding/presentation/pages/welcome_page.dart';
 import 'app_routes.dart';
 
-GoRouter createRouter() => GoRouter(
+GoRouter createRouter({required OnboardingRepository onboarding}) => GoRouter(
   initialLocation: AppRoutes.expenses,
+  // First launch goes to the welcome screen; afterwards it is never shown again.
+  redirect: (context, state) {
+    final location = state.matchedLocation;
+    final inIntro =
+        location == AppRoutes.welcome || location == AppRoutes.onboarding;
+    if (!onboarding.isCompleted && !inIntro) return AppRoutes.welcome;
+    if (onboarding.isCompleted && inIntro) return AppRoutes.expenses;
+    return null;
+  },
   routes: [
+    GoRoute(
+      path: AppRoutes.welcome,
+      builder: (context, state) => const WelcomePage(),
+    ),
+    GoRoute(
+      path: AppRoutes.onboarding,
+      builder: (context, state) => BlocProvider(
+        create: (_) => OnboardingCubit(context.read<OnboardingRepository>()),
+        child: const OnboardingPage(),
+      ),
+    ),
     GoRoute(
       path: AppRoutes.expenses,
       builder: (context, state) => BlocProvider(

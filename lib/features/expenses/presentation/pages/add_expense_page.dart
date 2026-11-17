@@ -43,6 +43,8 @@ class _AddExpensePageState extends State<AddExpensePage> {
   void _onStateChanged(BuildContext context, AddExpenseState state) {
     switch (state.status) {
       case AddExpenseStatus.saved:
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Expense saved')));
         context.pop();
       case AddExpenseStatus.failed:
         ScaffoldMessenger.of(context).showSnackBar(

@@ -27,7 +27,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 
 **MVP: scan, track, export**
 - [ ] Welcome screen and onboarding (shown once)
-- [ ] Camera capture and gallery import for receipts
+- [ ] Optional receipt scanning with camera capture or gallery import (manual entry always works)
 - [ ] On-device OCR that extracts vendor, date and total
 - [ ] Review-and-edit form, auto-filled from the scan, confirmed before saving
 - [ ] Automatic category suggestion, with manual override

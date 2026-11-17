@@ -27,7 +27,9 @@ void main() {
         ],
         child: MaterialApp.router(
           theme: AppTheme.light,
-          routerConfig: createRouter(),
+          routerConfig: createRouter(
+            onboarding: FakeOnboardingRepository(completed: true),
+          ),
         ),
       ),
     );
@@ -56,6 +58,7 @@ void main() {
     await tester.pump();
     await tapSave(tester);
 
+    expect(find.text('Expense saved'), findsOneWidget);
     expect(find.text('Add your first expense'), findsNothing);
     expect(find.text('Unknown'), findsOneWidget);
     expect(find.text('12.50'), findsOneWidget);
