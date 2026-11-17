@@ -1,0 +1,9 @@
+# Generate with: dart run flutter_native_splash:create
+# Same black screen in light and dark mode so the logo is always visible.
+flutter_native_splash:
+  color: "#0A0A0A"
+  image: assets/branding/splash_logo.png
+  android_12:
+    color: "#0A0A0A"
+    image: assets/branding/splash_logo.png
+  web: false
