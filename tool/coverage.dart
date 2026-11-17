@@ -14,7 +14,9 @@ const _defaultMin = 80.0;
 const _helperPath = 'test/_coverage_helper_test.dart';
 const _lcovPath = 'coverage/lcov.info';
 
-const _excludedFiles = {'lib/main.dart', 'lib/app.dart'};
+const _excludedFiles = {'lib/main.dart'};
+// Composition root: app shell, router and dependency wiring.
+const _excludedPrefixes = ['lib/app/'];
 const _generatedSuffixes = ['.g.dart', '.freezed.dart', '.gr.dart'];
 
 Future<void> main(List<String> args) async {
@@ -157,6 +159,7 @@ String _normalize(String path) {
 
 bool _isExcluded(String path) {
   if (_excludedFiles.contains(path)) return true;
+  if (_excludedPrefixes.any(path.startsWith)) return true;
   if (_generatedSuffixes.any(path.endsWith)) return true;
   final file = File(path);
   return file.existsSync() &&

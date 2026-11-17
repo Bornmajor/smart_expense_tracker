@@ -122,6 +122,22 @@ abstract final class AppTheme {
       ),
 
       dividerTheme: DividerThemeData(color: s.outline, space: 1),
+
+      // Feedback messages float above the bottom bar with rounded corners.
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: AppRadius.mdAll),
+      ),
+
+      bottomSheetTheme: BottomSheetThemeData(
+        backgroundColor: s.surface,
+        showDragHandle: true,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(AppRadius.xl),
+          ),
+        ),
+      ),
     );
   }
 }

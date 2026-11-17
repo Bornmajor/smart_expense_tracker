@@ -25,6 +25,8 @@ SpendWise IQ uses a **feature-first, layered** structure. Each feature owns its 
 3. **Add structure when it earns its place.** No layer, class or file exists just to match a diagram.
 4. **Small files, reusable widgets.** Split before a file becomes hard to read (see [File size](#file-size-and-widgets)).
 5. **Offline-first.** The local database is the source of truth. A server, if added later, plugs in behind the repository.
+6. **Scanning is optional.** Every expense can be entered by hand, and the app never requires camera permission. Scan is a shortcut into the same add-expense form, not a separate path.
+7. **Feedback through snackbars.** Results of user actions ("Expense saved", "Couldn't save") are shown as snackbars.
 
 ## Folder structure
 

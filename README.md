@@ -22,22 +22,23 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 ### Implemented
 
 - [x] Light and dark themes with a shared design system (colors, spacing, typography)
+- [x] Welcome screen and three-step onboarding, shown once
+- [x] Manual expense entry with validation, stored offline on the device
+- [x] Expense list, newest first
+- [x] Monthly summary: total and spending by category, with a month switcher
+- [x] Settings: theme (system, light, dark) and About
+- [x] Optional fingerprint / face lock, turned on from Settings
 
 ### Planned
 
 **MVP: scan, track, export**
-- [ ] Welcome screen and onboarding (shown once)
-- [ ] Camera capture and gallery import for receipts
+- [ ] Optional receipt scanning with camera capture or gallery import (manual entry always works)
 - [ ] On-device OCR that extracts vendor, date and total
 - [ ] Review-and-edit form, auto-filled from the scan, confirmed before saving
 - [ ] Automatic category suggestion, with manual override
-- [ ] Manual expense entry
-- [ ] Offline-first local storage of expenses
 - [ ] Expense list grouped by day, with edit and delete (undo)
 - [ ] Custom categories (create and edit)
-- [ ] Home dashboard with the monthly total and spending by category
 - [ ] Monthly report as PDF and CSV, shared or saved from the system share sheet
-- [ ] Fingerprint / Face ID lock
 
 **After the MVP**
 - [ ] Budgets with progress and alerts
@@ -54,14 +55,15 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 | Framework | Flutter 3.47 (Dart 3.13), Material 3 | In use |
 | Theming | `ThemeData` + `ThemeExtension`, light and dark | In use |
 | CI | GitHub Actions (format, analyze, test, coverage) | In use |
+| Local database | `drift` (SQLite) | In use |
+| State management | `flutter_bloc` (Cubit), `equatable`, `bloc_test` for tests | In use |
+| Navigation | `go_router` | In use |
+| Settings storage | `shared_preferences` | In use |
+| Biometrics | `local_auth` | In use |
 | Camera | `camera` / `image_picker` | Planned |
 | On-device OCR | `google_mlkit_text_recognition` (ML Kit) | Planned |
-| Local database | `drift` (SQLite) | Planned |
-| State management | `flutter_bloc` (Cubit), `equatable`, `bloc_test` for tests | Planned |
-| Navigation | `go_router` | Planned |
-| Charts | `fl_chart` | Planned |
+| Charts | `fl_chart` (if a chart is added) | Planned |
 | Export | `pdf`, `printing`, `csv`, `share_plus` | Planned |
-| Biometrics | `local_auth` | Planned |
 
 ## Architecture
 
