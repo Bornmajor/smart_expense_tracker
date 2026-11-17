@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/presentation/cubit/categories_cubit.dart';
+import '../features/dashboard/presentation/cubit/summary_cubit.dart';
+import '../features/dashboard/presentation/pages/summary_page.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
 import '../features/expenses/presentation/cubit/add_expense_cubit.dart';
@@ -13,17 +15,37 @@ import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/onboarding/presentation/pages/welcome_page.dart';
+import '../features/security/domain/repositories/biometric_authenticator.dart';
+import '../features/security/presentation/cubit/lock_cubit.dart';
+import '../features/security/presentation/lock_session.dart';
+import '../features/security/presentation/pages/lock_page.dart';
+import '../features/settings/presentation/pages/settings_page.dart';
 import 'app_routes.dart';
+import 'app_shell.dart';
 
-GoRouter createRouter({required OnboardingRepository onboarding}) => GoRouter(
+/// The app's navigation.
+///
+/// Journey on launch:
+///  1. First time: welcome -> onboarding (once) -> home.
+///  2. Afterwards: home, or the lock screen first if the user turned on the
+///     biometric lock.
+GoRouter createRouter({
+  required OnboardingRepository onboarding,
+  required LockSession lockSession,
+}) => GoRouter(
   initialLocation: AppRoutes.expenses,
-  // First launch goes to the welcome screen; afterwards it is never shown again.
+  refreshListenable: lockSession,
   redirect: (context, state) {
     final location = state.matchedLocation;
     final inIntro =
         location == AppRoutes.welcome || location == AppRoutes.onboarding;
-    if (!onboarding.isCompleted && !inIntro) return AppRoutes.welcome;
-    if (onboarding.isCompleted && inIntro) return AppRoutes.expenses;
+
+    if (!onboarding.isCompleted) return inIntro ? null : AppRoutes.welcome;
+
+    if (lockSession.isLocked) {
+      return location == AppRoutes.lock ? null : AppRoutes.lock;
+    }
+    if (inIntro || location == AppRoutes.lock) return AppRoutes.expenses;
     return null;
   },
   routes: [
@@ -39,11 +61,58 @@ GoRouter createRouter({required OnboardingRepository onboarding}) => GoRouter(
       ),
     ),
     GoRoute(
-      path: AppRoutes.expenses,
+      path: AppRoutes.lock,
       builder: (context, state) => BlocProvider(
-        create: (_) => ExpenseListCubit(context.read<ExpenseRepository>()),
-        child: const ExpenseListPage(),
+        create: (_) =>
+            LockCubit(context.read<BiometricAuthenticator>(), lockSession),
+        child: const LockPage(),
       ),
+    ),
+    StatefulShellRoute.indexedStack(
+      builder: (context, state, navigationShell) =>
+          AppShell(navigationShell: navigationShell),
+      branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.expenses,
+              builder: (context, state) => BlocProvider(
+                create: (_) =>
+                    ExpenseListCubit(context.read<ExpenseRepository>()),
+                child: const ExpenseListPage(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.summary,
+              builder: (context, state) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) =>
+                        SummaryCubit(context.read<ExpenseRepository>()),
+                  ),
+                  BlocProvider(
+                    create: (_) =>
+                        CategoriesCubit(context.read<CategoryRepository>()),
+                  ),
+                ],
+                child: const SummaryPage(),
+              ),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.settings,
+              builder: (context, state) => const SettingsPage(),
+            ),
+          ],
+        ),
+      ],
     ),
     GoRoute(
       path: AppRoutes.addExpense,

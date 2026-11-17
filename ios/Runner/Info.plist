@@ -6,6 +6,8 @@
 		<true/>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
+		<key>NSFaceIDUsageDescription</key>
+		<string>Use Face ID to unlock SpendWise IQ.</string>
 		<key>CFBundleDisplayName</key>
 		<string>SpendWise IQ</string>
 		<key>CFBundleExecutable</key>

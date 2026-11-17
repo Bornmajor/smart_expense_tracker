@@ -5,6 +5,10 @@ import 'package:smart_expense_tracker/features/categories/domain/repositories/ca
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
+import 'package:smart_expense_tracker/features/security/domain/repositories/biometric_authenticator.dart';
+import 'package:smart_expense_tracker/features/security/domain/repositories/security_repository.dart';
+import 'package:smart_expense_tracker/features/settings/domain/entities/app_theme_mode.dart';
+import 'package:smart_expense_tracker/features/settings/domain/repositories/settings_repository.dart';
 
 class FakeExpenseRepository implements ExpenseRepository {
   FakeExpenseRepository({List<Expense> initial = const []})
@@ -57,6 +61,47 @@ class ErrorExpenseRepository implements ExpenseRepository {
 class ErrorCategoryRepository implements CategoryRepository {
   @override
   Stream<List<Category>> watchAll() => Stream.error(Exception('boom'));
+}
+
+class FakeSettingsRepository implements SettingsRepository {
+  FakeSettingsRepository({this.mode = AppThemeMode.system});
+
+  AppThemeMode mode;
+
+  @override
+  AppThemeMode get themeMode => mode;
+
+  @override
+  Future<void> setThemeMode(AppThemeMode value) async => mode = value;
+}
+
+class FakeSecurityRepository implements SecurityRepository {
+  FakeSecurityRepository({this.enabled = false});
+
+  bool enabled;
+
+  @override
+  bool get isBiometricEnabled => enabled;
+
+  @override
+  Future<void> setBiometricEnabled(bool value) async => enabled = value;
+}
+
+class FakeBiometricAuthenticator implements BiometricAuthenticator {
+  FakeBiometricAuthenticator({this.available = true, this.succeeds = true});
+
+  bool available;
+  bool succeeds;
+  int authenticateCalls = 0;
+
+  @override
+  Future<bool> isAvailable() async => available;
+
+  @override
+  Future<bool> authenticate({required String reason}) async {
+    authenticateCalls++;
+    return succeeds;
+  }
 }
 
 class FakeOnboardingRepository implements OnboardingRepository {

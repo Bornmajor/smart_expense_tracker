@@ -23,3 +23,19 @@ final class StorageFailure extends AppFailure {
   @override
   List<Object?> get props => [];
 }
+
+/// The device has no usable biometrics (none enrolled, or not supported).
+final class BiometricUnavailableFailure extends AppFailure {
+  const BiometricUnavailableFailure();
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// The user cancelled or failed the biometric check.
+final class AuthenticationFailure extends AppFailure {
+  const AuthenticationFailure();
+
+  @override
+  List<Object?> get props => [];
+}

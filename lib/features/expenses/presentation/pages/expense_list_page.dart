@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 
-import '../../../../app/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../cubit/expense_list_cubit.dart';
@@ -16,11 +14,6 @@ class ExpenseListPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Expenses')),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.push(AppRoutes.addExpense),
-        icon: const Icon(Icons.add),
-        label: const Text('Add expense'),
-      ),
       body: BlocBuilder<ExpenseListCubit, ExpenseListState>(
         builder: (context, state) => switch (state) {
           ExpenseListLoading() => const Center(
