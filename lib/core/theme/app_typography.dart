@@ -1,0 +1,44 @@
+import 'package:flutter/material.dart';
+
+abstract final class AppTypography {
+  /// Set to 'Inter' once the font files are added to assets/fonts and
+  /// declared in pubspec.yaml. Null uses the platform default font.
+  static const String? fontFamily = null;
+
+  static TextTheme textTheme(Color primary, Color secondary) => TextTheme(
+    headlineMedium: TextStyle(
+      fontSize: 28,
+      fontWeight: FontWeight.w600,
+      color: primary,
+      height: 1.2,
+    ),
+    titleLarge: TextStyle(
+      fontSize: 22,
+      fontWeight: FontWeight.w600,
+      color: primary,
+    ),
+    titleMedium: TextStyle(
+      fontSize: 17,
+      fontWeight: FontWeight.w600,
+      color: primary,
+    ),
+    bodyLarge: TextStyle(
+      fontSize: 16,
+      fontWeight: FontWeight.w400,
+      color: primary,
+      height: 1.5,
+    ),
+    bodyMedium: TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.w400,
+      color: secondary,
+      height: 1.5,
+    ),
+    bodySmall: TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w400,
+      color: secondary,
+    ),
+    labelLarge: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+  );
+}
