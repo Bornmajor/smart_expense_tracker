@@ -1,9 +1,16 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/categories/domain/repositories/category_repository.dart';
+import '../features/categories/domain/usecases/create_category.dart';
+import '../features/categories/domain/usecases/delete_category.dart';
+import '../features/categories/domain/usecases/find_or_create_category.dart';
+import '../features/categories/domain/usecases/rename_category.dart';
 import '../features/categories/presentation/cubit/categories_cubit.dart';
+import '../features/categories/presentation/cubit/category_actions_cubit.dart';
+import '../features/categories/presentation/pages/categories_page.dart';
 import '../features/dashboard/presentation/cubit/summary_cubit.dart';
 import '../features/dashboard/presentation/pages/summary_page.dart';
 import '../features/expenses/domain/entities/expense.dart';
@@ -15,6 +22,14 @@ import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
 import '../features/expenses/presentation/pages/expense_form_page.dart';
 import '../features/expenses/presentation/pages/expense_list_page.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/scan/debug/ocr_debug_page.dart';
+import '../features/scan/domain/entities/receipt_source.dart';
+import '../features/scan/domain/entities/scan_result.dart';
+import '../features/scan/domain/repositories/receipt_photo_source.dart';
+import '../features/scan/domain/repositories/receipt_text_reader.dart';
+import '../features/scan/domain/usecases/scan_receipt.dart';
+import '../features/scan/presentation/cubit/scan_cubit.dart';
+import '../features/scan/presentation/pages/scan_page.dart';
 import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/onboarding/presentation/pages/welcome_page.dart';
@@ -126,9 +141,49 @@ GoRouter createRouter({
         ),
       ],
     ),
+    // TEMPORARY developer tool. Only exists in debug builds, so it can never
+    // reach a release.
+    if (kDebugMode)
+      GoRoute(
+        path: AppRoutes.ocrDebug,
+        builder: (context, state) => const OcrDebugPage(),
+      ),
+    GoRoute(
+      path: AppRoutes.categories,
+      builder: (context, state) {
+        final categories = context.read<CategoryRepository>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => CategoriesCubit(categories)),
+            BlocProvider(create: (_) => _categoryActions(categories)),
+          ],
+          child: const CategoriesPage(),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.scan,
+      // The photo source arrives as `extra`; without it there is nothing to do.
+      redirect: (context, state) =>
+          state.extra is ReceiptSource ? null : AppRoutes.expenses,
+      builder: (context, state) => BlocProvider(
+        create: (_) => ScanCubit(
+          ScanReceipt(
+            photos: context.read<ReceiptPhotoSource>(),
+            reader: context.read<ReceiptTextReader>(),
+            categories: context.read<CategoryRepository>(),
+          ),
+        ),
+        child: ScanPage(source: state.extra! as ReceiptSource),
+      ),
+    ),
     GoRoute(
       path: AppRoutes.addExpense,
-      builder: (context, state) => _expenseForm(context),
+      // After a scan, the result arrives as `extra` and fills in the form.
+      builder: (context, state) => _expenseForm(
+        context,
+        scan: state.extra is ScanResult ? state.extra! as ScanResult : null,
+      ),
     ),
     GoRoute(
       path: AppRoutes.editExpense,
@@ -141,9 +196,24 @@ GoRouter createRouter({
   ],
 );
 
-/// The expense form: adding when [original] is null, editing otherwise.
-Widget _expenseForm(BuildContext context, {Expense? original}) {
+CategoryActionsCubit _categoryActions(CategoryRepository categories) =>
+    CategoryActionsCubit(
+      createCategory: CreateCategory(categories),
+      findOrCreateCategory: FindOrCreateCategory(categories),
+      renameCategory: RenameCategory(categories),
+      deleteCategory: DeleteCategory(categories),
+      repository: categories,
+    );
+
+/// The expense form: adding when [original] is null, editing otherwise. A
+/// [scan] fills in the fields and shows the receipt photo.
+Widget _expenseForm(
+  BuildContext context, {
+  Expense? original,
+  ScanResult? scan,
+}) {
   final expenses = context.read<ExpenseRepository>();
+  final categories = context.read<CategoryRepository>();
   return MultiBlocProvider(
     providers: [
       BlocProvider(
@@ -154,10 +224,17 @@ Widget _expenseForm(BuildContext context, {Expense? original}) {
           original: original,
         ),
       ),
-      BlocProvider(
-        create: (_) => CategoriesCubit(context.read<CategoryRepository>()),
-      ),
+      BlocProvider(create: (_) => CategoriesCubit(categories)),
+      // For the "New" chip: add a category without leaving the form.
+      BlocProvider(create: (_) => _categoryActions(categories)),
     ],
-    child: ExpenseFormPage(original: original),
+    child: ExpenseFormPage(
+      original: original,
+      scan: scan,
+      // The receipt photo is only for comparing, so it goes when the form does.
+      discardPhoto: scan == null
+          ? null
+          : context.read<ReceiptPhotoSource>().discard,
+    ),
   );
 }

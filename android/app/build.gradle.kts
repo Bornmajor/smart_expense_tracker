@@ -61,6 +61,12 @@ android {
             } else {
                 signingConfigs.getByName("debug")
             }
+
+            // Rules for the code shrinker (R8), see proguard-rules.pro.
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
         }
     }
 }

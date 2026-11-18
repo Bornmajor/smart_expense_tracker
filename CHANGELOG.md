@@ -6,8 +6,19 @@ Add entries under **Unreleased** as you merge into `dev`. When a release goes to
 
 ## [Unreleased]
 
+First release. Nothing has been published to Google Play yet.
+
 ### Added
 
-### Changed
-
-### Fixed
+- Welcome screen and a three-step introduction, shown once
+- Add expenses by hand with an amount, date, category, and an optional title and vendor
+- Scan a receipt: choose a photo and the vendor, date, total and a likely category are read on your phone and filled into the expense form for you to check. Nothing is uploaded, and the photo is deleted afterwards
+- Edit an expense, and delete it by swiping (with Undo) or from the edit screen
+- Expenses grouped by day, with a total for each day and the category name on every row
+- Monthly summary with the total and spending by category, and a month switcher
+- Categories you manage yourself: create, rename and delete. Deleting a category moves its expenses to Other
+- A New chip on the expense form to add a category without leaving the form
+- Light, dark and system themes
+- Optional fingerprint or face lock, turned on from Settings
+- Color-coded messages for success, warnings and errors
+- Everything is stored on the phone and works offline, with no account

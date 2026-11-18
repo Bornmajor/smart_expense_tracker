@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/expenses/presentation/widgets/add_expense_sheet.dart';
-import '../shared/widgets/app_snack_bar.dart';
+import '../features/scan/domain/entities/receipt_source.dart';
 import 'app_routes.dart';
 
 /// Bottom navigation around the three main tabs, plus the add button.
@@ -20,8 +20,10 @@ class AppShell extends StatelessWidget {
     switch (choice) {
       case AddExpenseChoice.manual:
         context.push(AppRoutes.addExpense);
-      case AddExpenseChoice.scan:
-        context.showInfo('Receipt scanning is coming soon');
+      case AddExpenseChoice.scanGallery:
+        context.push(AppRoutes.scan, extra: ReceiptSource.gallery);
+      case AddExpenseChoice.scanCamera:
+        context.push(AppRoutes.scan, extra: ReceiptSource.camera);
     }
   }
 

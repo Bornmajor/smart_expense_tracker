@@ -103,6 +103,8 @@ A use case is added only when it does more than forward a call.
 
 Starting rules for an expense (change them here when the product changes): amount greater than zero, date not in the future, category required, vendor optional (blank becomes "Unknown"), title optional (trimmed, at most 60 characters). Adding and editing share these rules (`ExpenseRules`).
 
+Starting rules for a category: a name is required, at most 30 characters, and unique ignoring case and surrounding spaces (`CategoryRules`). The "Other" category is the fallback: it can be renamed but never deleted, and deleting any other category moves its expenses to it in one database transaction. The Categories screen uses `CreateCategory`, which reports a duplicate name. The expense form's New chip uses `FindOrCreateCategory`, which quietly selects the category the user already has.
+
 ### Datasources
 
 Add a datasource class only where it wraps something we want to fake in tests or isolate from a plugin: ML Kit, camera, biometrics, PDF and CSV generation.
@@ -217,16 +219,18 @@ CI enforces formatting, static analysis and the coverage gate. See [README](../R
 
 ```
 ScanPage (UI)
-  -> ScanCubit
-    -> ScanReceipt (use case)         # business logic
-      -> ReceiptOcrRepository         # domain interface
-        -> ReceiptOcrRepositoryImpl   # data
-          -> MlKitOcrDataSource       # wraps google_mlkit_text_recognition
-      -> ReceiptParser                # domain: finds vendor, date, total
-      -> Categorizer                  # domain: suggests a category
+  -> ScanCubit                        # where the scan is: working, preview, done, failed
+    -> ScanReceipt (use case)         # pick, read, recover, discard
+      -> ReceiptPhotoSource           # domain interface
+        -> ImagePickerPhotoSource     # data: wraps image_picker
+      -> ReceiptTextReader            # domain interface
+        -> MlKitReceiptTextReader     # data: wraps google_mlkit_text_recognition
+      -> ReceiptRows                  # domain: joins OCR lines at the same height into rows
+      -> ParseReceipt                 # domain: finds vendor, date, total
+      -> SuggestCategory              # domain: suggests a category the user has
 ```
 
-The cubit emits a scanned result that fills the review form. After the user verifies it, saving goes through the `SaveExpense` use case, which validates the business rules and then writes through `ExpenseRepository`.
+The cubit emits a scanned result that fills the add-expense form, beside the receipt photo. The plugins sit behind two small interfaces, so everything else is tested with fakes and only the native ML Kit call needs a phone. The photo is temporary: it is deleted when the form closes, and whenever a scan fails or is left. After the user verifies it, saving goes through the `SaveExpense` use case, which validates the business rules and then writes through `ExpenseRepository`.
 
 ## Example: monthly report
 

@@ -6,6 +6,8 @@ import 'package:smart_expense_tracker/core/theme/app_theme.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
+import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_photo_source.dart';
+import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_text_reader.dart';
 import 'package:smart_expense_tracker/features/security/domain/repositories/biometric_authenticator.dart';
 import 'package:smart_expense_tracker/features/security/domain/usecases/enable_biometric_lock.dart';
 import 'package:smart_expense_tracker/features/security/presentation/cubit/security_cubit.dart';
@@ -20,6 +22,9 @@ Future<LockSession> pumpRouterApp(
   WidgetTester tester, {
   FakeOnboardingRepository? onboarding,
   FakeExpenseRepository? expenses,
+  FakeCategoryRepository? categories,
+  FakeReceiptPhotoSource? photos,
+  FakeReceiptTextReader? reader,
   FakeSettingsRepository? settings,
   FakeSecurityRepository? security,
   FakeBiometricAuthenticator? authenticator,
@@ -56,9 +61,15 @@ Future<LockSession> pumpRouterApp(
           value: expenses ?? FakeExpenseRepository(),
         ),
         RepositoryProvider<CategoryRepository>.value(
-          value: FakeCategoryRepository(),
+          value: categories ?? FakeCategoryRepository(),
         ),
         RepositoryProvider<BiometricAuthenticator>.value(value: auth),
+        RepositoryProvider<ReceiptPhotoSource>.value(
+          value: photos ?? FakeReceiptPhotoSource(),
+        ),
+        RepositoryProvider<ReceiptTextReader>.value(
+          value: reader ?? FakeReceiptTextReader(),
+        ),
       ],
       child: MultiBlocProvider(
         providers: [

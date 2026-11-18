@@ -8,6 +8,10 @@
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>NSFaceIDUsageDescription</key>
 		<string>Use Face ID to unlock SpendWise IQ.</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Take a photo of a receipt to read its vendor, date and total on your phone.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Choose a photo of a receipt to read its vendor, date and total on your phone.</string>
 		<key>CFBundleDisplayName</key>
 		<string>SpendWise IQ</string>
 		<key>CFBundleExecutable</key>

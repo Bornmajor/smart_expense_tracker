@@ -19,7 +19,7 @@ SpendWise IQ is a smart, privacy-first expense tracker. Point your camera at a r
   </tr>
 </table>
 
-Captured on an Android phone with the dark theme. Receipt scanning, mentioned on the welcome and onboarding screens, is still planned (see [Features](#features)).
+Captured on an Android phone with the dark theme. Scanning a receipt photo from the gallery works; taking the photo with the camera is still planned (see [Features](#features)).
 
 ## The problem it solves
 
@@ -43,18 +43,17 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Manual expense entry with validation (optional title and vendor), stored offline on the device
 - [x] Expense list grouped by day, with daily totals and category names
 - [x] Edit an expense, or delete it by swiping (with Undo) or from the edit screen
+- [x] Categories you manage yourself: create, rename and delete (deleting moves the expenses to Other)
+- [x] Add a category from the expense form with the New chip, without losing what you typed
 - [x] Monthly summary: total and spending by category, with a month switcher
 - [x] Settings: theme (system, light, dark) and About
 - [x] Optional fingerprint / face lock, turned on from Settings
+- [x] Scan a receipt: choose a photo and the app reads the vendor, date and total on your phone, suggests a category, and fills the expense form for you to check before saving. The photo is temporary and is deleted afterwards
 
 ### Planned
 
 **MVP: scan, track, export**
-- [ ] Optional receipt scanning with camera capture or gallery import (manual entry always works)
-- [ ] On-device OCR that extracts vendor, date and total
-- [ ] Review-and-edit form, auto-filled from the scan, confirmed before saving
-- [ ] Automatic category suggestion, with manual override
-- [ ] Custom categories (create and edit)
+- [ ] Scan a receipt with the camera (choosing a photo from the gallery works today; see the [roadmap](docs/roadmap.md))
 - [ ] Monthly report as PDF and CSV, shared or saved from the system share sheet
 
 **After the MVP** (see the [roadmap](docs/roadmap.md) for the build order)
