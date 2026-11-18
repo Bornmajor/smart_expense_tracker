@@ -1,9 +1,9 @@
 # Releasing to Google Play
 
-Pushing a version tag builds a signed app bundle in GitHub Actions and uploads it to the **internal testing** track with [Fastlane](https://docs.fastlane.tools/). Testers get the update from the Play Store.
+Merging to `main` builds a signed app bundle in GitHub Actions, once CI passes, and uploads it to the **internal testing** track with [Fastlane](https://docs.fastlane.tools/). Testers get the update from the Play Store.
 
 ```
-git tag v0.1.0  ->  GitHub Actions  ->  flutter build appbundle  ->  fastlane internal  ->  Play internal testing
+merge to main  ->  CI passes  ->  flutter build appbundle  ->  fastlane internal  ->  Play internal testing
 ```
 
 ## How the pieces fit
@@ -78,15 +78,20 @@ Encode the keystore on Windows (PowerShell) and paste the result into the secret
 
 ## Releasing
 
-1. Set the user-facing version in `pubspec.yaml`, for example `version: 1.0.0+1`. The part before `+` is the version name testers see.
-2. Merge to `main`, then tag and push:
+Every merge to `main` goes to internal testing on its own:
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
+1. Merge a pull request into `main`.
+2. The **CI** workflow runs (format, analyze, tests, coverage).
+3. If CI passes, **Release to Play internal testing** builds that exact commit and uploads it. If CI fails, nothing is uploaded.
 
-You can also run the workflow by hand from the **Actions** tab.
+Testers get the update from the Play Store a few minutes later. You can also start the workflow by hand from the **Actions** tab, on `main` only.
+
+Set the user-facing version in `pubspec.yaml` (for example `version: 1.1.0+1`) in the pull request that should change it. The part before `+` is the version name testers see. Every merge uploads a new build even when the version name stays the same, so testers may see several builds of 1.1.0.
+
+Because every merge ships to testers:
+
+- In GitHub, **Settings, Branches**, add a rule for `main` that requires the CI checks to pass and a pull request before merging. This keeps broken code out of `main` in the first place.
+- If you only want some merges released, open **Settings, Environments**, create an environment named `internal`, add yourself as a required reviewer, and add `environment: internal` to the job in `release.yml`. Each upload then waits for your approval.
 
 The workflow replaces the build number with `run number + 100`, because Play needs a higher version code for every upload and the run number only goes up. You do not need to bump the `+N` part yourself.
 
