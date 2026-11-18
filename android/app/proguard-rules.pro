@@ -15,3 +15,10 @@
 -dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 -dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions$Builder
 -dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
+
+# ML Kit starts itself by looking up its "registrar" classes by name and calling
+# their empty constructors. Nothing in the code calls those constructors, so R8
+# removes them, ML Kit never starts, and every receipt fails to read in the
+# release build (the debug build does not shrink, so it works). Keep them.
+-keep class com.google.mlkit.**.*Registrar { <init>(); }
+-keep class * implements com.google.firebase.components.ComponentRegistrar { <init>(); }
