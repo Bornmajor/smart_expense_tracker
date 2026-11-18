@@ -14,6 +14,13 @@ abstract final class Money {
     return whole * 100 + cents;
   }
 
+  /// Plain text for an input field, such as "1234.50". Unlike [format] it has
+  /// no thousands separators, so [tryParse] reads it back to the same value.
+  static String toInputText(int minorUnits) {
+    final cents = (minorUnits.abs() % 100).toString().padLeft(2, '0');
+    return '${minorUnits < 0 ? '-' : ''}${minorUnits.abs() ~/ 100}.$cents';
+  }
+
   /// Formats minor units as "1,234.56".
   static String format(int minorUnits) {
     final negative = minorUnits < 0;

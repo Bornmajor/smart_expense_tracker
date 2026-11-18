@@ -19,13 +19,30 @@ class FakeExpenseRepository implements ExpenseRepository {
   /// When set, `save` throws it (to test failure handling).
   Object? saveError;
 
+  /// When set, `delete` throws it.
+  Object? deleteError;
+
   final _changes = StreamController<List<Expense>>.broadcast();
 
   @override
   Future<void> save(Expense expense) async {
     final error = saveError;
     if (error != null) throw error;
-    saved.add(expense);
+    // Same as the real repository: an existing id is replaced.
+    final index = saved.indexWhere((e) => e.id == expense.id);
+    if (index >= 0) {
+      saved[index] = expense;
+    } else {
+      saved.add(expense);
+    }
+    _changes.add(List.of(saved));
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    final error = deleteError;
+    if (error != null) throw error;
+    saved.removeWhere((e) => e.id == id);
     _changes.add(List.of(saved));
   }
 
@@ -53,6 +70,9 @@ class FakeCategoryRepository implements CategoryRepository {
 class ErrorExpenseRepository implements ExpenseRepository {
   @override
   Future<void> save(Expense expense) async {}
+
+  @override
+  Future<void> delete(String id) async {}
 
   @override
   Stream<List<Expense>> watchAll() => Stream.error(Exception('boom'));

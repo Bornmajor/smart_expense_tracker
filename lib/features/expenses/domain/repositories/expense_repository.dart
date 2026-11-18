@@ -5,6 +5,10 @@ abstract interface class ExpenseRepository {
   /// Throws `StorageException` if storage fails.
   Future<void> save(Expense expense);
 
+  /// Removes the expense. Does nothing when the id does not exist.
+  /// Throws `StorageException` if storage fails.
+  Future<void> delete(String id);
+
   /// Emits all expenses (newest first) now and whenever they change.
   Stream<List<Expense>> watchAll();
 }

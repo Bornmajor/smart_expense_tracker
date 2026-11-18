@@ -12,8 +12,10 @@ enum AppSnackBarKind { success, warning, error, info }
 SnackBar buildAppSnackBar(
   BuildContext context,
   AppSnackBarKind kind,
-  String message,
-) {
+  String message, {
+  String? actionLabel,
+  VoidCallback? onAction,
+}) {
   final semantic = context.semantic;
   final (background, icon) = switch (kind) {
     AppSnackBarKind.success => (semantic.success, Icons.check_circle_outline),
@@ -27,6 +29,14 @@ SnackBar buildAppSnackBar(
 
   return SnackBar(
     backgroundColor: background,
+    // The action uses the same readable color as the message.
+    action: actionLabel == null || onAction == null
+        ? null
+        : SnackBarAction(
+            label: actionLabel,
+            textColor: foreground,
+            onPressed: onAction,
+          ),
     content: Row(
       children: [
         Icon(icon, color: foreground),
@@ -43,7 +53,8 @@ SnackBar buildAppSnackBar(
 }
 
 /// `context.showSuccess('Saved')`, `showWarning`, `showError` and `showInfo`.
-/// A new message replaces the one on screen.
+/// A new message replaces the one on screen. Pass [actionLabel] and
+/// [onAction] for a button such as Undo.
 extension AppSnackBars on BuildContext {
   void showSuccess(String message) => _show(AppSnackBarKind.success, message);
 
@@ -51,11 +62,33 @@ extension AppSnackBars on BuildContext {
 
   void showError(String message) => _show(AppSnackBarKind.error, message);
 
-  void showInfo(String message) => _show(AppSnackBarKind.info, message);
+  void showInfo(
+    String message, {
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) => _show(
+    AppSnackBarKind.info,
+    message,
+    actionLabel: actionLabel,
+    onAction: onAction,
+  );
 
-  void _show(AppSnackBarKind kind, String message) {
+  void _show(
+    AppSnackBarKind kind,
+    String message, {
+    String? actionLabel,
+    VoidCallback? onAction,
+  }) {
     ScaffoldMessenger.of(this)
       ..hideCurrentSnackBar()
-      ..showSnackBar(buildAppSnackBar(this, kind, message));
+      ..showSnackBar(
+        buildAppSnackBar(
+          this,
+          kind,
+          message,
+          actionLabel: actionLabel,
+          onAction: onAction,
+        ),
+      );
   }
 }

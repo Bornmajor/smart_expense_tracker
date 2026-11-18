@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
@@ -5,11 +6,13 @@ import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/presentation/cubit/categories_cubit.dart';
 import '../features/dashboard/presentation/cubit/summary_cubit.dart';
 import '../features/dashboard/presentation/pages/summary_page.dart';
+import '../features/expenses/domain/entities/expense.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
-import '../features/expenses/presentation/cubit/add_expense_cubit.dart';
+import '../features/expenses/domain/usecases/update_expense.dart';
+import '../features/expenses/presentation/cubit/expense_form_cubit.dart';
 import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
-import '../features/expenses/presentation/pages/add_expense_page.dart';
+import '../features/expenses/presentation/pages/expense_form_page.dart';
 import '../features/expenses/presentation/pages/expense_list_page.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
@@ -76,9 +79,18 @@ GoRouter createRouter({
           routes: [
             GoRoute(
               path: AppRoutes.expenses,
-              builder: (context, state) => BlocProvider(
-                create: (_) =>
-                    ExpenseListCubit(context.read<ExpenseRepository>()),
+              builder: (context, state) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) =>
+                        ExpenseListCubit(context.read<ExpenseRepository>()),
+                  ),
+                  // Category names for the rows.
+                  BlocProvider(
+                    create: (_) =>
+                        CategoriesCubit(context.read<CategoryRepository>()),
+                  ),
+                ],
                 child: const ExpenseListPage(),
               ),
             ),
@@ -116,18 +128,36 @@ GoRouter createRouter({
     ),
     GoRoute(
       path: AppRoutes.addExpense,
-      builder: (context, state) => MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (_) =>
-                AddExpenseCubit(SaveExpense(context.read<ExpenseRepository>())),
-          ),
-          BlocProvider(
-            create: (_) => CategoriesCubit(context.read<CategoryRepository>()),
-          ),
-        ],
-        child: const AddExpensePage(),
-      ),
+      builder: (context, state) => _expenseForm(context),
+    ),
+    GoRoute(
+      path: AppRoutes.editExpense,
+      // The expense arrives as `extra`; without it there is nothing to edit.
+      redirect: (context, state) =>
+          state.extra is Expense ? null : AppRoutes.expenses,
+      builder: (context, state) =>
+          _expenseForm(context, original: state.extra! as Expense),
     ),
   ],
 );
+
+/// The expense form: adding when [original] is null, editing otherwise.
+Widget _expenseForm(BuildContext context, {Expense? original}) {
+  final expenses = context.read<ExpenseRepository>();
+  return MultiBlocProvider(
+    providers: [
+      BlocProvider(
+        create: (_) => ExpenseFormCubit(
+          saveExpense: SaveExpense(expenses),
+          updateExpense: UpdateExpense(expenses),
+          repository: expenses,
+          original: original,
+        ),
+      ),
+      BlocProvider(
+        create: (_) => CategoriesCubit(context.read<CategoryRepository>()),
+      ),
+    ],
+    child: ExpenseFormPage(original: original),
+  );
+}
