@@ -3,7 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/categories/domain/repositories/category_repository.dart';
+import '../features/categories/domain/usecases/create_category.dart';
+import '../features/categories/domain/usecases/delete_category.dart';
+import '../features/categories/domain/usecases/rename_category.dart';
 import '../features/categories/presentation/cubit/categories_cubit.dart';
+import '../features/categories/presentation/cubit/category_actions_cubit.dart';
+import '../features/categories/presentation/pages/categories_page.dart';
 import '../features/dashboard/presentation/cubit/summary_cubit.dart';
 import '../features/dashboard/presentation/pages/summary_page.dart';
 import '../features/expenses/domain/entities/expense.dart';
@@ -125,6 +130,26 @@ GoRouter createRouter({
           ],
         ),
       ],
+    ),
+    GoRoute(
+      path: AppRoutes.categories,
+      builder: (context, state) {
+        final categories = context.read<CategoryRepository>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(create: (_) => CategoriesCubit(categories)),
+            BlocProvider(
+              create: (_) => CategoryActionsCubit(
+                createCategory: CreateCategory(categories),
+                renameCategory: RenameCategory(categories),
+                deleteCategory: DeleteCategory(categories),
+                repository: categories,
+              ),
+            ),
+          ],
+          child: const CategoriesPage(),
+        );
+      },
     ),
     GoRoute(
       path: AppRoutes.addExpense,

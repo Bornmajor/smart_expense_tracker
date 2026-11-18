@@ -20,6 +20,7 @@ Future<LockSession> pumpRouterApp(
   WidgetTester tester, {
   FakeOnboardingRepository? onboarding,
   FakeExpenseRepository? expenses,
+  FakeCategoryRepository? categories,
   FakeSettingsRepository? settings,
   FakeSecurityRepository? security,
   FakeBiometricAuthenticator? authenticator,
@@ -56,7 +57,7 @@ Future<LockSession> pumpRouterApp(
           value: expenses ?? FakeExpenseRepository(),
         ),
         RepositoryProvider<CategoryRepository>.value(
-          value: FakeCategoryRepository(),
+          value: categories ?? FakeCategoryRepository(),
         ),
         RepositoryProvider<BiometricAuthenticator>.value(value: auth),
       ],

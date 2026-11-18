@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_logo.dart';
 import '../../../../shared/widgets/section_header.dart';
@@ -32,6 +34,17 @@ class SettingsPage extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
+          ),
+          const Gap(AppSpacing.xl),
+          const SectionHeader('Spending'),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.category_outlined),
+              title: const Text('Categories'),
+              subtitle: const Text('Add, rename or delete categories'),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.categories),
             ),
           ),
           const Gap(AppSpacing.xl),

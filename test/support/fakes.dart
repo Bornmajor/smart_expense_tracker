@@ -54,17 +54,82 @@ class FakeExpenseRepository implements ExpenseRepository {
 }
 
 class FakeCategoryRepository implements CategoryRepository {
-  FakeCategoryRepository([this.categories = defaultCategories]);
+  FakeCategoryRepository([
+    List<Category> initial = defaultCategories,
+    Map<String, int> expenseCounts = const {},
+  ]) : categories = List.of(initial),
+       expenseCounts = Map.of(expenseCounts);
 
   static const defaultCategories = [
     Category(id: 'food', name: 'Food'),
     Category(id: 'transport', name: 'Transport'),
   ];
 
+  /// Like the real database: includes the "Other" fallback category.
+  static const withFallback = [
+    Category(id: 'food', name: 'Food'),
+    Category(id: 'transport', name: 'Transport'),
+    Category(id: Category.fallbackId, name: 'Other'),
+  ];
+
   final List<Category> categories;
 
+  /// Category id -> how many expenses use it.
+  final Map<String, int> expenseCounts;
+
+  /// Every `deleteAndMoveExpenses` call, as (id, moveToId).
+  final List<(String, String)> deletions = [];
+
+  /// When set, the matching operation throws it.
+  Object? saveError;
+  Object? deleteError;
+  Object? countError;
+
+  final _changes = StreamController<List<Category>>.broadcast();
+
   @override
-  Stream<List<Category>> watchAll() => Stream.value(categories);
+  Stream<List<Category>> watchAll() async* {
+    yield List.of(categories);
+    yield* _changes.stream;
+  }
+
+  @override
+  Future<List<Category>> getAll() async => List.of(categories);
+
+  @override
+  Future<void> save(Category category) async {
+    final error = saveError;
+    if (error != null) throw error;
+    final index = categories.indexWhere((c) => c.id == category.id);
+    if (index >= 0) {
+      categories[index] = category;
+    } else {
+      categories.add(category);
+    }
+    _changes.add(List.of(categories));
+  }
+
+  @override
+  Future<int> countExpenses(String id) async {
+    final error = countError;
+    if (error != null) throw error;
+    return expenseCounts[id] ?? 0;
+  }
+
+  @override
+  Future<int> deleteAndMoveExpenses({
+    required String id,
+    required String moveToId,
+  }) async {
+    final error = deleteError;
+    if (error != null) throw error;
+    deletions.add((id, moveToId));
+    categories.removeWhere((c) => c.id == id);
+    final moved = expenseCounts.remove(id) ?? 0;
+    expenseCounts[moveToId] = (expenseCounts[moveToId] ?? 0) + moved;
+    _changes.add(List.of(categories));
+    return moved;
+  }
 }
 
 class ErrorExpenseRepository implements ExpenseRepository {
@@ -81,6 +146,21 @@ class ErrorExpenseRepository implements ExpenseRepository {
 class ErrorCategoryRepository implements CategoryRepository {
   @override
   Stream<List<Category>> watchAll() => Stream.error(Exception('boom'));
+
+  @override
+  Future<List<Category>> getAll() async => const [];
+
+  @override
+  Future<void> save(Category category) async {}
+
+  @override
+  Future<int> countExpenses(String id) async => 0;
+
+  @override
+  Future<int> deleteAndMoveExpenses({
+    required String id,
+    required String moveToId,
+  }) async => 0;
 }
 
 class FakeSettingsRepository implements SettingsRepository {
