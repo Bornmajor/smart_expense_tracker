@@ -1,0 +1,77 @@
+default_platform(:android)
+
+# The bundle Flutter built: flutter build appbundle --release
+def release_bundle
+  bundle = File.expand_path("../../build/app/outputs/bundle/release/app-release.aab", __dir__)
+  UI.user_error!("No bundle at #{bundle}. Run `flutter build appbundle --release` first.") unless File.exist?(bundle)
+  bundle
+end
+
+# Uploads only the app bundle, never store text, images or screenshots.
+def skip_store_listing
+  { skip_upload_metadata: true, skip_upload_images: true, skip_upload_screenshots: true }
+end
+
+platform :android do
+  desc "Upload the built bundle to the internal testing track (testers get it in minutes)"
+  lane :internal do
+    upload_to_play_store(
+      track: "internal",
+      aab: release_bundle,
+      # "draft" leaves the release for you to roll out in Play Console. Use it
+      # while the app has never been published; switch to "completed" later.
+      release_status: ENV["PLAY_RELEASE_STATUS"] || "completed",
+      **skip_store_listing
+    )
+  end
+
+  desc "Upload the built bundle to the production track. A draft by default, so " \
+       "nothing reaches users until you press Roll out in Play Console"
+  lane :production do
+    status = ENV["PLAY_RELEASE_STATUS"] || "draft"
+    rollout = ENV["PLAY_ROLLOUT"].to_s.strip
+
+    options = {
+      track: "production",
+      aab: release_bundle,
+      release_status: status,
+      **skip_store_listing
+    }
+    # A staged rollout needs the status "inprogress" and a fraction such as 0.1.
+    if status == "inprogress"
+      UI.user_error!("Set PLAY_ROLLOUT, for example 0.1 for 10%.") if rollout.empty?
+      options[:rollout] = rollout
+    end
+
+    upload_to_play_store(**options)
+  end
+
+  desc "Move the latest release from one track to another without rebuilding. " \
+       "Example: fastlane promote from:internal to:production"
+  lane :promote do |options|
+    from = options[:from] || "internal"
+    to = options[:to]
+    UI.user_error!("Say where to promote to, for example: fastlane promote to:production") if to.to_s.empty?
+    UI.user_error!("from and to are both #{from}.") if from == to
+
+    status = options[:status] || ENV["PLAY_RELEASE_STATUS"] || "draft"
+    promote = {
+      track: from,
+      track_promote_to: to,
+      release_status: status,
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_changelogs: true,
+      **skip_store_listing
+    }
+    rollout = (options[:rollout] || ENV["PLAY_ROLLOUT"]).to_s.strip
+    promote[:rollout] = rollout if status == "inprogress" && !rollout.empty?
+
+    upload_to_play_store(**promote)
+  end
+
+  desc "Check that the Play service account key works, without uploading anything"
+  lane :validate do
+    validate_play_store_json_key
+  end
+end

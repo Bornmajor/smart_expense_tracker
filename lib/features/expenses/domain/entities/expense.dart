@@ -9,9 +9,13 @@ class Expense extends Equatable {
     required this.categoryId,
     required this.createdAt,
     required this.updatedAt,
+    this.title = '',
   });
 
   final String id;
+
+  /// Optional short title such as "Lunch with team". Empty when not set.
+  final String title;
   final String vendor;
 
   /// Amount in minor units (cents).
@@ -24,6 +28,7 @@ class Expense extends Equatable {
   @override
   List<Object?> get props => [
     id,
+    title,
     vendor,
     amountMinor,
     date,

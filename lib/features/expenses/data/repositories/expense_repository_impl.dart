@@ -23,6 +23,15 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   }
 
   @override
+  Future<void> delete(String id) async {
+    try {
+      await (_db.delete(_db.expenses)..where((t) => t.id.equals(id))).go();
+    } on Exception catch (error) {
+      throw StorageException(error);
+    }
+  }
+
+  @override
   Stream<List<Expense>> watchAll() {
     final query = _db.select(_db.expenses)
       ..orderBy([

@@ -4,6 +4,23 @@
 
 SpendWise IQ is a smart, privacy-first expense tracker. Point your camera at a receipt and the app reads the vendor, date and total on your device, suggests a category, and lets you confirm the details before saving. No typing, no account, no cloud.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/welcome.jpg" width="200" alt="Welcome screen"><br><sub>Welcome</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-add.jpg" width="200" alt="Onboarding: add expenses your way"><br><sub>Onboarding</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-summary.jpg" width="200" alt="Onboarding: see where your money goes"><br><sub>Onboarding</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/expenses.jpg" width="200" alt="Expenses tab"><br><sub>Expenses</sub></td>
+    <td align="center"><img src="docs/screenshots/summary.jpg" width="200" alt="Monthly summary"><br><sub>Monthly summary</sub></td>
+    <td align="center"><img src="docs/screenshots/settings.jpg" width="200" alt="Settings"><br><sub>Settings</sub></td>
+  </tr>
+</table>
+
+Captured on an Android phone with the dark theme. Receipt scanning, mentioned on the welcome and onboarding screens, is still planned (see [Features](#features)).
+
 ## The problem it solves
 
 Most people want to know where their money goes, but tracking it is tedious. Receipts pile up, typing each purchase takes too long, and the habit fades after a week. The apps that automate it usually ask for an account and upload financial data to a server.
@@ -23,8 +40,9 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 
 - [x] Light and dark themes with a shared design system (colors, spacing, typography)
 - [x] Welcome screen and three-step onboarding, shown once
-- [x] Manual expense entry with validation, stored offline on the device
-- [x] Expense list, newest first
+- [x] Manual expense entry with validation (optional title and vendor), stored offline on the device
+- [x] Expense list grouped by day, with daily totals and category names
+- [x] Edit an expense, or delete it by swiping (with Undo) or from the edit screen
 - [x] Monthly summary: total and spending by category, with a month switcher
 - [x] Settings: theme (system, light, dark) and About
 - [x] Optional fingerprint / face lock, turned on from Settings
@@ -36,7 +54,6 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [ ] On-device OCR that extracts vendor, date and total
 - [ ] Review-and-edit form, auto-filled from the scan, confirmed before saving
 - [ ] Automatic category suggestion, with manual override
-- [ ] Expense list grouped by day, with edit and delete (undo)
 - [ ] Custom categories (create and edit)
 - [ ] Monthly report as PDF and CSV, shared or saved from the system share sheet
 
@@ -111,11 +128,13 @@ We test business logic, utility functions and reusable UI components rather than
 
 ### Continuous integration
 
-Every pull request and every push to `main` runs the workflow in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+Every pull request into, and every push to, `dev`, `uat` and `main` runs the workflow in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
 1. Formatting check (`dart format`)
 2. Static analysis (`flutter analyze --fatal-infos`)
 3. Tests with a minimum 80% coverage gate
+
+Releases are separate. Work lands in `dev` (no upload), `uat` sends a build to Play internal testing, and `main` sends one to production after you approve it, all through [`release.yml`](.github/workflows/release.yml). See [docs/branching.md](docs/branching.md) for the branch flow, [docs/releasing.md](docs/releasing.md) for the setup, and the [release checklist](docs/release-checklist.md). User-facing changes go in [CHANGELOG.md](CHANGELOG.md).
 
 Run the same checks locally before opening a pull request:
 

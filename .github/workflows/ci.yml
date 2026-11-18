@@ -1,10 +1,12 @@
 name: CI
 
+# Runs for every pull request into, and every push to, the three long-lived
+# branches. See docs/branching.md for how they are used.
 on:
   pull_request:
-    branches: [main]
+    branches: [dev, uat, main]
   push:
-    branches: [main]
+    branches: [dev, uat, main]
 
 # A newer push to the same PR/branch cancels the older run.
 concurrency:

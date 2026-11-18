@@ -110,6 +110,51 @@ void main() {
         }
       });
 
+      testWidgets('shows an action button that can be pressed', (tester) async {
+        await pumpHost(tester, theme);
+        var pressed = 0;
+        await show(
+          tester,
+          () => context.showInfo(
+            'Deleted',
+            actionLabel: 'Undo',
+            onAction: () => pressed++,
+          ),
+        );
+
+        expect(find.text('Undo'), findsOneWidget);
+        await tester.tap(find.text('Undo'));
+        await tester.pump();
+
+        expect(pressed, 1);
+      });
+
+      testWidgets('the action is readable on the info background', (
+        tester,
+      ) async {
+        await pumpHost(tester, theme);
+        await show(
+          tester,
+          () =>
+              context.showInfo('Deleted', actionLabel: 'Undo', onAction: () {}),
+        );
+
+        final action = tester.widget<SnackBarAction>(
+          find.byType(SnackBarAction),
+        );
+        expect(
+          contrastRatio(action.textColor!, snackBar(tester).backgroundColor!),
+          greaterThanOrEqualTo(4.5),
+        );
+      });
+
+      testWidgets('has no action unless one is given', (tester) async {
+        await pumpHost(tester, theme);
+        await show(tester, () => context.showInfo('FYI'));
+
+        expect(find.byType(SnackBarAction), findsNothing);
+      });
+
       testWidgets('a new message replaces the one on screen', (tester) async {
         await pumpHost(tester, theme);
 

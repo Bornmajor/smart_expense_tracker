@@ -1,0 +1,162 @@
+name: Release to Google Play
+
+# One workflow for both tracks, so one run counter gives every upload a higher
+# version code than the last (Google Play requires that across all tracks).
+#
+#   push to uat   ->  CI passes  ->  internal testing track (testers)
+#   push to main  ->  CI passes  ->  you approve  ->  production track
+#
+# Nothing is uploaded for dev. A failing CI run never reaches Play. You can
+# also start it by hand from the Actions tab, on uat or main only.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [uat, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: "3.47.2"
+  # The branch being released: the one CI ran on, or the one chosen by hand.
+  RELEASE_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+  RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+jobs:
+  release:
+    name: Build and upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # The "production" environment holds the run until you approve it (set up
+    # required reviewers in GitHub, see docs/releasing.md). "internal" has none.
+    environment: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'main' && 'production' || 'internal' }}
+    # A green push, or a manual run on uat or main. The "push" check keeps pull
+    # requests (including ones from forks) out.
+    if: >-
+      (github.event_name == 'workflow_dispatch' &&
+       (github.ref_name == 'uat' || github.ref_name == 'main')) ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    outputs:
+      track: ${{ steps.track.outputs.track }}
+      version: ${{ steps.track.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Build exactly the commit that CI tested.
+          ref: ${{ env.RELEASE_SHA }}
+
+      - name: Choose the track
+        id: track
+        env:
+          # Optional repository variables (Settings, Secrets and variables,
+          # Actions, Variables). Without them the safe defaults below apply.
+          INTERNAL_STATUS: ${{ vars.PLAY_INTERNAL_STATUS }}
+          PRODUCTION_STATUS: ${{ vars.PLAY_PRODUCTION_STATUS }}
+          PRODUCTION_ROLLOUT: ${{ vars.PLAY_PRODUCTION_ROLLOUT }}
+        run: |
+          case "$RELEASE_BRANCH" in
+            uat)
+              echo "track=internal" >> "$GITHUB_OUTPUT"
+              echo "PLAY_RELEASE_STATUS=${INTERNAL_STATUS:-completed}" >> "$GITHUB_ENV"
+              ;;
+            main)
+              echo "track=production" >> "$GITHUB_OUTPUT"
+              # A draft waits for you to press Roll out in Play Console.
+              echo "PLAY_RELEASE_STATUS=${PRODUCTION_STATUS:-draft}" >> "$GITHUB_ENV"
+              echo "PLAY_ROLLOUT=${PRODUCTION_ROLLOUT}" >> "$GITHUB_ENV"
+              ;;
+            *)
+              echo "::error::Only uat and main are released, not '$RELEASE_BRANCH'."
+              exit 1
+              ;;
+          esac
+          version=$(grep '^version:' pubspec.yaml | sed -E 's/version: *//; s/\+.*//')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Releasing $version from $RELEASE_BRANCH"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: android
+
+      - name: Write signing files from secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD PLAY_SERVICE_ACCOUNT_JSON; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing repository secret $name"
+              exit 1
+            fi
+          done
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          {
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+            echo "keyPassword=$ANDROID_KEY_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "storeFile=upload-keystore.jks"
+          } > android/key.properties
+          echo "$PLAY_SERVICE_ACCOUNT_JSON" > android/play-service-account.json
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build the release bundle
+        # Play needs a higher version code for every upload. The run number
+        # only goes up, and the offset keeps clear of any manual uploads.
+        # The version name comes from pubspec.yaml.
+        run: flutter build appbundle --release --build-number=$((GITHUB_RUN_NUMBER + 100))
+
+      - name: Upload with Fastlane
+        working-directory: android
+        env:
+          PLAY_JSON_KEY_FILE: play-service-account.json
+        # The lane has the same name as the track: internal or production.
+        run: bundle exec fastlane ${{ steps.track.outputs.track }}
+
+  # After a production upload, mark the commit with the version, such as
+  # v1.2.0, and create a GitHub release with generated notes.
+  tag:
+    name: Tag the release
+    needs: release
+    if: needs.release.outputs.track == 'production'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Create the tag and release if they do not exist yet
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ needs.release.outputs.version }}
+        run: |
+          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            echo "$TAG already exists, leaving it alone."
+          else
+            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
+              --target "$RELEASE_SHA" --title "$TAG" --generate-notes
+          fi

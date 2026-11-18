@@ -42,4 +42,23 @@ void main() {
       expect(Money.format(-1250), '-12.50');
     });
   });
+
+  group('Money.toInputText', () {
+    test('writes plain text with two decimals and no thousands separators', () {
+      expect(Money.toInputText(0), '0.00');
+      expect(Money.toInputText(5), '0.05');
+      expect(Money.toInputText(1250), '12.50');
+      expect(Money.toInputText(123456), '1234.56');
+    });
+
+    test('reads back to the same amount through tryParse', () {
+      for (final amount in [1, 99, 100, 1250, 123456, 100000000]) {
+        expect(
+          Money.tryParse(Money.toInputText(amount)),
+          amount,
+          reason: 'amount: $amount',
+        );
+      }
+    });
+  });
 }
