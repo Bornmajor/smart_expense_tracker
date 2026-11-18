@@ -33,6 +33,9 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
 
   bool _busy = false;
   bool _fullSize = false;
+
+  /// True when the photo was taken before the app was killed and restarted.
+  bool _recovered = false;
   String? _photoPath;
   String? _report;
   String? _error;
@@ -58,10 +61,39 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
     }
   }
 
+  @override
+  void initState() {
+    super.initState();
+    // Android can kill the app while the camera is open (the Infinix phone
+    // does this about two seconds after the camera opens). The photo is then
+    // waiting for us when the app starts again.
+    if (Platform.isAndroid) _recoverLostPhoto();
+  }
+
+  Future<void> _recoverLostPhoto() async {
+    try {
+      final lost = await _picker.retrieveLostData();
+      if (lost.isEmpty || !mounted) return;
+
+      final file = lost.file ?? lost.files?.firstOrNull;
+      if (file != null) {
+        setState(() => _recovered = true);
+        await _process(file.path);
+      } else if (lost.exception != null) {
+        setState(
+          () => _error = 'The camera result was lost: ${lost.exception}',
+        );
+      }
+    } on Exception catch (e) {
+      if (mounted) setState(() => _error = '$e');
+    }
+  }
+
   Future<void> _run(ImageSource source) async {
     setState(() {
       _busy = true;
       _error = null;
+      _recovered = false;
     });
 
     try {
@@ -76,9 +108,25 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
         setState(() => _busy = false);
         return;
       }
+      await _process(file.path);
+    } on Exception catch (e) {
+      setState(() {
+        _busy = false;
+        _error = '$e';
+      });
+    }
+  }
 
+  /// Reads the photo and fills in every section of the screen.
+  Future<void> _process(String path) async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+
+    try {
       final timer = Stopwatch()..start();
-      final recognized = await recognizeWithMlKit(file.path);
+      final recognized = await recognizeWithMlKit(path);
       timer.stop();
 
       final lines = MlKitReceiptTextReader.linesFrom(recognized);
@@ -107,7 +155,7 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
       _deletePhoto();
       setState(() {
         _busy = false;
-        _photoPath = file.path;
+        _photoPath = path;
         _recognized = recognized;
         _rows = rows;
         _parsed = parsed;
@@ -259,7 +307,13 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
                   ),
                 ),
               const Gap(AppSpacing.sm),
-              Text('Read in $_milliseconds ms', style: context.text.bodySmall),
+              Text(
+                _recovered
+                    ? 'Recovered after the app was restarted. '
+                          'Read in $_milliseconds ms'
+                    : 'Read in $_milliseconds ms',
+                style: context.text.bodySmall,
+              ),
               const Gap(AppSpacing.lg),
               _Section(
                 title: 'Raw text from ML Kit',
