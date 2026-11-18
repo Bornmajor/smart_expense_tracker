@@ -7,16 +7,21 @@ import '../../../categories/presentation/cubit/categories_cubit.dart';
 import '../../../categories/presentation/cubit/categories_state.dart';
 
 /// Chips for choosing a category. Reads the list from CategoriesCubit.
+///
+/// With [onAdd], a "New" chip at the end lets the user add a category without
+/// leaving the form; the screen decides what happens when it is tapped.
 class CategoryPicker extends StatelessWidget {
   const CategoryPicker({
     super.key,
     required this.selectedId,
     required this.onSelected,
+    this.onAdd,
     this.errorText,
   });
 
   final String? selectedId;
   final ValueChanged<String> onSelected;
+  final VoidCallback? onAdd;
   final String? errorText;
 
   @override
@@ -39,6 +44,12 @@ class CategoryPicker extends StatelessWidget {
                     label: Text(category.name),
                     selected: category.id == selectedId,
                     onSelected: (_) => onSelected(category.id),
+                  ),
+                if (onAdd != null)
+                  ActionChip(
+                    avatar: const Icon(Icons.add, size: 18),
+                    label: const Text('New'),
+                    onPressed: onAdd,
                   ),
               ],
             ),

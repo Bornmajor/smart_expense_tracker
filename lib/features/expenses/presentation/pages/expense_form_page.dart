@@ -3,9 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/errors/result.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../shared/widgets/app_snack_bar.dart';
+import '../../../categories/domain/entities/category.dart';
+import '../../../categories/presentation/category_validation_messages.dart';
+import '../../../categories/presentation/cubit/category_actions_cubit.dart';
+import '../../../categories/presentation/widgets/category_name_sheet.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/validation/expense_rules.dart';
 import '../../domain/validation/expense_validation.dart';
@@ -69,6 +74,37 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       date: _date,
       categoryId: _categoryId,
     );
+  }
+
+  /// Adds a category without leaving the form. The sheet is a modal on top of
+  /// this page, so everything already typed stays as it is. A name the user
+  /// already has picks that category; a new name creates it. Either way the
+  /// category ends up selected.
+  Future<void> _addCategory() async {
+    final actions = context.read<CategoryActionsCubit>();
+    Category? chosen;
+
+    await showCategoryNameSheet(
+      context,
+      title: 'New category',
+      submitLabel: 'Add category',
+      onSubmit: (name) async {
+        switch (await actions.findOrCreate(name)) {
+          case Success(:final value):
+            chosen = value;
+            return null;
+          case Failure(:final failure):
+            return categorySaveError(failure);
+          case null:
+            return 'Couldn\'t add the category. Try again.';
+        }
+      },
+    );
+
+    final category = chosen;
+    if (category != null && mounted) {
+      setState(() => _categoryId = category.id);
+    }
   }
 
   Future<void> _confirmDelete() async {
@@ -198,6 +234,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                         selectedId: _categoryId,
                         errorText: _error(state, ExpenseField.category),
                         onSelected: (id) => setState(() => _categoryId = id),
+                        onAdd: _addCategory,
                       ),
                     ],
                   ),

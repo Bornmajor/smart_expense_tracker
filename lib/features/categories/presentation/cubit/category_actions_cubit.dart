@@ -7,6 +7,7 @@ import '../../domain/entities/category.dart';
 import '../../domain/repositories/category_repository.dart';
 import '../../domain/usecases/create_category.dart';
 import '../../domain/usecases/delete_category.dart';
+import '../../domain/usecases/find_or_create_category.dart';
 import '../../domain/usecases/rename_category.dart';
 
 class CategoryActionsState extends Equatable {
@@ -25,18 +26,25 @@ class CategoryActionsState extends Equatable {
 class CategoryActionsCubit extends Cubit<CategoryActionsState> {
   CategoryActionsCubit({
     required this._createCategory,
+    required this._findOrCreateCategory,
     required this._renameCategory,
     required this._deleteCategory,
     required this._repository,
   }) : super(const CategoryActionsState());
 
   final CreateCategory _createCategory;
+  final FindOrCreateCategory _findOrCreateCategory;
   final RenameCategory _renameCategory;
   final DeleteCategory _deleteCategory;
   final CategoryRepository _repository;
 
   Future<Result<Category>?> create(String name) =>
       _run(() => _createCategory(name));
+
+  /// The category with this name, created if it does not exist yet. A name the
+  /// user already has returns that category instead of an error.
+  Future<Result<Category>?> findOrCreate(String name) =>
+      _run(() => _findOrCreateCategory(name));
 
   Future<Result<Category>?> rename(Category category, String name) =>
       _run(() => _renameCategory(category, name));

@@ -43,6 +43,8 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Manual expense entry with validation (optional title and vendor), stored offline on the device
 - [x] Expense list grouped by day, with daily totals and category names
 - [x] Edit an expense, or delete it by swiping (with Undo) or from the edit screen
+- [x] Categories you manage yourself: create, rename and delete (deleting moves the expenses to Other)
+- [x] Add a category from the expense form with the New chip, without losing what you typed
 - [x] Monthly summary: total and spending by category, with a month switcher
 - [x] Settings: theme (system, light, dark) and About
 - [x] Optional fingerprint / face lock, turned on from Settings
@@ -54,7 +56,6 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [ ] On-device OCR that extracts vendor, date and total
 - [ ] Review-and-edit form, auto-filled from the scan, confirmed before saving
 - [ ] Automatic category suggestion, with manual override
-- [ ] Custom categories (create and edit)
 - [ ] Monthly report as PDF and CSV, shared or saved from the system share sheet
 
 **After the MVP** (see the [roadmap](docs/roadmap.md) for the build order)

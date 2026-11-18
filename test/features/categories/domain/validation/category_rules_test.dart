@@ -68,6 +68,30 @@ void main() {
     });
   });
 
+  group('CategoryRules.findByName', () {
+    test('finds a category ignoring case and surrounding spaces', () {
+      for (final name in ['Food', 'food', '  FOOD  ']) {
+        expect(
+          CategoryRules.findByName(name, existing)?.id,
+          'food',
+          reason: 'name: "$name"',
+        );
+      }
+    });
+
+    test('returns null when no category has the name', () {
+      expect(CategoryRules.findByName('Pets', existing), isNull);
+      expect(CategoryRules.findByName('', existing), isNull);
+    });
+
+    test('can leave one category out of the search', () {
+      expect(
+        CategoryRules.findByName('Food', existing, exceptId: 'food'),
+        isNull,
+      );
+    });
+  });
+
   group('Category', () {
     test('only the "other" category is the fallback', () {
       expect(const Category(id: 'other', name: 'Other').isFallback, isTrue);
