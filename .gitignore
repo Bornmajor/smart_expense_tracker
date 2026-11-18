@@ -55,3 +55,13 @@ play-service-account*.json
 /android/fastlane/report.xml
 /android/vendor/
 /android/.bundle/
+/android/fastlane/README.md
+
+# Signing keys and credentials, ignored at any depth as a safety net
+*.jks
+*.keystore
+key.properties
+play-service-account*.json
+
+# Flutter DevTools local settings
+devtools_options.yaml
