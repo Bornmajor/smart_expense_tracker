@@ -12,6 +12,7 @@ abstract final class AppColors {
   static const grey100 = Color(0xFFEFEFEC);
   static const grey200 = Color(0xFFE2E2DE); // borders, dividers
   static const grey400 = Color(0xFF9A9A9A); // hints
+  static const grey500 = Color(0xFF8A8A8A); // light-mode field border (3:1)
   static const grey600 = Color(0xFF6B6B6B); // body text
   static const grey800 = Color(0xFF222222); // dark field / border
   static const grey850 = Color(0xFF161616); // dark surface

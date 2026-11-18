@@ -36,6 +36,44 @@ void main() {
       expect(border.borderRadius, AppRadius.mdAll);
     });
 
+    test('an empty field is visible against the screen in light mode', () {
+      // The fill matches the screen color, so the border has to show it.
+      final theme = AppTheme.light;
+      final border = theme.inputDecorationTheme.enabledBorder!.borderSide;
+
+      expect(border.style, BorderStyle.solid);
+      expect(
+        contrastRatio(border.color, theme.scaffoldBackgroundColor),
+        greaterThanOrEqualTo(3),
+      );
+      expect(
+        contrastRatio(border.color, theme.inputDecorationTheme.fillColor!),
+        greaterThanOrEqualTo(3),
+      );
+    });
+
+    test('the focused border is stronger than the resting one', () {
+      final input = AppTheme.light.inputDecorationTheme;
+
+      expect(
+        input.focusedBorder!.borderSide.width,
+        greaterThan(input.enabledBorder!.borderSide.width),
+      );
+    });
+
+    test('dark fields stand out by their fill, with no border', () {
+      final theme = AppTheme.dark;
+
+      expect(
+        theme.inputDecorationTheme.enabledBorder!.borderSide,
+        BorderSide.none,
+      );
+      expect(
+        theme.inputDecorationTheme.fillColor,
+        isNot(theme.scaffoldBackgroundColor),
+      );
+    });
+
     test('primary buttons are full width and 52 high', () {
       final style = AppTheme.light.filledButtonTheme.style!;
 

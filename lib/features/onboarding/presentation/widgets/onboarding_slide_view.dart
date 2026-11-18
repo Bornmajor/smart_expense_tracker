@@ -24,6 +24,9 @@ class OnboardingSlideView extends StatelessWidget {
   /// 16 padding + 52 button + 8 gap + 48 skip.
   static const buttonsAreaHeight = 124.0;
 
+  /// The most the slide text grows when the phone's font size is large.
+  static const maxTextScale = 1.15;
+
   @override
   Widget build(BuildContext context) {
     final buttonsSpace =
@@ -61,27 +64,33 @@ class OnboardingSlideView extends StatelessWidget {
                 bottom: false,
                 child: Padding(
                   padding: AppSpacing.screen.copyWith(bottom: buttonsSpace),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        slide.title,
-                        textAlign: TextAlign.center,
-                        style: context.text.headlineMedium?.copyWith(
-                          color: onboardingInk,
-                          fontSize: 32,
-                          height: 1.15,
+                  // These are short marketing screens, so the phone's font
+                  // size setting is honored only up to a limit. Without it a
+                  // phone set to a large font shows huge text here.
+                  child: MediaQuery.withClampedTextScaling(
+                    maxScaleFactor: maxTextScale,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          slide.title,
+                          textAlign: TextAlign.center,
+                          style: context.text.headlineMedium?.copyWith(
+                            color: onboardingInk,
+                            fontSize: 32,
+                            height: 1.15,
+                          ),
                         ),
-                      ),
-                      const Gap(AppSpacing.md),
-                      Text(
-                        slide.description,
-                        textAlign: TextAlign.center,
-                        style: context.text.bodyLarge?.copyWith(
-                          color: onboardingInk.withValues(alpha: 0.85),
+                        const Gap(AppSpacing.md),
+                        Text(
+                          slide.description,
+                          textAlign: TextAlign.center,
+                          style: context.text.bodyLarge?.copyWith(
+                            color: onboardingInk.withValues(alpha: 0.85),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
