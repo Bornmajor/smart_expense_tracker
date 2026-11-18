@@ -5,6 +5,7 @@ import 'package:smart_expense_tracker/core/errors/storage_exception.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense_draft.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/usecases/save_expense.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/validation/expense_rules.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/validation/expense_validation.dart';
 
 import '../../../../support/fakes.dart';
@@ -15,11 +16,13 @@ void main() {
   late SaveExpense saveExpense;
 
   ExpenseDraft draft({
+    String title = '',
     String vendor = 'Corner Cafe',
     int? amountMinor = 847,
     DateTime? date,
     String? categoryId = 'food',
   }) => ExpenseDraft(
+    title: title,
     vendor: vendor,
     amountMinor: amountMinor,
     date: date ?? DateTime(2026, 11, 16),
@@ -67,6 +70,41 @@ void main() {
         (result as Success<Expense>).value.vendor,
         SaveExpense.unknownVendor,
       );
+    });
+
+    test('saves the title trimmed, and no title when it is blank', () async {
+      final withTitle = await saveExpense(draft(title: '  Lunch with team  '));
+      expect((withTitle as Success<Expense>).value.title, 'Lunch with team');
+
+      final blank = await saveExpense(draft(title: '   '));
+      expect((blank as Success<Expense>).value.title, isEmpty);
+    });
+
+    test('accepts a title of exactly the longest length', () async {
+      final title = 'a' * ExpenseRules.maxTitleLength;
+
+      final result = await saveExpense(draft(title: title));
+
+      expect(result, isA<Success<Expense>>());
+    });
+
+    test('rejects a title that is too long, and saves nothing', () async {
+      final title = 'a' * (ExpenseRules.maxTitleLength + 1);
+
+      final result = await saveExpense(draft(title: title));
+
+      expect(validationErrors(result), {
+        ExpenseField.title: ExpenseError.titleTooLong,
+      });
+      expect(repository.saved, isEmpty);
+    });
+
+    test('does not count the spaces around a long title', () async {
+      final title = '  ${'a' * ExpenseRules.maxTitleLength}  ';
+
+      final result = await saveExpense(draft(title: title));
+
+      expect(result, isA<Success<Expense>>());
     });
 
     test('accepts today as the date', () async {

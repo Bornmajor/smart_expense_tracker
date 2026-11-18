@@ -326,6 +326,16 @@ class $ExpensesTable extends Expenses
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _titleMeta = const VerificationMeta('title');
+  @override
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+    'title',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   static const VerificationMeta _vendorMeta = const VerificationMeta('vendor');
   @override
   late final GeneratedColumn<String> vendor = GeneratedColumn<String>(
@@ -394,6 +404,7 @@ class $ExpensesTable extends Expenses
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    title,
     vendor,
     amountMinor,
     date,
@@ -417,6 +428,12 @@ class $ExpensesTable extends Expenses
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('title')) {
+      context.handle(
+        _titleMeta,
+        title.isAcceptableOrUnknown(data['title']!, _titleMeta),
+      );
     }
     if (data.containsKey('vendor')) {
       context.handle(
@@ -482,6 +499,10 @@ class $ExpensesTable extends Expenses
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      title: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}title'],
+      )!,
       vendor: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}vendor'],
@@ -517,6 +538,10 @@ class $ExpensesTable extends Expenses
 
 class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   final String id;
+
+  /// Optional short title, such as "Lunch with team". Empty when not set.
+  /// Added in schema version 2.
+  final String title;
   final String vendor;
 
   /// Integer minor units (cents).
@@ -527,6 +552,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   final DateTime updatedAt;
   const ExpenseRow({
     required this.id,
+    required this.title,
     required this.vendor,
     required this.amountMinor,
     required this.date,
@@ -538,6 +564,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    map['title'] = Variable<String>(title);
     map['vendor'] = Variable<String>(vendor);
     map['amount_minor'] = Variable<int>(amountMinor);
     map['date'] = Variable<DateTime>(date);
@@ -550,6 +577,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   ExpensesCompanion toCompanion(bool nullToAbsent) {
     return ExpensesCompanion(
       id: Value(id),
+      title: Value(title),
       vendor: Value(vendor),
       amountMinor: Value(amountMinor),
       date: Value(date),
@@ -566,6 +594,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ExpenseRow(
       id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
       vendor: serializer.fromJson<String>(json['vendor']),
       amountMinor: serializer.fromJson<int>(json['amountMinor']),
       date: serializer.fromJson<DateTime>(json['date']),
@@ -579,6 +608,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
       'vendor': serializer.toJson<String>(vendor),
       'amountMinor': serializer.toJson<int>(amountMinor),
       'date': serializer.toJson<DateTime>(date),
@@ -590,6 +620,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
 
   ExpenseRow copyWith({
     String? id,
+    String? title,
     String? vendor,
     int? amountMinor,
     DateTime? date,
@@ -598,6 +629,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     DateTime? updatedAt,
   }) => ExpenseRow(
     id: id ?? this.id,
+    title: title ?? this.title,
     vendor: vendor ?? this.vendor,
     amountMinor: amountMinor ?? this.amountMinor,
     date: date ?? this.date,
@@ -608,6 +640,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   ExpenseRow copyWithCompanion(ExpensesCompanion data) {
     return ExpenseRow(
       id: data.id.present ? data.id.value : this.id,
+      title: data.title.present ? data.title.value : this.title,
       vendor: data.vendor.present ? data.vendor.value : this.vendor,
       amountMinor: data.amountMinor.present
           ? data.amountMinor.value
@@ -625,6 +658,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   String toString() {
     return (StringBuffer('ExpenseRow(')
           ..write('id: $id, ')
+          ..write('title: $title, ')
           ..write('vendor: $vendor, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('date: $date, ')
@@ -638,6 +672,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   @override
   int get hashCode => Object.hash(
     id,
+    title,
     vendor,
     amountMinor,
     date,
@@ -650,6 +685,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       identical(this, other) ||
       (other is ExpenseRow &&
           other.id == this.id &&
+          other.title == this.title &&
           other.vendor == this.vendor &&
           other.amountMinor == this.amountMinor &&
           other.date == this.date &&
@@ -660,6 +696,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
 
 class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<String> id;
+  final Value<String> title;
   final Value<String> vendor;
   final Value<int> amountMinor;
   final Value<DateTime> date;
@@ -669,6 +706,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
+    this.title = const Value.absent(),
     this.vendor = const Value.absent(),
     this.amountMinor = const Value.absent(),
     this.date = const Value.absent(),
@@ -679,6 +717,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   });
   ExpensesCompanion.insert({
     required String id,
+    this.title = const Value.absent(),
     required String vendor,
     required int amountMinor,
     required DateTime date,
@@ -695,6 +734,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
        updatedAt = Value(updatedAt);
   static Insertable<ExpenseRow> custom({
     Expression<String>? id,
+    Expression<String>? title,
     Expression<String>? vendor,
     Expression<int>? amountMinor,
     Expression<DateTime>? date,
@@ -705,6 +745,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (title != null) 'title': title,
       if (vendor != null) 'vendor': vendor,
       if (amountMinor != null) 'amount_minor': amountMinor,
       if (date != null) 'date': date,
@@ -717,6 +758,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
 
   ExpensesCompanion copyWith({
     Value<String>? id,
+    Value<String>? title,
     Value<String>? vendor,
     Value<int>? amountMinor,
     Value<DateTime>? date,
@@ -727,6 +769,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   }) {
     return ExpensesCompanion(
       id: id ?? this.id,
+      title: title ?? this.title,
       vendor: vendor ?? this.vendor,
       amountMinor: amountMinor ?? this.amountMinor,
       date: date ?? this.date,
@@ -742,6 +785,9 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (title.present) {
+      map['title'] = Variable<String>(title.value);
     }
     if (vendor.present) {
       map['vendor'] = Variable<String>(vendor.value);
@@ -771,6 +817,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   String toString() {
     return (StringBuffer('ExpensesCompanion(')
           ..write('id: $id, ')
+          ..write('title: $title, ')
           ..write('vendor: $vendor, ')
           ..write('amountMinor: $amountMinor, ')
           ..write('date: $date, ')
@@ -1078,6 +1125,7 @@ typedef $$CategoriesTableProcessedTableManager =
     >;
 typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   required String id,
+  Value<String> title,
   required String vendor,
   required int amountMinor,
   required DateTime date,
@@ -1088,6 +1136,7 @@ typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
 });
 typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
   Value<String> id,
+  Value<String> title,
   Value<String> vendor,
   Value<int> amountMinor,
   Value<DateTime> date,
@@ -1130,6 +1179,11 @@ class $$ExpensesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get title => $composableBuilder(
+    column: $table.title,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1196,6 +1250,11 @@ class $$ExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get title => $composableBuilder(
+    column: $table.title,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get vendor => $composableBuilder(
     column: $table.vendor,
     builder: (column) => ColumnOrderings(column),
@@ -1256,6 +1315,9 @@ class $$ExpensesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get title =>
+      $composableBuilder(column: $table.title, builder: (column) => column);
 
   GeneratedColumn<String> get vendor =>
       $composableBuilder(column: $table.vendor, builder: (column) => column);
@@ -1327,6 +1389,7 @@ class $$ExpensesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String> title = const Value.absent(),
                 Value<String> vendor = const Value.absent(),
                 Value<int> amountMinor = const Value.absent(),
                 Value<DateTime> date = const Value.absent(),
@@ -1336,6 +1399,7 @@ class $$ExpensesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion(
                 id: id,
+                title: title,
                 vendor: vendor,
                 amountMinor: amountMinor,
                 date: date,
@@ -1347,6 +1411,7 @@ class $$ExpensesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String> title = const Value.absent(),
                 required String vendor,
                 required int amountMinor,
                 required DateTime date,
@@ -1356,6 +1421,7 @@ class $$ExpensesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion.insert(
                 id: id,
+                title: title,
                 vendor: vendor,
                 amountMinor: amountMinor,
                 date: date,

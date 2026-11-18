@@ -6,4 +6,7 @@ abstract final class AppRoutes {
   static const summary = '/summary';
   static const settings = '/settings';
   static const addExpense = '/expenses/new';
+
+  /// Needs the expense to edit passed as `extra`.
+  static const editExpense = '/expenses/edit';
 }

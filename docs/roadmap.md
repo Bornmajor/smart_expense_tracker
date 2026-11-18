@@ -4,12 +4,12 @@ What is planned, in the order we intend to build it. Items move to the README fe
 
 ## Up next
 
-1. **Onboarding redesign** (in progress): a bright full-screen background per slide (yellow, lavender, orange) with black text and buttons, a 50/50 split between the illustration and the text, and a secondary Skip button below Next.
-2. **Release pipeline and early testers.** Fastlane run from GitHub Actions, release signing, and uploads to the Google Play internal testing track. Add testers by email and start a closed test early.
-3. **Finish the expense loop.** Edit an expense, delete with undo, group the list by day, and show the category name on each item.
-4. **Category management.** Create, rename and delete categories (name required and unique; deleting moves expenses to "Other").
-5. **Optional receipt scanning.** Camera or gallery, on-device OCR, a receipt parser and category suggestion, filling the same add-expense form. Manual entry always keeps working.
-6. **Monthly report export.** PDF and CSV for a month, shared or saved from the system share sheet.
+1. **Release pipeline and early testers** (code done, setup in progress). Fastlane run from GitHub Actions, release signing, and uploads to the Google Play internal testing track after CI passes on `main`. Still needed: GitHub secrets, the first manual upload, and testers. Start a closed test early.
+2. **Category management.** Create, rename and delete categories (name required and unique; deleting moves expenses to "Other").
+3. **Optional receipt scanning.** Camera or gallery, on-device OCR, a receipt parser and category suggestion, filling the same expense form. Manual entry always keeps working.
+4. **Monthly report export.** PDF and CSV for a month, shared or saved from the system share sheet.
+
+**Done recently:** onboarding redesign, safe-area fixes, color-coded snackbars, and the expense loop (edit, delete with undo, list grouped by day with category names).
 
 ## Planned: prompt sheet
 
