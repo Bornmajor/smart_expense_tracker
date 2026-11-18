@@ -5,6 +5,7 @@ import 'package:smart_expense_tracker/core/errors/storage_exception.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense_draft.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/usecases/update_expense.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/validation/expense_rules.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/validation/expense_validation.dart';
 
 import '../../../../support/fakes.dart';
@@ -17,11 +18,13 @@ void main() {
   late UpdateExpense updateExpense;
 
   ExpenseDraft draft({
+    String title = '',
     String vendor = 'BP',
     int? amountMinor = 1250,
     DateTime? date,
     String? categoryId = 'transport',
   }) => ExpenseDraft(
+    title: title,
     vendor: vendor,
     amountMinor: amountMinor,
     date: date ?? DateTime(2026, 11, 15),
@@ -68,6 +71,26 @@ void main() {
 
       final blank = await updateExpense(original, draft(vendor: '   '));
       expect((blank as Success<Expense>).value.vendor, 'Unknown');
+    });
+
+    test('can add, change and clear the title', () async {
+      final added = await updateExpense(original, draft(title: ' Lunch '));
+      final addedExpense = (added as Success<Expense>).value;
+      expect(addedExpense.title, 'Lunch');
+
+      final cleared = await updateExpense(addedExpense, draft());
+      expect((cleared as Success<Expense>).value.title, isEmpty);
+    });
+
+    test('rejects a title that is too long', () async {
+      final result = await updateExpense(
+        original,
+        draft(title: 'a' * (ExpenseRules.maxTitleLength + 1)),
+      );
+
+      expect(validationErrors(result), {
+        ExpenseField.title: ExpenseError.titleTooLong,
+      });
     });
 
     test('applies the same rules as adding an expense', () async {

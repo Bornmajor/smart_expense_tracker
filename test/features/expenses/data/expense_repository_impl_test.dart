@@ -43,6 +43,27 @@ void main() {
       expect(await repository.watchAll().first, [saved]);
     });
 
+    test('keeps the title, and an empty one when there is none', () async {
+      await repository.save(
+        Expense(
+          id: 'with',
+          title: 'Lunch with team',
+          vendor: 'Cafe',
+          amountMinor: 900,
+          date: DateTime(2026, 11, 16),
+          categoryId: 'food',
+          createdAt: DateTime(2026, 11, 16, 9),
+          updatedAt: DateTime(2026, 11, 16, 9),
+        ),
+      );
+      await repository.save(expense(id: 'without'));
+
+      final byId = {
+        for (final e in await repository.watchAll().first) e.id: e.title,
+      };
+      expect(byId, {'with': 'Lunch with team', 'without': ''});
+    });
+
     test('lists the newest date first, then the newest entry', () async {
       final older = expense(id: 'old', date: DateTime(2026, 11, 1));
       final newerEarly = expense(

@@ -124,6 +124,56 @@ void main() {
       expect(find.text('Save changes'), findsOneWidget);
     });
 
+    testWidgets('shows the title on the list and in the form', (tester) async {
+      expenses = FakeExpenseRepository(
+        initial: [
+          buildExpense(
+            title: 'Team lunch',
+            vendor: 'Cafe',
+            date: today,
+            categoryId: 'food',
+          ),
+        ],
+      );
+      await pumpRouterApp(tester, expenses: expenses);
+
+      expect(find.text('Team lunch'), findsOneWidget);
+      expect(find.text('Cafe · Food'), findsOneWidget);
+
+      await tapText(tester, 'Team lunch');
+
+      expect(field(tester, 'Title (optional)').controller!.text, 'Team lunch');
+    });
+
+    testWidgets('adds a title to an existing expense', (tester) async {
+      await pumpRouterApp(tester, expenses: expenses);
+
+      await tapText(tester, 'Cafe');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Title (optional)'),
+        '  Morning coffee ',
+      );
+      await tapText(tester, 'Save changes');
+
+      expect(find.text('Morning coffee'), findsOneWidget);
+      expect(
+        expenses.saved.firstWhere((e) => e.id == '1').title,
+        'Morning coffee',
+      );
+    });
+
+    testWidgets('does not let the title grow past its limit', (tester) async {
+      await pumpRouterApp(tester, expenses: expenses);
+
+      await tapText(tester, 'Cafe');
+      await tester.enterText(
+        find.widgetWithText(TextField, 'Title (optional)'),
+        'a' * 80,
+      );
+
+      expect(field(tester, 'Title (optional)').controller!.text.length, 60);
+    });
+
     testWidgets('shows a blank vendor as empty when editing', (tester) async {
       expenses = FakeExpenseRepository(
         initial: [buildExpense(vendor: 'Unknown', date: today)],

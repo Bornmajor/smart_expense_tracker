@@ -4,8 +4,12 @@ import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/utils/money.dart';
 import '../../domain/entities/expense.dart';
+import '../../domain/validation/expense_rules.dart';
 
-/// One expense: vendor, category and amount. Tap to edit.
+/// One expense. Tap to edit.
+///
+/// The title leads when there is one, and the vendor moves to the line below
+/// with the category. Without a title the vendor leads, as before.
 class ExpenseTile extends StatelessWidget {
   const ExpenseTile({
     super.key,
@@ -16,12 +20,23 @@ class ExpenseTile extends StatelessWidget {
 
   final Expense expense;
 
-  /// Shown under the vendor. Left out when the category is not known.
+  /// Shown on the second line. Left out when the category is not known.
   final String? categoryName;
   final VoidCallback? onTap;
 
+  bool get _hasTitle => expense.title.isNotEmpty;
+
+  /// The small line under the heading: vendor (when it is not the heading and
+  /// is known) and category, separated by a dot.
+  String get _details => [
+    if (_hasTitle && expense.vendor != ExpenseRules.unknownVendor)
+      expense.vendor,
+    ?categoryName,
+  ].join(' · ');
+
   @override
   Widget build(BuildContext context) {
+    final details = _details;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -34,10 +49,13 @@ class ExpenseTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(expense.vendor, style: context.text.titleMedium),
-                    if (categoryName != null) ...[
+                    Text(
+                      _hasTitle ? expense.title : expense.vendor,
+                      style: context.text.titleMedium,
+                    ),
+                    if (details.isNotEmpty) ...[
                       const Gap(AppSpacing.xs),
-                      Text(categoryName!, style: context.text.bodySmall),
+                      Text(details, style: context.text.bodySmall),
                     ],
                   ],
                 ),

@@ -40,7 +40,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 
 - [x] Light and dark themes with a shared design system (colors, spacing, typography)
 - [x] Welcome screen and three-step onboarding, shown once
-- [x] Manual expense entry with validation, stored offline on the device
+- [x] Manual expense entry with validation (optional title and vendor), stored offline on the device
 - [x] Expense list grouped by day, with daily totals and category names
 - [x] Edit an expense, or delete it by swiping (with Undo) or from the edit screen
 - [x] Monthly summary: total and spending by category, with a month switcher

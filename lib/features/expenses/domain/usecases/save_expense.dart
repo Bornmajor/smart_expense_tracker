@@ -30,6 +30,7 @@ class SaveExpense {
 
     final expense = Expense(
       id: _newId(),
+      title: ExpenseRules.cleanTitle(draft.title),
       vendor: ExpenseRules.vendorOrUnknown(draft.vendor),
       amountMinor: draft.amountMinor!,
       date: ExpenseRules.dayOnly(draft.date),

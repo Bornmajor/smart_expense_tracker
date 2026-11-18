@@ -2,6 +2,7 @@ import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.
 
 Expense buildExpense({
   String id = 'e1',
+  String title = '',
   String vendor = 'Corner Cafe',
   int amountMinor = 500,
   DateTime? date,
@@ -10,6 +11,7 @@ Expense buildExpense({
   final day = date ?? DateTime(2026, 11, 16);
   return Expense(
     id: id,
+    title: title,
     vendor: vendor,
     amountMinor: amountMinor,
     date: day,

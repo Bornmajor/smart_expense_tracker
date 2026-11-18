@@ -14,13 +14,17 @@ class AppDatabase extends _$AppDatabase {
       AppDatabase(driftDatabase(name: 'spendwise_iq'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (migrator) async {
       await migrator.createAll();
       await batch((b) => b.insertAll(categories, _defaultCategories()));
+    },
+    onUpgrade: (migrator, from, to) async {
+      // Version 2 added an optional title. Existing expenses get no title.
+      if (from < 2) await migrator.addColumn(expenses, expenses.title);
     },
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );

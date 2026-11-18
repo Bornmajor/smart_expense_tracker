@@ -101,7 +101,7 @@ A use case is added only when it does more than forward a call.
 - Because the rules live in the use case, they hold no matter which screen or feature calls it.
 - A use case that depends on the current time takes a `DateTime Function() now` parameter, so tests do not depend on the real clock.
 
-Starting rules for an expense (change them here when the product changes): amount greater than zero, date not in the future, category required, vendor optional (blank becomes "Unknown").
+Starting rules for an expense (change them here when the product changes): amount greater than zero, date not in the future, category required, vendor optional (blank becomes "Unknown"), title optional (trimmed, at most 60 characters). Adding and editing share these rules (`ExpenseRules`).
 
 ### Datasources
 
@@ -115,6 +115,14 @@ For drift, the generated database access object (DAO) already is the datasource,
 - Drift generates its own row classes in `data`. A mapper converts between a row and an entity. There are no separate DTO classes beyond that.
 - Money is stored as **integer minor units** (cents), never `double`.
 - Expenses and categories have a UUID `id` and `createdAt` / `updatedAt`, so a server can be added later. No sync logic exists until then.
+
+### Changing the database
+
+Testers and users already have data, so a table change must never lose it:
+
+1. Change the table in `tables.dart`, raise `schemaVersion` in `app_database.dart`, and add the step to `onUpgrade` (for example `addColumn`).
+2. Run `dart run build_runner build --delete-conflicting-outputs` and commit the regenerated `app_database.g.dart`.
+3. Add a test that opens a database in the old shape and checks the data survives (see `test/core/database/app_database_test.dart`). Remove the upgrade step and confirm the test fails.
 
 ### Receipt photos
 

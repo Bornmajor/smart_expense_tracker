@@ -6,6 +6,9 @@ abstract final class ExpenseRules {
   /// Stored when the user leaves the vendor blank.
   static const unknownVendor = 'Unknown';
 
+  /// The longest title allowed, after trimming.
+  static const maxTitleLength = 60;
+
   /// Checks a draft and returns field name -> error code. Empty when valid.
   static Map<String, String> validate(ExpenseDraft draft, DateTime now) {
     final errors = <String, String>{};
@@ -26,8 +29,16 @@ abstract final class ExpenseRules {
       errors[ExpenseField.category] = ExpenseError.categoryRequired;
     }
 
+    // The title is optional, but it can't be a paragraph.
+    if (cleanTitle(draft.title).length > maxTitleLength) {
+      errors[ExpenseField.title] = ExpenseError.titleTooLong;
+    }
+
     return errors;
   }
+
+  /// The title as it is stored: trimmed, and empty when the user left it blank.
+  static String cleanTitle(String title) => title.trim();
 
   /// The vendor as it is stored: trimmed, or "Unknown" when blank.
   static String vendorOrUnknown(String vendor) {

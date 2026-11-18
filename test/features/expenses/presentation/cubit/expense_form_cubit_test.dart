@@ -47,6 +47,37 @@ void main() {
     );
 
     blocTest<ExpenseFormCubit, ExpenseFormState>(
+      'saves the title with the expense',
+      build: buildCubit,
+      act: (cubit) => cubit.submit(
+        title: 'Team lunch',
+        vendor: 'Cafe',
+        amountText: '9',
+        date: today,
+        categoryId: 'food',
+      ),
+      verify: (_) => expect(repository.saved.single.title, 'Team lunch'),
+    );
+
+    blocTest<ExpenseFormCubit, ExpenseFormState>(
+      'shows a too-long title as a title error',
+      build: buildCubit,
+      act: (cubit) => cubit.submit(
+        title: 'a' * 61,
+        vendor: 'Cafe',
+        amountText: '9',
+        date: today,
+        categoryId: 'food',
+      ),
+      expect: () => const [
+        ExpenseFormState(status: ExpenseFormStatus.saving),
+        ExpenseFormState(
+          fieldErrors: {ExpenseField.title: ExpenseError.titleTooLong},
+        ),
+      ],
+    );
+
+    blocTest<ExpenseFormCubit, ExpenseFormState>(
       'shows field errors from the use case and stays editable',
       build: buildCubit,
       act: (cubit) => cubit.submit(

@@ -7,8 +7,11 @@ class ExpenseDraft extends Equatable {
     required this.amountMinor,
     required this.date,
     required this.categoryId,
+    this.title = '',
   });
 
+  /// Optional. Blank means no title.
+  final String title;
   final String vendor;
 
   /// Null when the user did not enter a usable amount.
@@ -17,5 +20,5 @@ class ExpenseDraft extends Equatable {
   final String? categoryId;
 
   @override
-  List<Object?> get props => [vendor, amountMinor, date, categoryId];
+  List<Object?> get props => [title, vendor, amountMinor, date, categoryId];
 }

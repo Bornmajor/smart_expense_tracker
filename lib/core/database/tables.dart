@@ -14,6 +14,10 @@ class Categories extends Table {
 @DataClassName('ExpenseRow')
 class Expenses extends Table {
   TextColumn get id => text()();
+
+  /// Optional short title, such as "Lunch with team". Empty when not set.
+  /// Added in schema version 2.
+  TextColumn get title => text().withDefault(const Constant(''))();
   TextColumn get vendor => text()();
 
   /// Integer minor units (cents).

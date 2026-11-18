@@ -30,6 +30,7 @@ class ExpenseFormCubit extends Cubit<ExpenseFormState> {
   bool get isEditing => original != null;
 
   Future<void> submit({
+    String title = '',
     required String vendor,
     required String amountText,
     required DateTime date,
@@ -41,6 +42,7 @@ class ExpenseFormCubit extends Cubit<ExpenseFormState> {
     // Turning text into a number is a form concern; the rules are in the use case.
     final amountMinor = Money.tryParse(amountText);
     final draft = ExpenseDraft(
+      title: title,
       vendor: vendor,
       amountMinor: amountMinor,
       date: date,

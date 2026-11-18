@@ -27,6 +27,7 @@ class ExpenseFormPage extends StatefulWidget {
 }
 
 class _ExpenseFormPageState extends State<ExpenseFormPage> {
+  late final TextEditingController _title;
   late final TextEditingController _vendor;
   late final TextEditingController _amount;
   late DateTime _date;
@@ -38,6 +39,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   void initState() {
     super.initState();
     final original = widget.original;
+    _title = TextEditingController(text: original?.title ?? '');
     // A blank vendor is stored as "Unknown"; show it blank again when editing.
     _vendor = TextEditingController(
       text: original == null || original.vendor == ExpenseRules.unknownVendor
@@ -53,6 +55,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
 
   @override
   void dispose() {
+    _title.dispose();
     _vendor.dispose();
     _amount.dispose();
     super.dispose();
@@ -60,6 +63,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
 
   void _submit() {
     context.read<ExpenseFormCubit>().submit(
+      title: _title.text,
       vendor: _vendor.text,
       amountText: _amount.text,
       date: _date,
@@ -147,6 +151,21 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     children: [
+                      TextField(
+                        controller: _title,
+                        textCapitalization: TextCapitalization.sentences,
+                        inputFormatters: [
+                          LengthLimitingTextInputFormatter(
+                            ExpenseRules.maxTitleLength,
+                          ),
+                        ],
+                        decoration: InputDecoration(
+                          labelText: 'Title (optional)',
+                          hintText: 'For example, Lunch with team',
+                          errorText: _error(state, ExpenseField.title),
+                        ),
+                      ),
+                      const Gap(AppSpacing.md),
                       TextField(
                         controller: _vendor,
                         textCapitalization: TextCapitalization.words,

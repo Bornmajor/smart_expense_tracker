@@ -22,6 +22,7 @@ class UpdateExpense {
 
     final updated = Expense(
       id: original.id,
+      title: ExpenseRules.cleanTitle(draft.title),
       vendor: ExpenseRules.vendorOrUnknown(draft.vendor),
       amountMinor: draft.amountMinor!,
       date: ExpenseRules.dayOnly(draft.date),
