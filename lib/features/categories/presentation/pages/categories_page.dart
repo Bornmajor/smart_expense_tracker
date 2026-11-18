@@ -18,14 +18,6 @@ import '../widgets/category_name_sheet.dart';
 class CategoriesPage extends StatelessWidget {
   const CategoriesPage({super.key});
 
-  /// What a sheet shows under the name field when saving did not work.
-  String _saveError(AppFailure failure) => switch (failure) {
-    ValidationFailure(:final fieldErrors) => categoryErrorMessage(
-      fieldErrors[CategoryField.name] ?? '',
-    ),
-    _ => 'Couldn\'t save the category. Try again.',
-  };
-
   Future<void> _add(BuildContext context) async {
     final actions = context.read<CategoryActionsCubit>();
     final saved = await showCategoryNameSheet(
@@ -33,7 +25,7 @@ class CategoriesPage extends StatelessWidget {
       title: 'New category',
       submitLabel: 'Add category',
       onSubmit: (name) async => switch (await actions.create(name)) {
-        Failure(:final failure) => _saveError(failure),
+        Failure(:final failure) => categorySaveError(failure),
         _ => null,
       },
     );
@@ -48,7 +40,7 @@ class CategoriesPage extends StatelessWidget {
       submitLabel: 'Save name',
       initialName: category.name,
       onSubmit: (name) async => switch (await actions.rename(category, name)) {
-        Failure(:final failure) => _saveError(failure),
+        Failure(:final failure) => categorySaveError(failure),
         _ => null,
       },
     );

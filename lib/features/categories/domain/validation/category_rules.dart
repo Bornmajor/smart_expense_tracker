@@ -34,10 +34,25 @@ abstract final class CategoryRules {
     if (clean.isEmpty) return CategoryError.nameRequired;
     if (clean.length > maxNameLength) return CategoryError.nameTooLong;
 
-    final lower = clean.toLowerCase();
-    final taken = existing.any(
-      (c) => c.id != exceptId && cleanName(c.name).toLowerCase() == lower,
-    );
-    return taken ? CategoryError.nameTaken : null;
+    return findByName(name, existing, exceptId: exceptId) == null
+        ? null
+        : CategoryError.nameTaken;
+  }
+
+  /// The category that already has this name, ignoring case and the spaces
+  /// around it, or null. [exceptId] leaves one category out of the search.
+  static Category? findByName(
+    String name,
+    List<Category> existing, {
+    String? exceptId,
+  }) {
+    final lower = cleanName(name).toLowerCase();
+    for (final category in existing) {
+      if (category.id != exceptId &&
+          cleanName(category.name).toLowerCase() == lower) {
+        return category;
+      }
+    }
+    return null;
   }
 }

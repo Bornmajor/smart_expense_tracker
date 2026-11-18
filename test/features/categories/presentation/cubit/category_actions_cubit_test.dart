@@ -5,6 +5,7 @@ import 'package:smart_expense_tracker/core/errors/storage_exception.dart';
 import 'package:smart_expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/usecases/create_category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/usecases/delete_category.dart';
+import 'package:smart_expense_tracker/features/categories/domain/usecases/find_or_create_category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/usecases/rename_category.dart';
 import 'package:smart_expense_tracker/features/categories/presentation/cubit/category_actions_cubit.dart';
 
@@ -21,6 +22,10 @@ void main() {
     });
     cubit = CategoryActionsCubit(
       createCategory: CreateCategory(repository, newId: () => 'new-id'),
+      findOrCreateCategory: FindOrCreateCategory(
+        repository,
+        newId: () => 'new-id',
+      ),
       renameCategory: RenameCategory(repository),
       deleteCategory: DeleteCategory(repository),
       repository: repository,
@@ -35,6 +40,17 @@ void main() {
 
       expect(
         (result! as Success<Category>).value,
+        const Category(id: 'new-id', name: 'Pets'),
+      );
+    });
+
+    test('finds an existing category, or creates a new one', () async {
+      final existing = await cubit.findOrCreate('FOOD');
+      expect((existing! as Success<Category>).value, food);
+
+      final created = await cubit.findOrCreate('Pets');
+      expect(
+        (created! as Success<Category>).value,
         const Category(id: 'new-id', name: 'Pets'),
       );
     });
@@ -87,6 +103,7 @@ void main() {
     test('goes back to idle even when an action throws', () async {
       final broken = CategoryActionsCubit(
         createCategory: _ThrowingCreate(repository),
+        findOrCreateCategory: FindOrCreateCategory(repository),
         renameCategory: RenameCategory(repository),
         deleteCategory: DeleteCategory(repository),
         repository: repository,

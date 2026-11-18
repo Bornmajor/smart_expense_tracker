@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/domain/usecases/create_category.dart';
 import '../features/categories/domain/usecases/delete_category.dart';
+import '../features/categories/domain/usecases/find_or_create_category.dart';
 import '../features/categories/domain/usecases/rename_category.dart';
 import '../features/categories/presentation/cubit/categories_cubit.dart';
 import '../features/categories/presentation/cubit/category_actions_cubit.dart';
@@ -138,14 +139,7 @@ GoRouter createRouter({
         return MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => CategoriesCubit(categories)),
-            BlocProvider(
-              create: (_) => CategoryActionsCubit(
-                createCategory: CreateCategory(categories),
-                renameCategory: RenameCategory(categories),
-                deleteCategory: DeleteCategory(categories),
-                repository: categories,
-              ),
-            ),
+            BlocProvider(create: (_) => _categoryActions(categories)),
           ],
           child: const CategoriesPage(),
         );
@@ -166,9 +160,19 @@ GoRouter createRouter({
   ],
 );
 
+CategoryActionsCubit _categoryActions(CategoryRepository categories) =>
+    CategoryActionsCubit(
+      createCategory: CreateCategory(categories),
+      findOrCreateCategory: FindOrCreateCategory(categories),
+      renameCategory: RenameCategory(categories),
+      deleteCategory: DeleteCategory(categories),
+      repository: categories,
+    );
+
 /// The expense form: adding when [original] is null, editing otherwise.
 Widget _expenseForm(BuildContext context, {Expense? original}) {
   final expenses = context.read<ExpenseRepository>();
+  final categories = context.read<CategoryRepository>();
   return MultiBlocProvider(
     providers: [
       BlocProvider(
@@ -179,9 +183,9 @@ Widget _expenseForm(BuildContext context, {Expense? original}) {
           original: original,
         ),
       ),
-      BlocProvider(
-        create: (_) => CategoriesCubit(context.read<CategoryRepository>()),
-      ),
+      BlocProvider(create: (_) => CategoriesCubit(categories)),
+      // For the "New" chip: add a category without leaving the form.
+      BlocProvider(create: (_) => _categoryActions(categories)),
     ],
     child: ExpenseFormPage(original: original),
   );
