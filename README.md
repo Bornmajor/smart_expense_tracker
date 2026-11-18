@@ -41,7 +41,8 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Light and dark themes with a shared design system (colors, spacing, typography)
 - [x] Welcome screen and three-step onboarding, shown once
 - [x] Manual expense entry with validation, stored offline on the device
-- [x] Expense list, newest first
+- [x] Expense list grouped by day, with daily totals and category names
+- [x] Edit an expense, or delete it by swiping (with Undo) or from the edit screen
 - [x] Monthly summary: total and spending by category, with a month switcher
 - [x] Settings: theme (system, light, dark) and About
 - [x] Optional fingerprint / face lock, turned on from Settings
@@ -53,7 +54,6 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [ ] On-device OCR that extracts vendor, date and total
 - [ ] Review-and-edit form, auto-filled from the scan, confirmed before saving
 - [ ] Automatic category suggestion, with manual override
-- [ ] Expense list grouped by day, with edit and delete (undo)
 - [ ] Custom categories (create and edit)
 - [ ] Monthly report as PDF and CSV, shared or saved from the system share sheet
 
