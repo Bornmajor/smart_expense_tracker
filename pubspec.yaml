@@ -68,6 +68,10 @@ dev_dependencies:
 # The following section is specific to Flutter packages.
 flutter:
 
+  # Without --flavor, builds use dev (its own app id), so a build from this
+  # computer never collides with the Play app. Releases pass --flavor prod.
+  default-flavor: dev
+
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
