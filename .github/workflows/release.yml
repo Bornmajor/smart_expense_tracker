@@ -1,0 +1,92 @@
+name: Release to Play internal testing
+
+# Runs after the CI workflow passes on a push to main (that is, after a merge),
+# or by hand from the Actions tab. A failing CI run never reaches Play.
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  FLUTTER_VERSION: "3.47.2"
+
+jobs:
+  internal:
+    name: Build and upload
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # Only a green push to main, or a manual run started on main. The "push"
+    # check keeps pull requests (including ones from forks) out.
+    if: >-
+      (github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Build exactly the commit that CI tested.
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          cache: true
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: android
+
+      - name: Write signing files from secrets
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          for name in ANDROID_KEYSTORE_BASE64 ANDROID_KEYSTORE_PASSWORD ANDROID_KEY_ALIAS ANDROID_KEY_PASSWORD PLAY_SERVICE_ACCOUNT_JSON; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing repository secret $name"
+              exit 1
+            fi
+          done
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/upload-keystore.jks
+          {
+            echo "storePassword=$ANDROID_KEYSTORE_PASSWORD"
+            echo "keyPassword=$ANDROID_KEY_PASSWORD"
+            echo "keyAlias=$ANDROID_KEY_ALIAS"
+            echo "storeFile=upload-keystore.jks"
+          } > android/key.properties
+          echo "$PLAY_SERVICE_ACCOUNT_JSON" > android/play-service-account.json
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build the release bundle
+        # Play needs a higher version code for every upload. The run number
+        # only goes up, and the offset keeps clear of any manual uploads.
+        run: flutter build appbundle --release --build-number=$((GITHUB_RUN_NUMBER + 100))
+
+      - name: Upload to the internal testing track
+        working-directory: android
+        env:
+          PLAY_JSON_KEY_FILE: play-service-account.json
+        run: bundle exec fastlane internal

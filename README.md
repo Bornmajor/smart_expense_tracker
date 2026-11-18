@@ -4,6 +4,23 @@
 
 SpendWise IQ is a smart, privacy-first expense tracker. Point your camera at a receipt and the app reads the vendor, date and total on your device, suggests a category, and lets you confirm the details before saving. No typing, no account, no cloud.
 
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/welcome.jpg" width="200" alt="Welcome screen"><br><sub>Welcome</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-add.jpg" width="200" alt="Onboarding: add expenses your way"><br><sub>Onboarding</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-summary.jpg" width="200" alt="Onboarding: see where your money goes"><br><sub>Onboarding</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/expenses.jpg" width="200" alt="Expenses tab"><br><sub>Expenses</sub></td>
+    <td align="center"><img src="docs/screenshots/summary.jpg" width="200" alt="Monthly summary"><br><sub>Monthly summary</sub></td>
+    <td align="center"><img src="docs/screenshots/settings.jpg" width="200" alt="Settings"><br><sub>Settings</sub></td>
+  </tr>
+</table>
+
+Captured on an Android phone with the dark theme. Receipt scanning, mentioned on the welcome and onboarding screens, is still planned (see [Features](#features)).
+
 ## The problem it solves
 
 Most people want to know where their money goes, but tracking it is tedious. Receipts pile up, typing each purchase takes too long, and the habit fades after a week. The apps that automate it usually ask for an account and upload financial data to a server.
@@ -116,6 +133,8 @@ Every pull request and every push to `main` runs the workflow in [`.github/workf
 1. Formatting check (`dart format`)
 2. Static analysis (`flutter analyze --fatal-infos`)
 3. Tests with a minimum 80% coverage gate
+
+Releases are separate: once CI passes on a merge to `main`, [`release.yml`](.github/workflows/release.yml) builds a signed bundle and uploads it to Play internal testing. See [docs/releasing.md](docs/releasing.md) for the one-time setup.
 
 Run the same checks locally before opening a pull request:
 
