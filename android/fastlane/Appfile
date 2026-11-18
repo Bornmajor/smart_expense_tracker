@@ -1,0 +1,5 @@
+package_name("com.bornmajor.spendwiseiq")
+
+# Path to the Google Play service account key. In CI the workflow writes it from
+# a secret; locally, point PLAY_JSON_KEY_FILE at your downloaded copy.
+json_key_file(ENV["PLAY_JSON_KEY_FILE"] || "play-service-account.json")

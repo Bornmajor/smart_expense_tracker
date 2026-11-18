@@ -117,6 +117,8 @@ Every pull request and every push to `main` runs the workflow in [`.github/workf
 2. Static analysis (`flutter analyze --fatal-infos`)
 3. Tests with a minimum 80% coverage gate
 
+Releases are separate: pushing a tag like `v1.0.0` runs [`release.yml`](.github/workflows/release.yml), which builds a signed bundle and uploads it to Play internal testing. See [docs/releasing.md](docs/releasing.md) for the one-time setup.
+
 Run the same checks locally before opening a pull request:
 
 ```bash
