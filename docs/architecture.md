@@ -219,16 +219,18 @@ CI enforces formatting, static analysis and the coverage gate. See [README](../R
 
 ```
 ScanPage (UI)
-  -> ScanCubit
-    -> ScanReceipt (use case)         # business logic
-      -> ReceiptOcrRepository         # domain interface
-        -> ReceiptOcrRepositoryImpl   # data
-          -> MlKitOcrDataSource       # wraps google_mlkit_text_recognition
-      -> ReceiptParser                # domain: finds vendor, date, total
-      -> Categorizer                  # domain: suggests a category
+  -> ScanCubit                        # where the scan is: working, preview, done, failed
+    -> ScanReceipt (use case)         # pick, read, recover, discard
+      -> ReceiptPhotoSource           # domain interface
+        -> ImagePickerPhotoSource     # data: wraps image_picker
+      -> ReceiptTextReader            # domain interface
+        -> MlKitReceiptTextReader     # data: wraps google_mlkit_text_recognition
+      -> ReceiptRows                  # domain: joins OCR lines at the same height into rows
+      -> ParseReceipt                 # domain: finds vendor, date, total
+      -> SuggestCategory              # domain: suggests a category the user has
 ```
 
-The cubit emits a scanned result that fills the review form. After the user verifies it, saving goes through the `SaveExpense` use case, which validates the business rules and then writes through `ExpenseRepository`.
+The cubit emits a scanned result that fills the add-expense form, beside the receipt photo. The plugins sit behind two small interfaces, so everything else is tested with fakes and only the native ML Kit call needs a phone. The photo is temporary: it is deleted when the form closes, and whenever a scan fails or is left. After the user verifies it, saving goes through the `SaveExpense` use case, which validates the business rules and then writes through `ExpenseRepository`.
 
 ## Example: monthly report
 

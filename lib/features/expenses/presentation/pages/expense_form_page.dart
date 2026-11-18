@@ -11,6 +11,8 @@ import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/category_validation_messages.dart';
 import '../../../categories/presentation/cubit/category_actions_cubit.dart';
 import '../../../categories/presentation/widgets/category_name_sheet.dart';
+import '../../../scan/domain/entities/scan_result.dart';
+import '../../../scan/presentation/widgets/scan_review_panel.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/validation/expense_rules.dart';
 import '../../domain/validation/expense_validation.dart';
@@ -23,9 +25,21 @@ import '../widgets/date_field.dart';
 /// The form for adding an expense, or editing one when [original] is given.
 /// The cubit above it decides which; this page only changes its wording.
 class ExpenseFormPage extends StatefulWidget {
-  const ExpenseFormPage({super.key, this.original});
+  const ExpenseFormPage({
+    super.key,
+    this.original,
+    this.scan,
+    this.discardPhoto,
+  });
 
   final Expense? original;
+
+  /// A scanned receipt that fills in the fields. Only used when adding.
+  final ScanResult? scan;
+
+  /// Deletes the receipt photo. Called when the form closes, whether the
+  /// expense was saved or not, because the photo is only for comparing.
+  final void Function(String photoPath)? discardPhoto;
 
   @override
   State<ExpenseFormPage> createState() => _ExpenseFormPageState();
@@ -44,22 +58,33 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   void initState() {
     super.initState();
     final original = widget.original;
+    final scan = widget.scan;
+    final draft = scan?.draft;
     _title = TextEditingController(text: original?.title ?? '');
     // A blank vendor is stored as "Unknown"; show it blank again when editing.
     _vendor = TextEditingController(
-      text: original == null || original.vendor == ExpenseRules.unknownVendor
-          ? ''
-          : original.vendor,
+      text: original != null
+          ? (original.vendor == ExpenseRules.unknownVendor
+                ? ''
+                : original.vendor)
+          : draft?.vendor ?? '',
     );
+    final scannedTotal = draft?.totalMinor;
     _amount = TextEditingController(
-      text: original == null ? '' : Money.toInputText(original.amountMinor),
+      text: original != null
+          ? Money.toInputText(original.amountMinor)
+          : scannedTotal == null
+          ? ''
+          : Money.toInputText(scannedTotal),
     );
-    _date = original?.date ?? DateTime.now();
-    _categoryId = original?.categoryId;
+    _date = original?.date ?? draft?.date ?? DateTime.now();
+    _categoryId = original?.categoryId ?? scan?.suggestedCategoryId;
   }
 
   @override
   void dispose() {
+    final scan = widget.scan;
+    if (scan != null) widget.discardPhoto?.call(scan.photoPath);
     _title.dispose();
     _vendor.dispose();
     _amount.dispose();
@@ -187,6 +212,11 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                     keyboardDismissBehavior:
                         ScrollViewKeyboardDismissBehavior.onDrag,
                     children: [
+                      // After a scan: the receipt photo and what to check.
+                      if (widget.scan != null) ...[
+                        ScanReviewPanel(scan: widget.scan!),
+                        const Gap(AppSpacing.lg),
+                      ],
                       TextField(
                         controller: _title,
                         textCapitalization: TextCapitalization.sentences,

@@ -5,6 +5,11 @@ import 'package:smart_expense_tracker/features/categories/domain/repositories/ca
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
+import 'package:smart_expense_tracker/features/scan/domain/entities/ocr_line.dart';
+import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_source.dart';
+import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_photo_source.dart';
+import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_text_reader.dart';
+import 'package:smart_expense_tracker/features/scan/domain/scan_exception.dart';
 import 'package:smart_expense_tracker/features/security/domain/repositories/biometric_authenticator.dart';
 import 'package:smart_expense_tracker/features/security/domain/repositories/security_repository.dart';
 import 'package:smart_expense_tracker/features/settings/domain/entities/app_theme_mode.dart';
@@ -129,6 +134,76 @@ class FakeCategoryRepository implements CategoryRepository {
     expenseCounts[moveToId] = (expenseCounts[moveToId] ?? 0) + moved;
     _changes.add(List.of(categories));
     return moved;
+  }
+}
+
+/// A stand-in for the camera and gallery. Tell it what the user "chose", or
+/// make it fail, and read back what it was asked to do.
+class FakeReceiptPhotoSource implements ReceiptPhotoSource {
+  FakeReceiptPhotoSource({this.path = '/tmp/receipt.jpg'});
+
+  /// What the user chose. Null means they backed out.
+  String? path;
+
+  /// Photos for the next picks, one each time. When empty, [path] is used.
+  /// Handy for a retake, which must return a different photo.
+  final List<String> pathQueue = [];
+
+  /// When set, `pick` throws it, as if the camera could not be used.
+  ScanException? pickError;
+
+  /// The photo waiting after Android restarted the app, or null for none.
+  String? recoverPath;
+
+  /// Every source `pick` was called with, in order.
+  final List<ReceiptSource> picked = [];
+
+  /// Every path passed to `discard`, in order.
+  final List<String> discarded = [];
+
+  /// How many times recovery was asked for.
+  int recoverCalls = 0;
+
+  @override
+  Future<String?> pick(ReceiptSource source) async {
+    picked.add(source);
+    final error = pickError;
+    if (error != null) throw error;
+    return pathQueue.isNotEmpty ? pathQueue.removeAt(0) : path;
+  }
+
+  @override
+  Future<String?> recoverLost() async {
+    recoverCalls++;
+    // A lost photo can be taken only once, like the real thing.
+    final found = recoverPath;
+    recoverPath = null;
+    return found;
+  }
+
+  @override
+  Future<void> discard(String path) async => discarded.add(path);
+}
+
+/// A stand-in for ML Kit: returns the lines it was given, or fails.
+class FakeReceiptTextReader implements ReceiptTextReader {
+  FakeReceiptTextReader([this.lines = const []]);
+
+  List<OcrLine> lines;
+
+  /// When set, `read` throws it. Use a `ScanException` for an expected problem
+  /// or any other error for a bug.
+  Object? error;
+
+  /// Every photo path `read` was called with.
+  final List<String> readPaths = [];
+
+  @override
+  Future<List<OcrLine>> read(String photoPath) async {
+    readPaths.add(photoPath);
+    final problem = error;
+    if (problem != null) throw problem;
+    return lines;
   }
 }
 
