@@ -128,13 +128,13 @@ We test business logic, utility functions and reusable UI components rather than
 
 ### Continuous integration
 
-Every pull request and every push to `main` runs the workflow in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
+Every pull request into, and every push to, `dev`, `uat` and `main` runs the workflow in [`.github/workflows/ci.yml`](.github/workflows/ci.yml):
 
 1. Formatting check (`dart format`)
 2. Static analysis (`flutter analyze --fatal-infos`)
 3. Tests with a minimum 80% coverage gate
 
-Releases are separate: once CI passes on a merge to `main`, [`release.yml`](.github/workflows/release.yml) builds a signed bundle and uploads it to Play internal testing. See [docs/releasing.md](docs/releasing.md) for the one-time setup.
+Releases are separate. Work lands in `dev` (no upload), `uat` sends a build to Play internal testing, and `main` sends one to production after you approve it, all through [`release.yml`](.github/workflows/release.yml). See [docs/branching.md](docs/branching.md) for the branch flow, [docs/releasing.md](docs/releasing.md) for the setup, and the [release checklist](docs/release-checklist.md). User-facing changes go in [CHANGELOG.md](CHANGELOG.md).
 
 Run the same checks locally before opening a pull request:
 
