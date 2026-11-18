@@ -9,4 +9,5 @@ abstract final class AppRoutes {
 
   /// Needs the expense to edit passed as `extra`.
   static const editExpense = '/expenses/edit';
+  static const categories = '/categories';
 }
