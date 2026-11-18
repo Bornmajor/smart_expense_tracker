@@ -145,8 +145,15 @@ class FakeReceiptPhotoSource implements ReceiptPhotoSource {
   /// What the user chose. Null means they backed out.
   String? path;
 
+  /// Photos for the next picks, one each time. When empty, [path] is used.
+  /// Handy for a retake, which must return a different photo.
+  final List<String> pathQueue = [];
+
   /// When set, `pick` throws it, as if the camera could not be used.
   ScanException? pickError;
+
+  /// The photo waiting after Android restarted the app, or null for none.
+  String? recoverPath;
 
   /// Every source `pick` was called with, in order.
   final List<ReceiptSource> picked = [];
@@ -154,12 +161,24 @@ class FakeReceiptPhotoSource implements ReceiptPhotoSource {
   /// Every path passed to `discard`, in order.
   final List<String> discarded = [];
 
+  /// How many times recovery was asked for.
+  int recoverCalls = 0;
+
   @override
   Future<String?> pick(ReceiptSource source) async {
     picked.add(source);
     final error = pickError;
     if (error != null) throw error;
-    return path;
+    return pathQueue.isNotEmpty ? pathQueue.removeAt(0) : path;
+  }
+
+  @override
+  Future<String?> recoverLost() async {
+    recoverCalls++;
+    // A lost photo can be taken only once, like the real thing.
+    final found = recoverPath;
+    recoverPath = null;
+    return found;
   }
 
   @override

@@ -14,9 +14,13 @@ import '../../domain/scan_exception.dart';
 /// The system camera app does the capturing, so this app never asks for the
 /// camera permission itself. Gallery picks need no permission either.
 class ImagePickerPhotoSource implements ReceiptPhotoSource {
-  ImagePickerPhotoSource(this._picker);
+  /// [supportsRecovery] is only for tests. Recovering a lost photo exists on
+  /// Android alone, and it is the default there.
+  ImagePickerPhotoSource(this._picker, {bool? supportsRecovery})
+    : _supportsRecovery = supportsRecovery ?? Platform.isAndroid;
 
   final ImagePicker _picker;
+  final bool _supportsRecovery;
 
   /// Large enough for the text to stay sharp, small enough to read quickly.
   static const _maxWidth = 2000.0;
@@ -39,6 +43,18 @@ class ImagePickerPhotoSource implements ReceiptPhotoSource {
       throw ScanException(_problemFor(e), e);
     } on Exception catch (e) {
       throw ScanException(ScanProblem.cameraUnavailable, e);
+    }
+  }
+
+  @override
+  Future<String?> recoverLost() async {
+    if (!_supportsRecovery) return null;
+    try {
+      final lost = await _picker.retrieveLostData();
+      if (lost.isEmpty) return null;
+      return (lost.file ?? lost.files?.firstOrNull)?.path;
+    } on Exception {
+      return null;
     }
   }
 

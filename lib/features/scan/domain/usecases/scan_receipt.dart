@@ -11,11 +11,14 @@ import '../scan_exception.dart';
 import 'parse_receipt.dart';
 import 'suggest_category.dart';
 
-/// Takes or picks a receipt photo, reads it, and works out the vendor, date,
-/// total and a likely category, ready to fill in the expense form.
+/// The steps of scanning a receipt. They are separate, because the screen
+/// stops in between: a photo from the camera is shown to the user first, who
+/// either uses it or retakes it.
 ///
-/// Returns null when the user backs out without choosing a photo. If the photo
-/// cannot be read, it is deleted before a failure is returned.
+///  1. [pick] (or [recover] after the app was restarted) gives a photo path.
+///  2. [read] reads the photo and works out the vendor, date, total and a
+///     likely category, ready to fill in the expense form.
+///  3. [discard] deletes a photo that will not be used.
 class ScanReceipt {
   ScanReceipt({
     required this._photos,
@@ -31,22 +34,31 @@ class ScanReceipt {
   final ParseReceipt _parse;
   final SuggestCategory _suggest;
 
-  Future<Result<ScanResult>?> call(ReceiptSource source) async {
-    final String? path;
+  /// Takes a photo with the camera, or picks one from the gallery.
+  /// Returns null when the user backs out without choosing one.
+  Future<Result<String>?> pick(ReceiptSource source) async {
     try {
-      path = await _photos.pick(source);
+      final path = await _photos.pick(source);
+      return path == null ? null : Success(path);
     } on ScanException catch (e) {
       return Failure(ScanFailure(e.problem));
     }
-    if (path == null) return null;
+  }
 
+  /// The photo taken just before Android restarted the app, or null. It can
+  /// be recovered once.
+  Future<String?> recover() => _photos.recoverLost();
+
+  /// Reads the photo. If that fails, the photo is deleted, since nothing will
+  /// show it. On success it stays, because the form shows it beside the fields.
+  Future<Result<ScanResult>> read(String photoPath) async {
     try {
-      final lines = ReceiptRows.build(await _reader.read(path));
+      final lines = ReceiptRows.build(await _reader.read(photoPath));
       final draft = _parse(lines);
 
       return Success(
         ScanResult(
-          photoPath: path,
+          photoPath: photoPath,
           draft: draft,
           suggestedCategoryId: _suggest(
             vendor: draft.vendor,
@@ -56,16 +68,18 @@ class ScanReceipt {
         ),
       );
     } on ScanException catch (e) {
-      // Nothing will show this photo, so it does not stay on the device.
-      await _photos.discard(path);
+      await _photos.discard(photoPath);
       return Failure(ScanFailure(e.problem));
     } catch (_) {
       // An unexpected bug. It is not hidden (it is rethrown), but the photo
       // still does not stay behind.
-      await _photos.discard(path);
+      await _photos.discard(photoPath);
       rethrow;
     }
   }
+
+  /// Deletes a photo that will not be used, such as one the user retook.
+  Future<void> discard(String photoPath) => _photos.discard(photoPath);
 
   /// The categories the user has. Without them there is simply no suggestion.
   Future<Set<String>> _categoryIds() async {

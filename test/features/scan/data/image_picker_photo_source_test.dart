@@ -43,7 +43,21 @@ class FakeImagePicker implements ImagePicker {
     return chosen == null ? null : XFile(chosen);
   }
 
-  // The wrapper only calls pickImage. Anything else would be a mistake.
+  /// What Android left behind when it killed the app during capture.
+  LostDataResponse lost = LostDataResponse.empty();
+
+  /// When set, `retrieveLostData` throws it.
+  Object? lostError;
+
+  @override
+  Future<LostDataResponse> retrieveLostData() async {
+    final problem = lostError;
+    if (problem != null) throw problem;
+    return lost;
+  }
+
+  // The wrapper only calls pickImage and retrieveLostData. Anything else
+  // would be a mistake.
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }
@@ -149,6 +163,60 @@ void main() {
       final problem = await failureOf(ReceiptSource.camera);
 
       expect(problem.cause, same(original));
+    });
+  });
+
+  group('recovering a photo lost when Android restarted the app', () {
+    late ImagePickerPhotoSource android;
+
+    // Recovery exists on Android only, so these tests turn it on.
+    setUp(
+      () => android = ImagePickerPhotoSource(picker, supportsRecovery: true),
+    );
+
+    test('returns the path of the photo that was waiting', () async {
+      picker.lost = LostDataResponse(
+        file: XFile('/cache/lost.jpg'),
+        type: RetrieveType.image,
+      );
+
+      expect(await android.recoverLost(), '/cache/lost.jpg');
+    });
+
+    test('returns the first photo when the answer is a list', () async {
+      picker.lost = LostDataResponse(
+        files: [XFile('/cache/a.jpg'), XFile('/cache/b.jpg')],
+        type: RetrieveType.image,
+      );
+
+      expect(await android.recoverLost(), '/cache/a.jpg');
+    });
+
+    test('returns null when nothing was lost', () async {
+      expect(await android.recoverLost(), isNull);
+    });
+
+    test('returns null when the lost result was a failure', () async {
+      picker.lost = LostDataResponse(
+        exception: PlatformException(code: 'camera_failed'),
+        type: RetrieveType.image,
+      );
+
+      expect(await android.recoverLost(), isNull);
+    });
+
+    test('never throws: any problem is just null', () async {
+      picker.lostError = Exception('plugin trouble');
+
+      expect(await android.recoverLost(), isNull);
+    });
+
+    test('does not even ask on platforms that cannot recover', () async {
+      picker.lost = LostDataResponse(file: XFile('/cache/lost.jpg'));
+      picker.lostError = StateError('would be called');
+
+      // The default source on this PC (not Android) has recovery off.
+      expect(await source.recoverLost(), isNull);
     });
   });
 

@@ -49,8 +49,18 @@ void main() {
     parse: ParseReceipt(now: () => DateTime(2026, 11, 18)),
   );
 
+  /// Pick, then read: what the screen does for a gallery photo.
+  Future<Result<ScanResult>?> scan(ReceiptSource source) async {
+    final picked = await scanReceipt.pick(source);
+    return switch (picked) {
+      null => null,
+      Failure(:final failure) => Failure(failure),
+      Success(:final value) => await scanReceipt.read(value),
+    };
+  }
+
   Future<ScanResult> succeeded(ReceiptSource source) async {
-    final result = await scanReceipt(source);
+    final result = await scan(source);
     return (result! as Success<ScanResult>).value;
   }
 
@@ -105,7 +115,7 @@ void main() {
     test('reads the photo that was picked', () async {
       photos.path = '/tmp/other.jpg';
 
-      await scanReceipt(ReceiptSource.camera);
+      await scan(ReceiptSource.camera);
 
       expect(reader.readPaths, ['/tmp/other.jpg']);
     });
@@ -113,15 +123,15 @@ void main() {
     test(
       'does not delete the photo, because the form still needs it',
       () async {
-        await scanReceipt(ReceiptSource.camera);
+        await scan(ReceiptSource.camera);
 
         expect(photos.discarded, isEmpty);
       },
     );
 
     test('asks for the camera or the gallery, as it was told', () async {
-      await scanReceipt(ReceiptSource.camera);
-      await scanReceipt(ReceiptSource.gallery);
+      await scan(ReceiptSource.camera);
+      await scan(ReceiptSource.gallery);
 
       expect(photos.picked, [ReceiptSource.camera, ReceiptSource.gallery]);
     });
@@ -159,7 +169,7 @@ void main() {
     test('returns null and reads nothing', () async {
       photos.path = null;
 
-      final result = await scanReceipt(ReceiptSource.camera);
+      final result = await scan(ReceiptSource.camera);
 
       expect(result, isNull);
       expect(reader.readPaths, isEmpty);
@@ -168,7 +178,7 @@ void main() {
     test('has no photo to delete', () async {
       photos.path = null;
 
-      await scanReceipt(ReceiptSource.gallery);
+      await scan(ReceiptSource.gallery);
 
       expect(photos.discarded, isEmpty);
     });
@@ -178,7 +188,7 @@ void main() {
     test('reports a permission problem', () async {
       photos.pickError = const ScanException(ScanProblem.permissionDenied);
 
-      final result = await scanReceipt(ReceiptSource.camera);
+      final result = await scan(ReceiptSource.camera);
 
       expect(problemOf(result), ScanProblem.permissionDenied);
     });
@@ -186,7 +196,7 @@ void main() {
     test('reports an unavailable camera', () async {
       photos.pickError = const ScanException(ScanProblem.cameraUnavailable);
 
-      final result = await scanReceipt(ReceiptSource.camera);
+      final result = await scan(ReceiptSource.camera);
 
       expect(problemOf(result), ScanProblem.cameraUnavailable);
     });
@@ -194,7 +204,7 @@ void main() {
     test('reads nothing, because there is no photo', () async {
       photos.pickError = const ScanException(ScanProblem.cameraUnavailable);
 
-      await scanReceipt(ReceiptSource.camera);
+      await scan(ReceiptSource.camera);
 
       expect(reader.readPaths, isEmpty);
       expect(photos.discarded, isEmpty);
@@ -205,13 +215,13 @@ void main() {
     setUp(() => reader.error = const ScanException(ScanProblem.unreadable));
 
     test('reports an unreadable photo', () async {
-      final result = await scanReceipt(ReceiptSource.camera);
+      final result = await scan(ReceiptSource.camera);
 
       expect(problemOf(result), ScanProblem.unreadable);
     });
 
     test('deletes the photo, because nothing will show it', () async {
-      await scanReceipt(ReceiptSource.camera);
+      await scan(ReceiptSource.camera);
 
       expect(photos.discarded, ['/tmp/receipt.jpg']);
     });
@@ -221,18 +231,77 @@ void main() {
     test('lets the error through, not hiding a bug', () async {
       reader.error = StateError('a bug');
 
-      expect(scanReceipt(ReceiptSource.camera), throwsA(isA<StateError>()));
+      expect(scan(ReceiptSource.camera), throwsA(isA<StateError>()));
     });
 
     test('still deletes the photo', () async {
       reader.error = StateError('a bug');
 
-      await expectLater(
-        scanReceipt(ReceiptSource.camera),
-        throwsA(isA<StateError>()),
-      );
+      await expectLater(scan(ReceiptSource.camera), throwsA(isA<StateError>()));
 
       expect(photos.discarded, ['/tmp/receipt.jpg']);
+    });
+  });
+
+  group('pick on its own', () {
+    test('returns the path and reads nothing yet', () async {
+      final picked = await scanReceipt.pick(ReceiptSource.camera);
+
+      expect((picked! as Success<String>).value, '/tmp/receipt.jpg');
+      expect(reader.readPaths, isEmpty, reason: 'the user has not confirmed');
+    });
+
+    test('returns null when the user backs out', () async {
+      photos.path = null;
+
+      expect(await scanReceipt.pick(ReceiptSource.camera), isNull);
+    });
+
+    test('returns a failure when the camera cannot be used', () async {
+      photos.pickError = const ScanException(ScanProblem.permissionDenied);
+
+      final picked = await scanReceipt.pick(ReceiptSource.camera);
+
+      final failure = (picked! as Failure<String>).failure as ScanFailure;
+      expect(failure.problem, ScanProblem.permissionDenied);
+    });
+  });
+
+  group('read on its own', () {
+    test('reads the photo it is given, without picking one', () async {
+      final result = await scanReceipt.read('/tmp/given.jpg');
+
+      expect((result as Success<ScanResult>).value.draft.totalMinor, 12000);
+      expect(reader.readPaths, ['/tmp/given.jpg']);
+      expect(photos.picked, isEmpty);
+    });
+  });
+
+  group('recovering a photo after the app was restarted', () {
+    test('returns the photo that was waiting', () async {
+      photos.recoverPath = '/cache/lost.jpg';
+
+      expect(await scanReceipt.recover(), '/cache/lost.jpg');
+    });
+
+    test('returns null when nothing was waiting', () async {
+      expect(await scanReceipt.recover(), isNull);
+    });
+
+    test('gives the photo only once', () async {
+      photos.recoverPath = '/cache/lost.jpg';
+
+      await scanReceipt.recover();
+
+      expect(await scanReceipt.recover(), isNull);
+    });
+  });
+
+  group('discarding a photo', () {
+    test('deletes it through the photo source', () async {
+      await scanReceipt.discard('/tmp/retaken.jpg');
+
+      expect(photos.discarded, ['/tmp/retaken.jpg']);
     });
   });
 
