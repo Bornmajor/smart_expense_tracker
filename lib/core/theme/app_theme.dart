@@ -23,6 +23,10 @@ abstract final class AppTheme {
     ),
     AppSemanticColors.light,
     scaffold: AppColors.grey50,
+    // The field fill is the same color as the screen in light mode, so without
+    // a border an empty field is invisible. Dark mode needs none: its fill is
+    // lighter than the black screen.
+    fieldBorder: AppColors.grey500,
   );
 
   static ThemeData get dark => _build(
@@ -48,10 +52,13 @@ abstract final class AppTheme {
     ColorScheme s,
     AppSemanticColors semantic, {
     required Color scaffold,
+    Color? fieldBorder,
   }) {
-    final fieldBorder = OutlineInputBorder(
+    final restingBorder = OutlineInputBorder(
       borderRadius: AppRadius.mdAll,
-      borderSide: BorderSide.none,
+      borderSide: fieldBorder == null
+          ? BorderSide.none
+          : BorderSide(color: fieldBorder),
     );
 
     return ThemeData(
@@ -70,15 +77,15 @@ abstract final class AppTheme {
           horizontal: AppSpacing.lg,
           vertical: AppSpacing.lg,
         ),
-        border: fieldBorder,
-        enabledBorder: fieldBorder,
-        focusedBorder: fieldBorder.copyWith(
+        border: restingBorder,
+        enabledBorder: restingBorder,
+        focusedBorder: restingBorder.copyWith(
           borderSide: BorderSide(color: s.primary, width: 1.5),
         ),
-        errorBorder: fieldBorder.copyWith(
+        errorBorder: restingBorder.copyWith(
           borderSide: BorderSide(color: s.error),
         ),
-        focusedErrorBorder: fieldBorder.copyWith(
+        focusedErrorBorder: restingBorder.copyWith(
           borderSide: BorderSide(color: s.error, width: 1.5),
         ),
         hintStyle: TextStyle(color: s.onSurfaceVariant.withValues(alpha: 0.7)),
