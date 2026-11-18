@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -71,6 +72,20 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           ),
+          // TEMPORARY developer tool, shown only in debug builds.
+          if (kDebugMode) ...[
+            const Gap(AppSpacing.xl),
+            const SectionHeader('Developer'),
+            Card(
+              child: ListTile(
+                leading: const Icon(Icons.bug_report_outlined),
+                title: const Text('OCR test'),
+                subtitle: const Text('Temporary: see what the scanner reads'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () => context.push(AppRoutes.ocrDebug),
+              ),
+            ),
+          ],
         ],
       ),
     );

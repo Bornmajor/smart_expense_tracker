@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -21,6 +22,7 @@ import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
 import '../features/expenses/presentation/pages/expense_form_page.dart';
 import '../features/expenses/presentation/pages/expense_list_page.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/scan/debug/ocr_debug_page.dart';
 import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/onboarding/presentation/pages/welcome_page.dart';
@@ -132,6 +134,13 @@ GoRouter createRouter({
         ),
       ],
     ),
+    // TEMPORARY developer tool. Only exists in debug builds, so it can never
+    // reach a release.
+    if (kDebugMode)
+      GoRoute(
+        path: AppRoutes.ocrDebug,
+        builder: (context, state) => const OcrDebugPage(),
+      ),
     GoRoute(
       path: AppRoutes.categories,
       builder: (context, state) {

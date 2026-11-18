@@ -10,4 +10,7 @@ abstract final class AppRoutes {
   /// Needs the expense to edit passed as `extra`.
   static const editExpense = '/expenses/edit';
   static const categories = '/categories';
+
+  /// TEMPORARY, debug builds only: see what the scanner reads.
+  static const ocrDebug = '/debug/ocr';
 }
