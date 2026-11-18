@@ -2,9 +2,13 @@
 //
 // TEMPORARY developer tool. Remove before the first public release.
 //
-// Shows what ML Kit returns for a photo, before any of our code changes it, so
-// scanning can be tried on difficult receipts. It is only reachable in debug
-// builds (see the route in app_router.dart and the Settings entry).
+// Two stages, so each can be tried on its own:
+//   1. Capture: take or choose a photo and see its path, size and a preview.
+//   2. Read: feed that photo to ML Kit and see what comes back, before any of
+//      our code changes it.
+// It is only reachable in debug builds (see the route in app_router.dart and
+// the Settings entry).
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -31,18 +35,32 @@ class OcrDebugPage extends StatefulWidget {
 class _OcrDebugPageState extends State<OcrDebugPage> {
   final _picker = ImagePicker();
 
-  bool _busy = false;
+  // Options.
   bool _fullSize = false;
+  bool _readNow = false;
 
-  /// True when the photo was taken before the app was killed and restarted.
+  // Stage 1: the captured photo.
+  bool _busy = false;
   bool _recovered = false;
   String? _photoPath;
-  String? _report;
+  String? _photoInfo;
   String? _error;
+
+  // Stage 2: what ML Kit returned.
   RecognizedText? _recognized;
   List<String> _rows = const [];
   String _parsed = '';
+  String? _report;
   int? _milliseconds;
+
+  @override
+  void initState() {
+    super.initState();
+    // Android can kill the app while the camera is open (the Infinix phone
+    // does this about two seconds after the camera opens). The photo is then
+    // waiting for us when the app starts again.
+    if (Platform.isAndroid) _recoverLostPhoto();
+  }
 
   @override
   void dispose() {
@@ -61,14 +79,7 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
     }
   }
 
-  @override
-  void initState() {
-    super.initState();
-    // Android can kill the app while the camera is open (the Infinix phone
-    // does this about two seconds after the camera opens). The photo is then
-    // waiting for us when the app starts again.
-    if (Platform.isAndroid) _recoverLostPhoto();
-  }
+  // ---- Stage 1: capture -------------------------------------------------
 
   Future<void> _recoverLostPhoto() async {
     try {
@@ -77,8 +88,7 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
 
       final file = lost.file ?? lost.files?.firstOrNull;
       if (file != null) {
-        setState(() => _recovered = true);
-        await _process(file.path);
+        await _useNewPhoto(file.path, recovered: true);
       } else if (lost.exception != null) {
         setState(
           () => _error = 'The camera result was lost: ${lost.exception}',
@@ -89,11 +99,10 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
     }
   }
 
-  Future<void> _run(ImageSource source) async {
+  Future<void> _pick(ImageSource source) async {
     setState(() {
       _busy = true;
       _error = null;
-      _recovered = false;
     });
 
     try {
@@ -108,7 +117,7 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
         setState(() => _busy = false);
         return;
       }
-      await _process(file.path);
+      await _useNewPhoto(file.path, recovered: false);
     } on Exception catch (e) {
       setState(() {
         _busy = false;
@@ -117,8 +126,76 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
     }
   }
 
-  /// Reads the photo and fills in every section of the screen.
-  Future<void> _process(String path) async {
+  /// Shows the photo and clears the results of the one before it.
+  Future<void> _useNewPhoto(String path, {required bool recovered}) async {
+    if (path != _photoPath) _deletePhoto();
+    setState(() {
+      _busy = false;
+      _error = null;
+      _photoPath = path;
+      _recovered = recovered;
+      _photoInfo = null;
+      _recognized = null;
+      _rows = const [];
+      _parsed = '';
+      _report = null;
+    });
+
+    unawaited(_describe(path));
+    if (_readNow) await _read();
+  }
+
+  /// The file size and the pixel size, so a blurry or tiny photo is obvious.
+  Future<void> _describe(String path) async {
+    try {
+      final file = File(path);
+      final bytes = await file.readAsBytes();
+      final image = await decodeImageFromList(bytes);
+      final info =
+          '${(bytes.length / 1024).round()} KB, ${image.width} x ${image.height} px';
+      image.dispose();
+      if (mounted && _photoPath == path) setState(() => _photoInfo = info);
+    } on Exception catch (e) {
+      if (mounted && _photoPath == path) {
+        setState(() => _photoInfo = 'Could not read the file: $e');
+      }
+    }
+  }
+
+  void _zoom() {
+    final path = _photoPath;
+    if (path == null) return;
+    showDialog<void>(
+      context: context,
+      builder: (context) => Dialog.fullscreen(
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              maxScale: 8,
+              child: Center(child: Image.file(File(path))),
+            ),
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topRight,
+                child: IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---- Stage 2: read ----------------------------------------------------
+
+  /// Reads the photo on screen and fills in every result section.
+  Future<void> _read() async {
+    final path = _photoPath;
+    if (path == null) return;
+
     setState(() {
       _busy = true;
       _error = null;
@@ -152,10 +229,9 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
         'Category: ${category ?? '(no suggestion)'}',
       ].join('\n');
 
-      _deletePhoto();
+      if (!mounted) return;
       setState(() {
         _busy = false;
-        _photoPath = path;
         _recognized = recognized;
         _rows = rows;
         _parsed = parsed;
@@ -168,10 +244,12 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
         );
       });
     } on Exception catch (e) {
-      setState(() {
-        _busy = false;
-        _error = '$e';
-      });
+      if (mounted) {
+        setState(() {
+          _busy = false;
+          _error = '$e';
+        });
+      }
     }
   }
 
@@ -186,20 +264,13 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
         'OCR TEST REPORT (${_fullSize ? 'full size' : 'scan size'}, '
         '$milliseconds ms)',
       )
+      ..writeln('Photo: ${_photoInfo ?? '?'}')
       ..writeln()
       ..writeln('--- RAW TEXT FROM ML KIT ---')
       ..writeln(recognized.text)
       ..writeln()
-      ..writeln('--- LINES WITH POSITIONS (left,top - right,bottom) ---');
-    var n = 0;
-    for (var i = 0; i < recognized.blocks.length; i++) {
-      b.writeln('Block ${i + 1}');
-      for (final line in recognized.blocks[i].lines) {
-        n++;
-        b.writeln('  #$n ${_box(line.boundingBox)} "${line.text}"');
-      }
-    }
-    b
+      ..writeln('--- LINES WITH POSITIONS (left,top - right,bottom) ---')
+      ..writeln(_linesText(recognized))
       ..writeln()
       ..writeln('--- ROWS AFTER REBUILDING (what the parser sees) ---');
     for (final row in rows) {
@@ -214,6 +285,20 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
 
   static String _box(Rect r) =>
       '(${r.left.round()},${r.top.round()})-(${r.right.round()},${r.bottom.round()})';
+
+  String _linesText(RecognizedText recognized) {
+    if (recognized.blocks.isEmpty) return '(none)';
+    final b = StringBuffer();
+    var n = 0;
+    for (var i = 0; i < recognized.blocks.length; i++) {
+      b.writeln('Block ${i + 1}');
+      for (final line in recognized.blocks[i].lines) {
+        n++;
+        b.writeln('  #$n ${_box(line.boundingBox)} "${line.text}"');
+      }
+    }
+    return b.toString().trimRight();
+  }
 
   Future<void> _copy() async {
     final report = _report;
@@ -231,9 +316,12 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
       );
   }
 
+  // ---- The screen -------------------------------------------------------
+
   @override
   Widget build(BuildContext context) {
     final recognized = _recognized;
+    final path = _photoPath;
     return Scaffold(
       appBar: AppBar(
         title: const Text('OCR test (temporary)'),
@@ -252,8 +340,8 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
           padding: AppSpacing.screen.copyWith(bottom: AppSpacing.xxl),
           children: [
             Text(
-              'Shows what ML Kit returns, before anything is cleaned up. '
-              'Debug builds only.',
+              '1. Take or choose a photo and check it.  '
+              '2. Read it with ML Kit.  Debug builds only.',
               style: context.text.bodySmall,
             ),
             const Gap(AppSpacing.md),
@@ -261,7 +349,7 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
               children: [
                 Expanded(
                   child: FilledButton.icon(
-                    onPressed: _busy ? null : () => _run(ImageSource.camera),
+                    onPressed: _busy ? null : () => _pick(ImageSource.camera),
                     icon: const Icon(Icons.photo_camera_outlined),
                     label: const Text('Take photo'),
                   ),
@@ -269,7 +357,7 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
                 const Gap(AppSpacing.md),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: _busy ? null : () => _run(ImageSource.gallery),
+                    onPressed: _busy ? null : () => _pick(ImageSource.gallery),
                     icon: const Icon(Icons.photo_library_outlined),
                     label: const Text('Choose photo'),
                   ),
@@ -285,6 +373,15 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
               value: _fullSize,
               onChanged: _busy ? null : (v) => setState(() => _fullSize = v),
             ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text('Read text straight away'),
+              subtitle: const Text(
+                'Off: check the photo first, then press Read',
+              ),
+              value: _readNow,
+              onChanged: _busy ? null : (v) => setState(() => _readNow = v),
+            ),
             if (_busy) ...[
               const Gap(AppSpacing.md),
               const Center(child: CircularProgressIndicator()),
@@ -293,28 +390,48 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
               const Gap(AppSpacing.md),
               _Section(title: 'Error', text: _error!),
             ],
-            if (recognized != null && !_busy) ...[
+            if (path != null) ...[
               const Gap(AppSpacing.md),
-              if (_photoPath != null)
-                ClipRRect(
+              Text('Stage 1: the photo', style: context.text.titleMedium),
+              const Gap(AppSpacing.sm),
+              GestureDetector(
+                onTap: _zoom,
+                child: ClipRRect(
                   borderRadius: AppRadius.mdAll,
                   child: Image.file(
-                    File(_photoPath!),
-                    height: 260,
+                    File(path),
+                    height: 300,
+                    width: double.infinity,
                     fit: BoxFit.contain,
                     errorBuilder: (_, _, _) =>
                         const Text('Could not show the photo'),
                   ),
                 ),
+              ),
+              const Gap(AppSpacing.xs),
+              Text('Tap the photo to zoom', style: context.text.bodySmall),
               const Gap(AppSpacing.sm),
-              Text(
-                _recovered
-                    ? 'Recovered after the app was restarted. '
-                          'Read in $_milliseconds ms'
-                    : 'Read in $_milliseconds ms',
-                style: context.text.bodySmall,
+              _Section(
+                title: _recovered
+                    ? 'Photo (recovered after the app was restarted)'
+                    : 'Photo',
+                text: 'Path: $path\n${_photoInfo ?? 'Reading the file...'}',
+              ),
+              FilledButton.icon(
+                onPressed: _busy ? null : _read,
+                icon: const Icon(Icons.text_snippet_outlined),
+                label: Text(recognized == null ? 'Read text' : 'Read again'),
               ),
               const Gap(AppSpacing.lg),
+            ],
+            if (recognized != null && !_busy) ...[
+              Text(
+                'Stage 2: what ML Kit returned',
+                style: context.text.titleMedium,
+              ),
+              const Gap(AppSpacing.xs),
+              Text('Read in $_milliseconds ms', style: context.text.bodySmall),
+              const Gap(AppSpacing.md),
               _Section(
                 title: 'Raw text from ML Kit',
                 text: recognized.text.isEmpty
@@ -335,20 +452,6 @@ class _OcrDebugPageState extends State<OcrDebugPage> {
         ),
       ),
     );
-  }
-
-  String _linesText(RecognizedText recognized) {
-    if (recognized.blocks.isEmpty) return '(none)';
-    final b = StringBuffer();
-    var n = 0;
-    for (var i = 0; i < recognized.blocks.length; i++) {
-      b.writeln('Block ${i + 1}');
-      for (final line in recognized.blocks[i].lines) {
-        n++;
-        b.writeln('  #$n ${_box(line.boundingBox)} "${line.text}"');
-      }
-    }
-    return b.toString().trimRight();
   }
 }
 

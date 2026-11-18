@@ -17,5 +17,8 @@ void main() {
     expect(find.text('Take photo'), findsOneWidget);
     expect(find.text('Choose photo'), findsOneWidget);
     expect(find.text('Original size'), findsOneWidget);
+    expect(find.text('Read text straight away'), findsOneWidget);
+    // Nothing is shown until a photo is taken or chosen.
+    expect(find.text('Read text'), findsNothing);
   });
 }
