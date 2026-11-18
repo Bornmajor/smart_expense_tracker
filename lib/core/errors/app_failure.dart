@@ -24,6 +24,28 @@ final class StorageFailure extends AppFailure {
   List<Object?> get props => [];
 }
 
+/// Why scanning a receipt did not work.
+enum ScanProblem {
+  /// The user refused camera or photo access.
+  permissionDenied,
+
+  /// No camera, or it could not be opened.
+  cameraUnavailable,
+
+  /// The photo was taken but its text could not be read.
+  unreadable,
+}
+
+/// Taking or reading a receipt photo failed.
+final class ScanFailure extends AppFailure {
+  const ScanFailure(this.problem);
+
+  final ScanProblem problem;
+
+  @override
+  List<Object?> get props => [problem];
+}
+
 /// The device has no usable biometrics (none enrolled, or not supported).
 final class BiometricUnavailableFailure extends AppFailure {
   const BiometricUnavailableFailure();
