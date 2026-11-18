@@ -129,7 +129,7 @@ jobs:
         # Play needs a higher version code for every upload. The run number
         # only goes up, and the offset keeps clear of any manual uploads.
         # The version name comes from pubspec.yaml.
-        run: flutter build appbundle --release --build-number=$((GITHUB_RUN_NUMBER + 100))
+        run: flutter build appbundle --release --flavor prod --build-number=$((GITHUB_RUN_NUMBER + 100))
 
       - name: Upload with Fastlane
         working-directory: android

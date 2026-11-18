@@ -111,8 +111,11 @@ flutter pub get
 ### Run
 
 ```bash
-flutter run
+flutter run                        # dev flavor: installs as "SpendWise IQ Dev"
+flutter run --release              # release build (code shrinking on), still dev
 ```
+
+Without `--flavor`, builds use the **dev** flavor (`com.bornmajor.spendwiseiq.dev`), so they install next to the Google Play app instead of failing to replace it. Only the release pipeline builds the **prod** flavor. See [releasing](docs/releasing.md#flavors).
 
 Pick a device when prompted, or pass one with `-d <device-id>` (list them with `flutter devices`).
 

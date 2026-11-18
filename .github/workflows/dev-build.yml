@@ -38,12 +38,12 @@ jobs:
 
       - name: Build the APK
         # No key.properties here, so Gradle signs with the debug key.
-        run: flutter build apk --release
+        run: flutter build apk --release --flavor dev
 
       - name: Keep the APK for a week
         uses: actions/upload-artifact@v4
         with:
           name: spendwise-iq-${{ github.ref_name }}-${{ github.run_number }}
-          path: build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-dev-release.apk
           retention-days: 7
           if-no-files-found: error
