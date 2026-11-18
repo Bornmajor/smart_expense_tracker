@@ -65,3 +65,6 @@ play-service-account*.json
 
 # Flutter DevTools local settings
 devtools_options.yaml
+
+# Gradle output of the Android project
+/android/build/

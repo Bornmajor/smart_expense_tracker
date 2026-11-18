@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/intl.dart';
+import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_source.dart';
 import 'package:smart_expense_tracker/features/settings/domain/entities/app_theme_mode.dart';
 
 import '../support/builders.dart';
@@ -45,20 +46,24 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Enter manually'), findsOneWidget);
-    expect(find.text('Scan receipt'), findsOneWidget);
+    expect(find.text('Choose a receipt photo'), findsOneWidget);
     final manualY = tester.getTopLeft(find.text('Enter manually')).dy;
-    final scanY = tester.getTopLeft(find.text('Scan receipt')).dy;
+    final scanY = tester.getTopLeft(find.text('Choose a receipt photo')).dy;
     expect(manualY, lessThan(scanY));
   });
 
-  testWidgets('choosing scan explains that it is coming soon', (tester) async {
-    await pumpRouterApp(tester);
+  testWidgets('choosing a receipt photo opens the scan, not the camera', (
+    tester,
+  ) async {
+    final photos = FakeReceiptPhotoSource();
+    await pumpRouterApp(tester, photos: photos);
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    await tapText(tester, 'Scan receipt');
+    await tapText(tester, 'Choose a receipt photo');
 
-    expect(find.text('Receipt scanning is coming soon'), findsOneWidget);
+    expect(photos.picked, [ReceiptSource.gallery]);
+    expect(find.text('Take a photo of a receipt'), findsNothing);
   });
 
   group('Summary tab', () {

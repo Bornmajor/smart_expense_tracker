@@ -7,6 +7,10 @@ abstract final class AppRoutes {
   static const settings = '/settings';
   static const addExpense = '/expenses/new';
 
+  /// Needs the photo source (a `ReceiptSource`) passed as `extra`. When the
+  /// scan succeeds it is replaced by [addExpense] with the scan as `extra`.
+  static const scan = '/expenses/scan';
+
   /// Needs the expense to edit passed as `extra`.
   static const editExpense = '/expenses/edit';
   static const categories = '/categories';

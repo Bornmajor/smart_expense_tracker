@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/database/app_database.dart';
@@ -11,6 +12,10 @@ import '../features/expenses/data/repositories/expense_repository_impl.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/scan/data/repositories/image_picker_photo_source.dart';
+import '../features/scan/data/repositories/ml_kit_receipt_text_reader.dart';
+import '../features/scan/domain/repositories/receipt_photo_source.dart';
+import '../features/scan/domain/repositories/receipt_text_reader.dart';
 import '../features/security/data/repositories/local_auth_biometric_authenticator.dart';
 import '../features/security/data/repositories/security_repository_impl.dart';
 import '../features/security/domain/repositories/biometric_authenticator.dart';
@@ -99,6 +104,13 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         ),
         RepositoryProvider<CategoryRepository>(
           create: (_) => CategoryRepositoryImpl(widget.database),
+        ),
+        // Receipt scanning. Created only when a scan starts.
+        RepositoryProvider<ReceiptPhotoSource>(
+          create: (_) => ImagePickerPhotoSource(ImagePicker()),
+        ),
+        RepositoryProvider<ReceiptTextReader>(
+          create: (_) => MlKitReceiptTextReader(),
         ),
       ],
       child: MultiBlocProvider(
