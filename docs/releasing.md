@@ -17,6 +17,21 @@ push to main  ->  CI passes  ->  you approve  ->  build  ->  fastlane production
 | Release | `.github/workflows/release.yml` | After CI passes on `uat` or `main`: writes secrets to files, builds, runs Fastlane, and tags production releases |
 | Dev build | `.github/workflows/dev-build.yml` | By hand: builds an APK for your own phone, uploads nothing to Play |
 
+### Flavors
+
+Two flavors keep builds from your computer apart from the Play app. Android will not update an app signed with a different key, which shows as "Can't install" in Play.
+
+| Flavor | App id | Name on the phone | Used for |
+| --- | --- | --- | --- |
+| `dev` (the default) | `com.bornmajor.spendwiseiq.dev` | SpendWise IQ Dev | `flutter run`, `flutter run --release`, the manual dev-build workflow |
+| `prod` | `com.bornmajor.spendwiseiq` | SpendWise IQ | Only the release workflow, for Play |
+
+- Defined in `android/app/build.gradle.kts` (`productFlavors`). The default comes from `default-flavor: dev` in `pubspec.yaml`.
+- The ids differ, so the two apps have separate data and can be installed together.
+- The flavor is chosen by the build command, not by the branch. `uat` and `main` still go to Play because the release workflow passes `--flavor prod`.
+- Fastlane picks up `build/app/outputs/bundle/prodRelease/app-prod-release.aab`.
+- Later, a Firebase or Google sign-in setup would need one config per app id.
+
 Without `key.properties` (a fresh clone), release builds fall back to the debug key so `flutter run --release` still works. Google Play rejects a debug-signed bundle, so that build can never be published by mistake.
 
 ### Fastlane lanes
@@ -55,10 +70,10 @@ To build a signed bundle on your own machine, copy `android/key.properties.examp
 The Play API only works after the app has had at least one upload through the console.
 
 ```bash
-flutter build appbundle --release
+flutter build appbundle --release --flavor prod
 ```
 
-Upload `build/app/outputs/bundle/release/app-release.aab` under **Testing, Internal testing, Create new release**. Roll it out when Play allows it. The store listing and the other setup tasks Play shows (privacy policy, content rating, data safety) are also needed before the app goes beyond testing.
+Upload `build/app/outputs/bundle/prodRelease/app-prod-release.aab` under **Testing, Internal testing, Create new release**. Roll it out when Play allows it. The store listing and the other setup tasks Play shows (privacy policy, content rating, data safety) are also needed before the app goes beyond testing.
 
 ### 4. Create a service account for Fastlane
 

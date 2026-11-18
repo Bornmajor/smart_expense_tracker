@@ -39,6 +39,29 @@ android {
         versionName = flutter.versionName
     }
 
+    // Two flavors so a build from this computer can never replace the Play app.
+    // Android refuses to update an app signed with a different key, which shows
+    // as "Can't install" in Play. The dev flavor has its own id, so it installs
+    // next to the Play app with its own data. Only `prod` goes to Play.
+    buildFeatures {
+        // Lets each flavor set the app name (resValue below).
+        resValues = true
+    }
+
+    flavorDimensions += "env"
+    productFlavors {
+        create("dev") {
+            dimension = "env"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            resValue("string", "app_name", "SpendWise IQ Dev")
+        }
+        create("prod") {
+            dimension = "env"
+            resValue("string", "app_name", "SpendWise IQ")
+        }
+    }
+
     signingConfigs {
         if (keystorePropertiesFile.exists()) {
             create("release") {
