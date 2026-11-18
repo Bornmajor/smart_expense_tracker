@@ -103,6 +103,8 @@ A use case is added only when it does more than forward a call.
 
 Starting rules for an expense (change them here when the product changes): amount greater than zero, date not in the future, category required, vendor optional (blank becomes "Unknown"), title optional (trimmed, at most 60 characters). Adding and editing share these rules (`ExpenseRules`).
 
+Starting rules for a category: a name is required, at most 30 characters, and unique ignoring case and surrounding spaces (`CategoryRules`). The "Other" category is the fallback: it can be renamed but never deleted, and deleting any other category moves its expenses to it in one database transaction. The Categories screen uses `CreateCategory`, which reports a duplicate name. The expense form's New chip uses `FindOrCreateCategory`, which quietly selects the category the user already has.
+
 ### Datasources
 
 Add a datasource class only where it wraps something we want to fake in tests or isolate from a plugin: ML Kit, camera, biometrics, PDF and CSV generation.

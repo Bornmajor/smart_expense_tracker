@@ -4,12 +4,11 @@ What is planned, in the order we intend to build it. Items move to the README fe
 
 ## Up next
 
-1. **Release pipeline and early testers** (code done, setup in progress). Fastlane run from GitHub Actions, release signing, and uploads to the Google Play internal testing track after CI passes on `main`. Still needed: GitHub secrets, the first manual upload, and testers. Start a closed test early.
-2. **Category management.** Create, rename and delete categories (name required and unique; deleting moves expenses to "Other").
-3. **Optional receipt scanning.** Camera or gallery, on-device OCR, a receipt parser and category suggestion, filling the same expense form. Manual entry always keeps working.
-4. **Monthly report export.** PDF and CSV for a month, shared or saved from the system share sheet.
+1. **Release setup and early testers** (code done, your setup remains). The `dev`, `uat` and `main` flow is built: `uat` sends a build to Play internal testing and `main` sends one to production after approval (see [branching](branching.md) and [releasing](releasing.md)). Still needed: the GitHub secrets, a first internal release, and a **closed test with testers started early**, because new personal accounts have needed 12 testers for 14 days before production.
+2. **Optional receipt scanning.** Camera or gallery, on-device OCR, a receipt parser and category suggestion, filling the same expense form. Manual entry always keeps working.
+3. **Monthly report export.** PDF and CSV for a month, shared or saved from the system share sheet.
 
-**Done recently:** onboarding redesign, safe-area fixes, color-coded snackbars, and the expense loop (edit, delete with undo, list grouped by day with category names).
+**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, and adding a category from the expense form.
 
 ## Planned: prompt sheet
 
