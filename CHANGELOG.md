@@ -23,3 +23,5 @@ First release. Nothing has been published to Google Play yet.
 - Optional fingerprint or face lock, turned on from Settings
 - Color-coded messages for success, warnings and errors
 - Everything is stored on the phone and works offline, with no account
+- A downloadable APK on the GitHub Releases page, for installing without Google Play
+- A Privacy policy link under Settings, About

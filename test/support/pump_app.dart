@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_expense_tracker/app/app_router.dart';
+import 'package:smart_expense_tracker/core/links/app_links.dart';
+import 'package:smart_expense_tracker/core/links/link_opener.dart';
 import 'package:smart_expense_tracker/core/theme/app_theme.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
@@ -29,6 +31,8 @@ Future<LockSession> pumpRouterApp(
   FakeReportSharer? sharer,
   FakeReportWriter? pdfWriter,
   FakeReportWriter? csvWriter,
+  FakeLinkOpener? links,
+  AppLinks appLinks = const AppLinks(privacyPolicyUrl: ''),
   FakeSettingsRepository? settings,
   FakeSecurityRepository? security,
   FakeBiometricAuthenticator? authenticator,
@@ -74,6 +78,8 @@ Future<LockSession> pumpRouterApp(
             sharer: sharer ?? FakeReportSharer(),
           ),
         ),
+        RepositoryProvider<AppLinks>.value(value: appLinks),
+        RepositoryProvider<LinkOpener>.value(value: links ?? FakeLinkOpener()),
         RepositoryProvider<BiometricAuthenticator>.value(value: auth),
         RepositoryProvider<ReceiptPhotoSource>.value(
           value: photos ?? FakeReceiptPhotoSource(),
