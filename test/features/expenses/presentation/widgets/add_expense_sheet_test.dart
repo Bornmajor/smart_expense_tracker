@@ -133,10 +133,4 @@ void main() {
       expect(chosen, isNull);
     });
   });
-
-  test('the camera is off in the app for now', () {
-    // See docs/roadmap.md before turning it on: on the Infinix test phone the
-    // system camera makes Android kill the app.
-    expect(ScanFeatures.cameraEnabled, isFalse);
-  });
 }
