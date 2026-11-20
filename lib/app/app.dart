@@ -5,6 +5,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/database/app_database.dart';
+import '../core/links/app_links.dart';
+import '../core/links/link_opener.dart';
+import '../core/links/url_launcher_link_opener.dart';
 import '../core/theme/app_theme.dart';
 import '../features/categories/data/repositories/category_repository_impl.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
@@ -109,6 +112,11 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         ),
         RepositoryProvider<CategoryRepository>(
           create: (_) => CategoryRepositoryImpl(widget.database),
+        ),
+        // Web pages the app links to, and the thing that opens them.
+        RepositoryProvider<AppLinks>.value(value: const AppLinks()),
+        RepositoryProvider<LinkOpener>.value(
+          value: const UrlLauncherLinkOpener(),
         ),
         // Monthly report export. The fonts are read when a PDF is made.
         RepositoryProvider<ExportMonth>(

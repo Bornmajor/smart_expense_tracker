@@ -10,6 +10,7 @@ import '../../../../shared/widgets/section_header.dart';
 import '../cubit/settings_cubit.dart';
 import '../cubit/settings_state.dart';
 import '../widgets/biometric_switch_tile.dart';
+import '../widgets/privacy_policy_tile.dart';
 import '../widgets/theme_mode_selector.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -72,6 +73,7 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           ),
+          const PrivacyPolicyTile(),
           // TEMPORARY developer tool, shown only in debug builds.
           if (kDebugMode) ...[
             const Gap(AppSpacing.xl),

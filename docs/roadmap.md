@@ -12,7 +12,7 @@ What is planned, in the order we intend to build it. Items move to the README fe
 
 **Privacy and store forms (before the first public release):**
 - Publish the privacy policy as a web page on Google Sites (not a PDF, not editable, public, no sign-in). The text is in [privacy-policy.md](privacy-policy.md), with an optional HTML version. Paste the text straight into the page rather than embedding it.
-- Add a "Privacy policy" row under Settings, About that opens that page (Google requires the link inside the app as well as in the Play listing). It needs the `url_launcher` package.
+- The "Privacy policy" row under Settings, About is built (it opens the page in the browser). It stays hidden until the published address is pasted into `lib/core/links/app_links.dart`; Google requires the link inside the app as well as in the Play listing.
 - Data safety form: do not answer "no data collected". Google says ML Kit sends performance and usage metrics to Google, and the release app has the `INTERNET` permission because of it. Declare it as the form's questions require, and check the current form before submitting.
 - Decide about device backups: `android:allowBackup` is not set, so Android may back the app's data up to the user's Google account. The policy says so. Setting it to `false` would keep expenses out of backups, at the cost of not restoring them on a new phone.
 - Keep the policy, the Data safety form and the real behavior in step whenever something changes (for example when report export ships).

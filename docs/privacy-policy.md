@@ -35,6 +35,10 @@ When you choose a photo of a receipt, the app receives only that photo, through 
 
 The photo is a temporary copy. It is deleted when you close the form, whether or not you saved the expense, and it is also deleted if reading the photo fails. The app does not upload the photo or the text it reads. Only what you save in the expense is kept.
 
+## Exporting reports
+
+You can export a month of your expenses as a PDF or a CSV file. The file is made on your phone and handed to Android's share sheet. It goes only where you choose to send it, such as your Google Drive or a message to someone. The app does not upload it, and the developer does not receive it.
+
 ## Biometric lock
 
 You can turn on a fingerprint or face lock. It uses your phone's own system. The app only learns whether the check passed. It never receives, stores or sends your fingerprint or face data.
