@@ -4,6 +4,12 @@
 
 SpendWise IQ is a smart, privacy-first expense tracker. Point your camera at a receipt and the app reads the vendor, date and total on your device, suggests a category, and lets you confirm the details before saving. No typing, no account, no cloud.
 
+## Download
+
+Get the latest Android APK from the [Releases page](https://github.com/Bornmajor/smart_expense_tracker/releases/latest), open it on your phone, and allow installs from your browser or file manager if Android asks. Every release lists what changed and has a `.sha256` file to check the download against. The first release appears there once the app goes to production.
+
+The APK is signed with a different key than the one Google Play uses, so a copy installed from the APK cannot be updated from Google Play, or the other way round. Use one source per phone.
+
 ## Screenshots
 
 <table>

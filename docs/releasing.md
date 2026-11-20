@@ -156,7 +156,7 @@ Do not limit them with "Deployment branches". Automatic runs start from the defa
 
 1. Bump the version name in `pubspec.yaml` and update [CHANGELOG.md](../CHANGELOG.md), in a pull request through `dev` and `uat`.
 2. Merge `uat` into `main`. CI runs, then the run waits for your approval in GitHub.
-3. Approve it. The bundle is uploaded to production as a draft, and a tag such as `v1.2.0` and a GitHub release are created.
+3. Approve it. The bundle is uploaded to production as a draft, and a tag such as `v1.2.0` and a GitHub release with the APK are created (see [GitHub release](#github-release-apk-download)).
 4. In Play Console, open the draft, add "What's new", and press **Roll out**. Start with a small percentage.
 5. Watch **Android vitals**, then raise the rollout. **Halt rollout** if something is wrong.
 
@@ -165,6 +165,25 @@ The [release checklist](release-checklist.md) has the full list.
 A run also starts by hand from the **Actions** tab, on `uat` or `main` only. It does not wait for CI, so use it with care.
 
 **For your own phone:** **Actions, Dev build, Run workflow**, on any branch. It builds an APK you can download for a week and uploads nothing to Play. It is signed with the debug key, so uninstall the Play version first.
+
+### GitHub release (APK download)
+
+The repository is public, so a production release also puts the app on its **Releases** page for anyone to download, without Google Play.
+
+What the release workflow does, in order:
+1. Builds the `prod` bundle for Play, then also a `prod` **APK**, with the same code, signing key and build number. This happens before anything is uploaded to Play, so a failure here leaves Play untouched and the run can simply be started again.
+2. Checks the APK is signed with the upload key. It stops the run if it finds the debug key, because a debug-signed file is not safe to publish.
+3. Writes `spendwise-iq-<version>.apk`, a `.sha256` checksum, and the release text. The text is the [CHANGELOG.md](../CHANGELOG.md) section headed `## [<version>]`, followed by install steps. If that heading does not exist yet it uses `## [Unreleased]`, so rename Unreleased to the version when you bump it (step 1 above).
+4. After the Play upload and your approval, the `tag` job creates the release `v<version>` with those files and marks it as the latest.
+
+Good to know:
+- A run started again on a version that already has a release keeps its text and just re-attaches the files.
+- On `uat`, the same files are kept as a **workflow artifact** for two weeks (Actions, the run, Artifacts). It is a rehearsal of the build and the release text, and publishes nothing.
+- The APK is signed with the upload key but Play signs its copy with its own key, so a phone can have one or the other. The release text says so. To test the Play build, install it from Play.
+- Nobody outside the project can use your secrets: the workflow only runs on pushes to `uat` and `main`, not on forks or pull requests.
+- To change the notes, edit the changelog before merging to `main`. To fix a published release, edit it on GitHub.
+
+To rehearse the release text on your computer: `dart run tool/release_notes.dart 1.0.0 notes.md`, then open `notes.md`.
 
 ### Version numbers
 

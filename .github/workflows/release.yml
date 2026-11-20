@@ -5,6 +5,7 @@ name: Release to Google Play
 #
 #   push to uat   ->  CI passes  ->  internal testing track (testers)
 #   push to main  ->  CI passes  ->  you approve  ->  production track
+#                                                    + a GitHub release with the APK
 #
 # Nothing is uploaded for dev. A failing CI run never reaches Play. You can
 # also start it by hand from the Actions tab, on uat or main only.
@@ -131,6 +132,47 @@ jobs:
         # The version name comes from pubspec.yaml.
         run: flutter build appbundle --release --flavor prod --build-number=$((GITHUB_RUN_NUMBER + 100))
 
+      # Everything below, up to Fastlane, is for the GitHub release. It runs
+      # before the Play upload on purpose: if anything here fails, nothing has
+      # reached Play yet, so the run can simply be started again.
+      - name: Build the APK for GitHub
+        # The same code, flavor, signing key and build number as the bundle, as
+        # one file that installs on any phone, for people who download it from
+        # the Releases page instead of Google Play.
+        run: flutter build apk --release --flavor prod --build-number=$((GITHUB_RUN_NUMBER + 100))
+
+      - name: Prepare the GitHub release files
+        env:
+          VERSION: ${{ steps.track.outputs.version }}
+        run: |
+          mkdir release-files
+          apk="spendwise-iq-${VERSION}.apk"
+          cp build/app/outputs/flutter-apk/app-prod-release.apk "release-files/$apk"
+
+          # Never publish a debug-signed file: it would be anyone's to forge.
+          apksigner=$(ls "$ANDROID_HOME"/build-tools/*/apksigner | sort -V | tail -1)
+          "$apksigner" verify --print-certs "release-files/$apk" | tee certs.txt
+          if grep -qi "android debug" certs.txt; then
+            echo "::error::The APK is signed with the debug key, not the upload key."
+            exit 1
+          fi
+
+          # People can check their download against this.
+          (cd release-files && sha256sum "$apk" > "$apk.sha256")
+          # The release page text: the changelog section plus install steps.
+          dart run tool/release_notes.dart "$VERSION" release-files/notes.md
+          ls -la release-files
+
+      - name: Keep the files for the release job
+        uses: actions/upload-artifact@v4
+        with:
+          # One per track. Uat runs keep theirs for two weeks as a rehearsal;
+          # only production publishes a release.
+          name: release-files-${{ steps.track.outputs.track }}
+          path: release-files/
+          retention-days: 14
+          if-no-files-found: error
+
       - name: Upload with Fastlane
         working-directory: android
         env:
@@ -139,9 +181,10 @@ jobs:
         run: bundle exec fastlane ${{ steps.track.outputs.track }}
 
   # After a production upload, mark the commit with the version, such as
-  # v1.2.0, and create a GitHub release with generated notes.
+  # v1.2.0, and publish a GitHub release with the APK, its checksum and the
+  # notes from CHANGELOG.md. The repository is public, so anyone can download it.
   tag:
-    name: Tag the release
+    name: Publish the GitHub release
     needs: release
     if: needs.release.outputs.track == 'production'
     runs-on: ubuntu-latest
@@ -149,14 +192,27 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Create the tag and release if they do not exist yet
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-files-production
+          path: release-files
+
+      - name: Create the release, or add the files to it
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: v${{ needs.release.outputs.version }}
+          VERSION: ${{ needs.release.outputs.version }}
         run: |
-          if gh release view "$TAG" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
-            echo "$TAG already exists, leaving it alone."
+          tag="v$VERSION"
+          apk="release-files/spendwise-iq-${VERSION}.apk"
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
+            # A run started again, or a release written by hand: keep its text
+            # and make sure the files are on it.
+            echo "$tag already exists. Attaching the files to it."
+            gh release upload "$tag" "$apk" "$apk.sha256" --clobber \
+              --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$TAG" --repo "$GITHUB_REPOSITORY" \
-              --target "$RELEASE_SHA" --title "$TAG" --generate-notes
+            gh release create "$tag" "$apk" "$apk.sha256" \
+              --repo "$GITHUB_REPOSITORY" --target "$RELEASE_SHA" \
+              --title "SpendWise IQ $tag" --notes-file release-files/notes.md \
+              --latest
           fi
