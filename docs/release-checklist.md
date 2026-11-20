@@ -12,6 +12,8 @@
 - [ ] Tried on a real phone: first launch, add, edit and delete an expense, categories, biometric lock, dark theme
 - [ ] Upgrade checked: install the previous version first, then update, and make sure the data is still there
 - [ ] `CHANGELOG.md` has a dated entry for this version
+- [ ] Privacy policy page is published (public, no sign-in, opens when signed out), its address is set in `lib/core/links/app_links.dart` and in the Play listing, and **Settings, About, Privacy policy** opens it on a real phone
+- [ ] The published policy, the Play Data safety form and what the app really does all agree (ML Kit usage metrics, backups, exported reports)
 - [ ] Store listing is current: description, screenshots, feature graphic
 - [ ] "What's new" text is ready to paste in Play Console
 

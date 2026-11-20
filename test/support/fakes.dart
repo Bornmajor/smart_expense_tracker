@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:smart_expense_tracker/core/links/link_opener.dart';
 import 'package:smart_expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
@@ -332,5 +333,20 @@ class FakeReportWriter implements ReportWriter {
       mimeType: 'x/$extension',
       bytes: Uint8List.fromList([1, 2, 3]),
     );
+  }
+}
+
+/// Records the pages the app tried to open instead of launching a browser.
+class FakeLinkOpener implements LinkOpener {
+  FakeLinkOpener({this.succeeds = true});
+
+  /// What `open` returns: false means no app could open the page.
+  bool succeeds;
+  final opened = <Uri>[];
+
+  @override
+  Future<bool> open(Uri uri) async {
+    opened.add(uri);
+    return succeeds;
   }
 }
