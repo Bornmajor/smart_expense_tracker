@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/features/security/domain/entities/auth_outcome.dart';
 import 'package:smart_expense_tracker/features/security/presentation/lock_session.dart';
 
 import '../support/fakes.dart';
@@ -62,6 +63,30 @@ void main() {
       expect(authenticator.authenticateCalls, 2);
       expect(find.text(lockedTitle), findsNothing);
       expect(find.text(homeMarker), findsOneWidget);
+    });
+
+    testWidgets('a phone that cannot check the user still lets them in', (
+      tester,
+    ) async {
+      // For example the screen lock was removed after the app lock was on.
+      final security = FakeSecurityRepository(enabled: true);
+      await pumpRouterApp(
+        tester,
+        security: security,
+        authenticator: FakeBiometricAuthenticator()
+          ..outcome = AuthOutcome.unavailable,
+      );
+      expect(find.text(lockedTitle), findsOneWidget);
+      expect(find.textContaining('can\'t check it\'s you'), findsOneWidget);
+
+      await tapText(tester, 'Turn off app lock');
+      // It asks first, because turning the lock off lets anyone in.
+      expect(find.text('Turn off the app lock?'), findsOneWidget);
+      await tapText(tester, 'Turn off');
+
+      expect(find.text(lockedTitle), findsNothing);
+      expect(find.text(homeMarker), findsOneWidget);
+      expect(security.enabled, isFalse);
     });
 
     testWidgets('a first-time user sees welcome before any lock', (
@@ -145,7 +170,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.text('Set up a fingerprint or face unlock on this device first'),
+        find.text(
+          'Set up a screen lock, fingerprint or face on this phone first',
+        ),
         findsOneWidget,
       );
       expect(security.enabled, isFalse);

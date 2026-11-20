@@ -17,6 +17,7 @@ import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_sour
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_photo_source.dart';
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_text_reader.dart';
 import 'package:smart_expense_tracker/features/scan/domain/scan_exception.dart';
+import 'package:smart_expense_tracker/features/security/domain/entities/auth_outcome.dart';
 import 'package:smart_expense_tracker/features/security/domain/repositories/biometric_authenticator.dart';
 import 'package:smart_expense_tracker/features/security/domain/repositories/security_repository.dart';
 import 'package:smart_expense_tracker/features/settings/domain/entities/app_theme_mode.dart';
@@ -284,15 +285,19 @@ class FakeBiometricAuthenticator implements BiometricAuthenticator {
 
   bool available;
   bool succeeds;
+
+  /// When set, `authenticate` ends this way, whatever [succeeds] says. Use it
+  /// for the cases other than a plain pass or fail.
+  AuthOutcome? outcome;
   int authenticateCalls = 0;
 
   @override
   Future<bool> isAvailable() async => available;
 
   @override
-  Future<bool> authenticate({required String reason}) async {
+  Future<AuthOutcome> authenticate({required String reason}) async {
     authenticateCalls++;
-    return succeeds;
+    return outcome ?? (succeeds ? AuthOutcome.success : AuthOutcome.failed);
   }
 }
 

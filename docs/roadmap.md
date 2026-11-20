@@ -19,6 +19,21 @@ What is planned, in the order we intend to build it. Items move to the README fe
 
 **Before the first public release:** remove the temporary OCR test screen (`lib/features/scan/debug/`, its route in `app_router.dart` and the Developer entry in Settings). On iOS, ML Kit needs two manual Xcode steps (linker flags and the Latin model bundle) that are not done yet; see the plugin's README.
 
+## TODO: app PIN (brainstormed, not built)
+
+An optional PIN of the app's own, besides the biometric and phone-screen-lock check that exists now. The main reason: on a shared phone, family may know the phone's PIN, and a separate app PIN keeps spending private from them. It also helps phones with no screen lock.
+
+**Decided so far**
+- Settings, Security gets "App lock" with three modes: Off, Phone lock (fingerprint, face or phone screen lock, as today), and App PIN with an optional fingerprint shortcut.
+- 4 to 6 digits, entered twice to set. The PIN is never stored: only a salted slow hash, in Android's secure storage (`flutter_secure_storage`).
+- After 5 wrong tries the lock waits 30 seconds, then longer each time, and the wait survives closing the app. Nothing erases automatically, because that risks losing data.
+- Forgot the PIN: there is no account to recover through. Reset it by confirming with the phone's own screen lock, and only if there is none, offer erase and start over with a clear warning. Backup and restore to a file (see Later) softens that case.
+- The PIN hashing and the attempt limit are plain Dart and the best things to test. One reusable PIN pad widget.
+
+**Still to decide:** PIN length (4 to 6, or fixed at 6), whether the fingerprint shortcut is offered, whether to add "hide in recent apps", and an auto-lock delay setting (the app locks after 30 seconds away today).
+
+**Honest limits:** the PIN is a gate on the screen, not encryption. The database stays unencrypted, and a short PIN could be guessed offline by someone who extracts the hash. It stops casual snooping, not forensics. Encrypting the database from the PIN is possible later but is a much bigger job.
+
 ## Planned: prompt sheet
 
 A bottom sheet that tells the user about a feature they have not tried, or a task still pending.
