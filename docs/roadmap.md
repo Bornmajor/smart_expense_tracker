@@ -64,9 +64,27 @@ A bottom sheet that tells the user about a feature they have not tried, or a tas
 - A cubit shows the chosen prompt, and a sheet widget (with a widget test) is shown by the app shell.
 - Choices are saved in `shared_preferences`, one entry per prompt id.
 
+## Decided next, in this order
+
+All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model can be added later behind a switch, on phones that support it.
+
+1. **Recurring expenses and subscriptions.** Due ones are added when the app opens (no background service), marked so the user can edit or skip them.
+2. **Safe-to-spend and smart alerts.** A card such as "KSh 850 a day left this month", from the overall budget, spending so far and upcoming recurring bills, with the sum shown. Plus in-app alerts: a possible duplicate charge, a subscription that changed price, a category running well above normal this month, an unusually large expense. Month against last month, and the biggest change. Alerts show when the app is open; push alerts from the background are not planned, because some phones kill background apps.
+3. **Backup and restore to a file**, optionally protected with a password, plus CSV import. This replaces cloud sync: a new phone gets the data back without a server.
+4. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
+5. **Rollover and rebalancing.** Optional: unused budget carries over, and the app suggests moving money from an unused category to an overspent one. Without a history of old limits, rollover uses today's limit.
+6. **Split expenses and IOUs.** A first version: a "my share" amount on an expense, and a simple list of who owes whom. Totals count only the user's share. The largest piece of work.
+
+## TODO: more ways to capture (later, not planned yet)
+
+Both feed the same pre-filled add-expense form as scanning and M-Pesa capture, and nothing saves without the user checking it.
+
+- **Typed quick add.** Type one line such as "lunch 350 cafe yesterday" and get the form filled in. A plain Dart parser finds the amount (including "1.5k"), the date words (today, yesterday, a weekday, "on 12 Nov") and the vendor after "at"; the rest becomes the title. The category comes from vendor memory, then the word list used for scanning. It guesses, so the form still shows. English only to start; Swahili words such as "jana" could be added. Effort: small to medium.
+- **App shortcuts.** Long-press the app icon for "Add expense" or "Scan receipt", using the `quick_actions` package. If the app lock is on, the shortcut waits until the user unlocks and then continues. Android shows only a few shortcuts and launchers differ a little. A home-screen widget is a separate, larger job with native code. Effort: small.
+- **Voice entry** is not planned: phone speech services can send audio to Google. If wanted, make it opt-in.
+
 ## Later
 
-- **Decided next, in this order:** recurring expenses and subscriptions (added when the app opens, no background service); insights written in plain Dart (month against last month, biggest change, budget pace, subscription cost, unusual expenses), with a plain-text wording layer so a language model can be added later on phones that support it; then backup and restore to a file.
 - Search and filters.
 - More charts.
 
