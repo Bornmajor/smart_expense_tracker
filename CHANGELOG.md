@@ -16,6 +16,7 @@ First release. Nothing has been published to Google Play yet.
 - Edit an expense, and delete it by swiping (with Undo) or from the edit screen
 - Expenses grouped by day, with a total for each day and the category name on every row
 - Monthly summary with the total and spending by category, and a month switcher
+- Export a month as a PDF report or a CSV spreadsheet from the Summary screen, and share or save it from the system share sheet
 - Categories you manage yourself: create, rename and delete. Deleting a category moves its expenses to Other
 - A New chip on the expense form to add a category without leaving the form
 - Light, dark and system themes

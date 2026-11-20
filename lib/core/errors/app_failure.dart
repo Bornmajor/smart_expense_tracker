@@ -46,6 +46,28 @@ final class ScanFailure extends AppFailure {
   List<Object?> get props => [problem];
 }
 
+/// Why a monthly report was not exported.
+enum ExportProblem {
+  /// The month has no expenses, so there is nothing to put in a report.
+  nothingToExport,
+
+  /// The report file could not be made.
+  couldNotCreate,
+
+  /// The share sheet could not be opened.
+  couldNotShare,
+}
+
+/// Exporting a monthly report failed.
+final class ExportFailure extends AppFailure {
+  const ExportFailure(this.problem);
+
+  final ExportProblem problem;
+
+  @override
+  List<Object?> get props => [problem];
+}
+
 /// The device has no usable biometrics (none enrolled, or not supported).
 final class BiometricUnavailableFailure extends AppFailure {
   const BiometricUnavailableFailure();

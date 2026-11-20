@@ -10,6 +10,11 @@ import '../features/categories/data/repositories/category_repository_impl.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/expenses/data/repositories/expense_repository_impl.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
+import '../features/export/data/repositories/share_plus_report_sharer.dart';
+import '../features/export/data/writers/bundled_fonts.dart';
+import '../features/export/data/writers/csv_report_writer.dart';
+import '../features/export/data/writers/pdf_report_writer.dart';
+import '../features/export/domain/usecases/export_month.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/scan/data/repositories/image_picker_photo_source.dart';
@@ -104,6 +109,16 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         ),
         RepositoryProvider<CategoryRepository>(
           create: (_) => CategoryRepositoryImpl(widget.database),
+        ),
+        // Monthly report export. The fonts are read when a PDF is made.
+        RepositoryProvider<ExportMonth>(
+          create: (context) => ExportMonth(
+            expenses: context.read<ExpenseRepository>(),
+            categories: context.read<CategoryRepository>(),
+            pdf: PdfReportWriter(loadFonts: loadBundledFonts),
+            csv: const CsvReportWriter(),
+            sharer: const SharePlusReportSharer(),
+          ),
         ),
         // Receipt scanning. Created only when a scan starts.
         RepositoryProvider<ReceiptPhotoSource>(
