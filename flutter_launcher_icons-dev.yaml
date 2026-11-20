@@ -1,0 +1,9 @@
+# The dev flavor's icon: grey background with a DEV label, so it is never
+# mistaken for the Play app. The images come from tool/make_dev_icon.ps1.
+# Generated into android/app/src/dev/res by: dart run flutter_launcher_icons
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: assets/branding/dev/icon.png
+  adaptive_icon_background: "#6B6B6B"
+  adaptive_icon_foreground: assets/branding/dev/icon_foreground.png
