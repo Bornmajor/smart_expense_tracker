@@ -8,6 +8,7 @@ import '../../../../app/app_routes.dart';
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
+import '../../domain/entities/recovered_photo.dart';
 import '../../domain/entities/receipt_source.dart';
 import '../cubit/scan_cubit.dart';
 import '../cubit/scan_state.dart';
@@ -17,9 +18,13 @@ import '../scan_messages.dart';
 /// that the app is working, previews a camera photo, or explains a problem.
 /// On success it hands the result to the add-expense form.
 class ScanPage extends StatefulWidget {
-  const ScanPage({super.key, required this.source});
+  const ScanPage({super.key, required this.source, this.recoveredPhoto});
 
   final ReceiptSource source;
+
+  /// A photo kept from before Android closed the app. When set, the screen
+  /// opens on its preview instead of opening the camera.
+  final RecoveredPhoto? recoveredPhoto;
 
   @override
   State<ScanPage> createState() => _ScanPageState();
@@ -29,7 +34,12 @@ class _ScanPageState extends State<ScanPage> {
   @override
   void initState() {
     super.initState();
-    context.read<ScanCubit>().start(widget.source);
+    final recovered = widget.recoveredPhoto;
+    if (recovered != null) {
+      context.read<ScanCubit>().resume(recovered.path);
+    } else {
+      context.read<ScanCubit>().start(widget.source);
+    }
   }
 
   void _onStateChanged(BuildContext context, ScanState state) {

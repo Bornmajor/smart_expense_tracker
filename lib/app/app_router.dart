@@ -39,6 +39,7 @@ import '../features/recurring/presentation/cubit/recurring_form_cubit.dart';
 import '../features/recurring/presentation/pages/recurring_form_page.dart';
 import '../features/recurring/presentation/pages/recurring_page.dart';
 import '../features/scan/debug/ocr_debug_page.dart';
+import '../features/scan/domain/entities/recovered_photo.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
 import '../features/scan/domain/entities/scan_result.dart';
 import '../features/scan/domain/repositories/receipt_photo_source.dart';
@@ -245,7 +246,9 @@ GoRouter createRouter({
       path: AppRoutes.scan,
       // The photo source arrives as `extra`; without it there is nothing to do.
       redirect: (context, state) =>
-          state.extra is ReceiptSource ? null : AppRoutes.expenses,
+          state.extra is ReceiptSource || state.extra is RecoveredPhoto
+          ? null
+          : AppRoutes.expenses,
       builder: (context, state) => BlocProvider(
         create: (_) => ScanCubit(
           ScanReceipt(
@@ -255,7 +258,13 @@ GoRouter createRouter({
             memory: context.read<VendorCategoryMemory>(),
           ),
         ),
-        child: ScanPage(source: state.extra! as ReceiptSource),
+        child: switch (state.extra) {
+          final RecoveredPhoto photo => ScanPage(
+            source: ReceiptSource.camera,
+            recoveredPhoto: photo,
+          ),
+          _ => ScanPage(source: state.extra! as ReceiptSource),
+        },
       ),
     ),
     GoRoute(
