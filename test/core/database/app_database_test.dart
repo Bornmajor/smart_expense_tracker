@@ -105,6 +105,37 @@ void main() {
       expect(await db.select(db.categories).get(), hasLength(1));
     });
 
+    test(
+      'upgrading from version 1 adds recurring rules and keeps expenses',
+      () async {
+        final db = openVersion1Database(withExpense: true);
+        addTearDown(db.close);
+
+        expect(await db.select(db.recurringRules).get(), isEmpty);
+        await db
+            .into(db.recurringRules)
+            .insert(
+              RecurringRulesCompanion.insert(
+                id: 'r1',
+                vendor: 'Netflix',
+                amountMinor: 120000,
+                categoryId: 'food',
+                frequency: 'monthly',
+                anchor: DateTime(2026, 11, 1),
+                nextDue: DateTime(2026, 11, 1),
+                createdAt: DateTime(2026, 11, 1),
+                updatedAt: DateTime(2026, 11, 1),
+              ),
+            );
+
+        // The old expense is still there, and was not added by a rule.
+        final expense = await db.select(db.expenses).getSingle();
+        expect(expense.id, 'old');
+        expect(expense.recurringRuleId, isNull);
+        expect(await db.select(db.recurringRules).get(), hasLength(1));
+      },
+    );
+
     test('an upgraded database can save a titled expense', () async {
       final db = openVersion1Database();
       addTearDown(db.close);

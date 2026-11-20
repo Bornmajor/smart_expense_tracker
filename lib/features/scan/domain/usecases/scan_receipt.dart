@@ -37,7 +37,7 @@ class ScanReceipt {
   final ParseReceipt _parse;
   final SuggestCategory _suggest;
 
-  /// Takes a photo with the camera, or picks one from the gallery.
+  /// Takes a photo with the camera, or picks a photo or PDF file.
   /// Returns null when the user backs out without choosing one.
   Future<Result<String>?> pick(ReceiptSource source) async {
     try {

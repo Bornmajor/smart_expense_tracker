@@ -98,7 +98,7 @@ void main() {
       final slow = _SlowPhotoSource();
       photos = slow;
 
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
 
       expect(find.text('Opening your photos...'), findsOneWidget);
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
@@ -123,7 +123,7 @@ void main() {
       final slow = _SlowReader(reader.lines);
       reader = slow;
 
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pump();
 
       expect(find.text('Reading your receipt...'), findsOneWidget);
@@ -199,7 +199,7 @@ void main() {
 
   group('a gallery photo', () {
     testWidgets('goes straight to the form with the scan', (tester) async {
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pumpAndSettle();
 
       expect(find.text('FORM with /tmp/a.jpg'), findsOneWidget);
@@ -209,7 +209,7 @@ void main() {
     testWidgets('the scan screen is replaced, so Back does not return to it', (
       tester,
     ) async {
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pumpAndSettle();
 
       await tester.pageBack();
@@ -224,7 +224,7 @@ void main() {
     testWidgets('the screen closes and shows where it began', (tester) async {
       photos.path = null;
 
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pumpAndSettle();
 
       expect(find.text('Home'), findsOneWidget);
@@ -238,7 +238,7 @@ void main() {
     ) async {
       photos.pickError = const ScanException(ScanProblem.permissionDenied);
 
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pumpAndSettle();
 
       expect(find.textContaining('can\'t open your photos'), findsOneWidget);
@@ -249,7 +249,7 @@ void main() {
 
     testWidgets('Try again starts over', (tester) async {
       photos.pickError = const ScanException(ScanProblem.cameraUnavailable);
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pumpAndSettle();
 
       photos.pickError = null;
@@ -263,7 +263,7 @@ void main() {
       tester,
     ) async {
       reader.error = const ScanException(ScanProblem.unreadable);
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pumpAndSettle();
 
       await tester.tap(find.text('Enter manually'));
@@ -277,7 +277,7 @@ void main() {
     ) async {
       reader.error = StateError('a bug');
 
-      await openScan(tester, ReceiptSource.gallery);
+      await openScan(tester, ReceiptSource.file);
       await tester.pumpAndSettle();
 
       expect(

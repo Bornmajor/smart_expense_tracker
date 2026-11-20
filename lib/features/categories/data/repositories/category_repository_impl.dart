@@ -84,6 +84,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
                 updatedAt: Value(_now()),
               ),
             );
+        // A recurring rule in this category moves with its expenses, or it would
+        // point at a category that is about to be deleted.
+        await (_db.update(_db.recurringRules)
+              ..where((r) => r.categoryId.equals(id)))
+            .write(RecurringRulesCompanion(categoryId: Value(moveToId)));
         // The category's budget goes with it, or it would be left measuring a
         // category that no longer exists.
         await (_db.delete(

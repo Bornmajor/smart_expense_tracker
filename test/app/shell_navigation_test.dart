@@ -46,9 +46,9 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Enter manually'), findsOneWidget);
-    expect(find.text('Choose a receipt photo'), findsOneWidget);
+    expect(find.text('Choose a receipt file'), findsOneWidget);
     final manualY = tester.getTopLeft(find.text('Enter manually')).dy;
-    final scanY = tester.getTopLeft(find.text('Choose a receipt photo')).dy;
+    final scanY = tester.getTopLeft(find.text('Choose a receipt file')).dy;
     expect(manualY, lessThan(scanY));
   });
 
@@ -60,9 +60,9 @@ void main() {
 
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    await tapText(tester, 'Choose a receipt photo');
+    await tapText(tester, 'Choose a receipt file');
 
-    expect(photos.picked, [ReceiptSource.gallery]);
+    expect(photos.picked, [ReceiptSource.file]);
     expect(find.text('Take a photo of a receipt'), findsNothing);
   });
 

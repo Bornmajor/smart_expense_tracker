@@ -60,6 +60,16 @@ class SettingsPage extends StatelessWidget {
                   onTap: () => context.push(AppRoutes.budgets),
                 ),
                 const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.repeat),
+                  title: const Text('Recurring expenses'),
+                  subtitle: const Text(
+                    'Rent, subscriptions and bills that repeat',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.recurring),
+                ),
+                const Divider(),
                 const CurrencyTile(),
               ],
             ),

@@ -29,6 +29,7 @@ class UpdateExpense {
       categoryId: draft.categoryId!,
       createdAt: original.createdAt,
       updatedAt: now,
+      recurringRuleId: original.recurringRuleId,
     );
 
     try {

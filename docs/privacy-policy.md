@@ -31,9 +31,9 @@ SpendWise IQ does not ask for or collect your name, email address, phone number,
 
 ## Receipt photos
 
-When you choose a photo of a receipt, the app receives only that photo, through Android's photo picker. It reads the text in the photo on your phone, using Google's ML Kit on-device text recognition, and fills in the expense form for you to check.
+When you choose a photo or a PDF of a receipt, the app receives only that file, through Android's file picker. For a PDF it draws the first page as a picture. It reads the text in the picture on your phone, using Google's ML Kit on-device text recognition, and fills in the expense form for you to check.
 
-The photo is a temporary copy. It is deleted when you close the form, whether or not you saved the expense, and it is also deleted if reading the photo fails. The app does not upload the photo or the text it reads. Only what you save in the expense is kept.
+The picture the app reads is a temporary copy. It is deleted when you close the form, whether or not you saved the expense, and it is also deleted if reading the photo fails. The app does not upload the photo or the text it reads. Only what you save in the expense is kept.
 
 ## Exporting reports
 

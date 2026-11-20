@@ -6,7 +6,8 @@ What is planned, in the order we intend to build it. Items move to the README fe
 
 1. **Release setup and early testers** (code done, your setup remains). The `dev`, `uat` and `main` flow is built: `uat` sends a build to Play internal testing and `main` sends one to production after approval (see [branching](branching.md) and [releasing](releasing.md)). Still needed: the GitHub secrets, a first internal release, and a **closed test with testers started early**, because new personal accounts have needed 12 testers for 14 days before production.
 2. **Scan a receipt with the camera** (the gallery route is done). The camera path, its "Use this photo / Retake" preview and the recovery of a photo lost to an app restart are built and tested, but switched off (`ScanFeatures.cameraEnabled` in `lib/features/scan/scan_features.dart`). On the Infinix X6528 test phone (3.8 GB RAM, swap nearly full) Android kills the app about two seconds after the system camera opens, which looks like a crash; the photo is recovered, but the restart is rough. Before turning it on: test a release build, read the kill reason from `adb logcat` right after a kill (the low-memory killer naming the app, or a vendor cleaner), and choose between keeping the system camera, an in-app camera (`camera` package) or Google's ML Kit document scanner. Recovery also needs wiring at app start, after the biometric unlock, so a recovered photo opens straight on the preview.
-**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, and adding a category from the expense form, scanning a receipt photo from the gallery, and exporting a month as a PDF or CSV from the Summary screen., choosing a currency, remembering the category for each vendor, and monthly budgets with progress on the Summary.
+
+**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt photo from the gallery, exporting a month as a PDF or CSV from the Summary screen, choosing a currency, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, and recurring expenses that are added when they come due.
 
 **Still to look at for export:** the PDF embeds the Inter font (`assets/fonts`), which covers Latin, Greek and Cyrillic. A vendor name in another script (Chinese, Arabic, and so on) would show as blank boxes in the PDF; the CSV is fine. Try the share sheet on a real phone before the first release. The privacy policy needs one line saying a report leaves the app only when the user shares it.
 
@@ -27,7 +28,7 @@ An optional PIN of the app's own, besides the biometric and phone-screen-lock ch
 - Settings, Security gets "App lock" with three modes: Off, Phone lock (fingerprint, face or phone screen lock, as today), and App PIN with an optional fingerprint shortcut.
 - 4 to 6 digits, entered twice to set. The PIN is never stored: only a salted slow hash, in Android's secure storage (`flutter_secure_storage`).
 - After 5 wrong tries the lock waits 30 seconds, then longer each time, and the wait survives closing the app. Nothing erases automatically, because that risks losing data.
-- Forgot the PIN: there is no account to recover through. Reset it by confirming with the phone's own screen lock, and only if there is none, offer erase and start over with a clear warning. Backup and restore to a file (see Later) softens that case.
+- Forgot the PIN: there is no account to recover through. Reset it by confirming with the phone's own screen lock, and only if there is none, offer erase and start over with a clear warning. Backup and restore to a file (see Decided next) softens that case.
 - The PIN hashing and the attempt limit are plain Dart and the best things to test. One reusable PIN pad widget.
 
 **Still to decide:** PIN length (4 to 6, or fixed at 6), whether the fingerprint shortcut is offered, whether to add "hide in recent apps", and an auto-lock delay setting (the app locks after 30 seconds away today).
@@ -64,9 +65,35 @@ A bottom sheet that tells the user about a feature they have not tried, or a tas
 - A cubit shows the chosen prompt, and a sheet widget (with a widget test) is shown by the app shell.
 - Choices are saved in `shared_preferences`, one entry per prompt id.
 
+## Decided next, in this order
+
+All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model can be added later behind a switch, on phones that support it.
+
+1. **Safe-to-spend and smart alerts.** A card such as "KSh 850 a day left this month", from the overall budget, spending so far and upcoming recurring bills, with the sum shown. Plus in-app alerts: a possible duplicate charge, a subscription that changed price, a category running well above normal this month, an unusually large expense. Month against last month, and the biggest change. Alerts show when the app is open; push alerts from the background are not planned, because some phones kill background apps.
+2. **Backup and restore to a file**, optionally protected with a password, plus CSV import. This replaces cloud sync: a new phone gets the data back without a server.
+3. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
+4. **Rollover and rebalancing.** Optional: unused budget carries over, and the app suggests moving money from an unused category to an overspent one. Without a history of old limits, rollover uses today's limit.
+
+## TODO: later, not planned yet
+
+**More ways to get a PDF receipt in (not decided).** Choosing a PDF or photo from the Files app is done (page 1 of a PDF is read; a password-protected PDF is refused). Two ideas remain:
+- **Share a receipt to the app:** from the email app, Share and choose SpendWise IQ (PDF or image). It uses the same Android share-target code as M-Pesa capture, so build them together if both are done.
+- **Read the text inside the PDF** instead of reading a picture of it. Emailed receipts usually contain real text, which is exact where OCR can slip; ML Kit is then only needed for scanned PDFs. Needs a PDF package that can extract text with positions.
+
+**Ask what kind of file first, then open the matching picker (not decided, waiting for tester feedback).** The Files app is the system picker, so it looks and behaves differently across phone makers and Android versions. Idea: the Add sheet asks first, with three options: **Photo** (image_picker, the Android photo picker), **File or PDF** (file_selector, the Files app, as now), and **Camera** (direct photo, already built but switched off). Not a priority. Decide after testers try the single Choose a receipt file option on different phones.
+
+**Own gallery picker, like WhatsApp's (no longer needed, and not recommended).** It would list every album in one place, but the cause above is PDFs, not the layout. It needs the broad photo permission (`READ_MEDIA_IMAGES`), and Google Play restricts that to apps whose main purpose is a gallery or photo manager; a custom picker does not qualify automatically and needs a declaration that the system picker is not enough, and an app that fails can be removed from Google Play. It also contradicts the app's promise that it only receives the photo the user chooses (the privacy policy says so), so the policy and Data safety form would change, and the permission prompt is a worse first impression for a privacy-first app. On top of that: thumbnail loading on low-memory phones, behavior differences between phone makers, and a package such as `photo_manager` to maintain (effort: large). Revisit only if sharing and "Choose a file" prove not enough.
+
+**Split expenses and IOUs.** Goal: personal totals show what the user actually spent, and money lent to friends does not distort the budget. A first version: a "my share" amount on an expense (a new nullable column, empty meaning the full amount), and a simple list of who owes whom, which the user marks settled or part-paid (people and debts tables). The Summary, budgets, exports and the expense list would all use one shared "effective amount" rule, so no total is missed. Everything stays on the phone, so settling up is manual. The largest piece of work (effort: large), and the most valuable for chamas and lending.
+
+**More ways to capture.** Typed quick add and app shortcuts feed the same pre-filled add-expense form as scanning and M-Pesa capture, and nothing saves without the user checking it.
+
+- **Typed quick add.** Type one line such as "lunch 350 cafe yesterday" and get the form filled in. A plain Dart parser finds the amount (including "1.5k"), the date words (today, yesterday, a weekday, "on 12 Nov") and the vendor after "at"; the rest becomes the title. The category comes from vendor memory, then the word list used for scanning. It guesses, so the form still shows. English only to start; Swahili words such as "jana" could be added. Effort: small to medium.
+- **App shortcuts.** Long-press the app icon for "Add expense" or "Scan receipt", using the `quick_actions` package. If the app lock is on, the shortcut waits until the user unlocks and then continues. Android shows only a few shortcuts and launchers differ a little. A home-screen widget is a separate, larger job with native code. Effort: small.
+- **Voice entry** is not planned: phone speech services can send audio to Google. If wanted, make it opt-in.
+
 ## Later
 
-- **Decided next, in this order:** recurring expenses and subscriptions (added when the app opens, no background service); insights written in plain Dart (month against last month, biggest change, budget pace, subscription cost, unusual expenses), with a plain-text wording layer so a language model can be added later on phones that support it; then backup and restore to a file.
 - Search and filters.
 - More charts.
 

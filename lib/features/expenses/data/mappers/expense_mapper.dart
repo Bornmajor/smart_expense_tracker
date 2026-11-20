@@ -13,6 +13,7 @@ extension ExpenseRowMapper on ExpenseRow {
     categoryId: categoryId,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    recurringRuleId: recurringRuleId,
   );
 }
 
@@ -26,5 +27,6 @@ extension ExpenseEntityMapper on Expense {
     categoryId: categoryId,
     createdAt: createdAt,
     updatedAt: updatedAt,
+    recurringRuleId: Value(recurringRuleId),
   );
 }
