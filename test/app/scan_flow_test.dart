@@ -347,4 +347,25 @@ void main() {
       expect(reader.readPaths, isEmpty);
     });
   });
+
+  group('a photo kept from before Android closed the app', () {
+    testWidgets('opens on its preview when the app starts', (tester) async {
+      photos.recoverPath = '/cache/lost.jpg';
+
+      await openApp(tester);
+
+      expect(
+        find.textContaining('restarted the app while the camera was open'),
+        findsOneWidget,
+      );
+      expect(find.text('Use this photo'), findsOneWidget);
+      expect(photos.picked, isEmpty);
+    });
+
+    testWidgets('leaves the list alone when there is none', (tester) async {
+      await openApp(tester);
+
+      expect(find.text('Use this photo'), findsNothing);
+    });
+  });
 }
