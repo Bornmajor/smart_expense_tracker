@@ -10,6 +10,10 @@ import '../../domain/entities/export_format.dart';
 Future<ExportFormat?> showExportSheet(BuildContext context, DateTime month) {
   return showModalBottomSheet<ExportFormat>(
     context: context,
+    // The Summary tab has its own navigator, which sits under the app's
+    // floating button and tab bar. The root navigator puts the sheet above
+    // them, so they cannot draw over it.
+    useRootNavigator: true,
     builder: (context) => _ExportSheet(month: month),
   );
 }

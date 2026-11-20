@@ -55,6 +55,30 @@ void main() {
     expect(find.text('CSV spreadsheet'), findsOneWidget);
   });
 
+  testWidgets('the sheet covers the Add expense button and the tab bar', (
+    tester,
+  ) async {
+    await openSummary(tester);
+    // Before the sheet opens, both can be tapped.
+    expect(find.text('Add expense').hitTestable(), findsOneWidget);
+
+    await tester.tap(exportButton);
+    await tester.pumpAndSettle();
+
+    // Nothing from the shell may sit on top of the sheet or its backdrop.
+    expect(find.text('Add expense').hitTestable(), findsNothing);
+    expect(
+      find
+          .descendant(
+            of: find.byType(NavigationBar),
+            matching: find.text('Settings'),
+          )
+          .hitTestable(),
+      findsNothing,
+    );
+    expect(find.text('PDF report').hitTestable(), findsOneWidget);
+  });
+
   testWidgets('shares a PDF for this month', (tester) async {
     await openSummary(tester);
 
