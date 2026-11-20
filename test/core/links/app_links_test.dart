@@ -34,14 +34,15 @@ void main() {
     expect(uriFor('https://'), isNull);
   });
 
-  test('the address in the app is empty or a secure web address', () {
-    // Empty is allowed so the Settings row stays hidden until it is set; see
-    // docs/release-checklist.md. Anything else must be a usable address.
-    const links = AppLinks();
+  test('the app has the published privacy policy address', () {
+    // Google Play requires this link inside the app. If this fails, the address
+    // was removed or broken: set it in lib/core/links/app_links.dart.
+    final uri = const AppLinks().privacyPolicyUri;
 
+    expect(uri, isNotNull);
     expect(
-      links.privacyPolicyUrl.isEmpty || links.privacyPolicyUri != null,
-      isTrue,
+      uri.toString(),
+      'https://sites.google.com/view/spendwiseiq-privacy-policy/home',
     );
   });
 }

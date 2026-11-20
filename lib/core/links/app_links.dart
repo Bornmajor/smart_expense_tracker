@@ -7,10 +7,12 @@ class AppLinks extends Equatable {
   /// The published privacy policy page (Google Sites, public, no sign-in).
   ///
   /// Google Play requires a link to it inside the app as well as in the store
-  /// listing. Paste the page address here when it is published. While this is
-  /// empty the Settings row is hidden, so the app never opens a wrong page.
-  /// See docs/release-checklist.md.
-  static const _privacyPolicyUrl = '';
+  /// listing, and both must be this same address. If the address ever changes,
+  /// change it here and in Play Console. While it is empty the Settings row is
+  /// hidden, so the app never opens a wrong page. See
+  /// docs/release-checklist.md.
+  static const _privacyPolicyUrl =
+      'https://sites.google.com/view/spendwiseiq-privacy-policy/home';
 
   final String privacyPolicyUrl;
 
