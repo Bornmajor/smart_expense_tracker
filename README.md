@@ -81,7 +81,6 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 
 **After the MVP** (see the [roadmap](docs/roadmap.md) for the build order)
 - [ ] Prompt sheet that introduces features and pending tasks, with "Remind me later" and "Not interested"
-- [ ] Budgets with progress and alerts
 - [ ] Search and filters (date, category, amount, vendor)
 - [ ] More charts and insights
 - [ ] Multi-currency
