@@ -140,6 +140,28 @@ void main() {
     });
   });
 
+  group('createWithFirstExpense', () {
+    test('saves the rule and its first expense together', () async {
+      await repository.createWithFirstExpense(
+        rule(nextDue: DateTime(2026, 12, 1)),
+        expense(),
+      );
+
+      expect((await repository.getAll()).single.nextDue, DateTime(2026, 12, 1));
+      expect((await allExpenses()).single.recurringRuleId, 'r1');
+    });
+
+    test('saves neither if the expense cannot be saved', () async {
+      await expectLater(
+        repository.createWithFirstExpense(rule(), expense(categoryId: 'ghost')),
+        throwsA(isA<StorageException>()),
+      );
+
+      expect(await repository.getAll(), isEmpty);
+      expect(await allExpenses(), isEmpty);
+    });
+  });
+
   group('the generator on a real database', () {
     GenerateDueExpenses generator() =>
         GenerateDueExpenses(repository, now: () => DateTime(2026, 11, 20, 9));

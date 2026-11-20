@@ -15,6 +15,7 @@ import '../../../categories/presentation/cubit/category_actions_cubit.dart';
 import '../../../categories/presentation/widgets/category_name_sheet.dart';
 import '../../../scan/domain/entities/scan_result.dart';
 import '../../../scan/presentation/widgets/scan_review_panel.dart';
+import '../../../recurring/domain/entities/recurrence_frequency.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/usecases/vendor_category_memory.dart';
@@ -55,6 +56,10 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   late final TextEditingController _amount;
   late DateTime _date;
   late String? _categoryId;
+
+  /// True when the user wants this expense to repeat. Only offered when adding.
+  bool _repeat = false;
+  RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
   final _vendorFocus = FocusNode();
 
   /// True while the category was filled in from the user's earlier expenses
@@ -146,6 +151,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       amountText: _amount.text,
       date: _date,
       categoryId: _categoryId,
+      repeat: _repeat ? _frequency : null,
     );
   }
 
@@ -323,6 +329,18 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                         const Gap(AppSpacing.sm),
                         Text(_categoryHint!, style: context.text.bodySmall),
                       ],
+                      if (!_isEditing) ...[
+                        const Gap(AppSpacing.md),
+                        _RepeatOption(
+                          repeat: _repeat,
+                          frequency: _frequency,
+                          enabled: !saving,
+                          onRepeatChanged: (value) =>
+                              setState(() => _repeat = value),
+                          onFrequencyChanged: (value) =>
+                              setState(() => _frequency = value),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -344,6 +362,67 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
           ),
         );
       },
+    );
+  }
+}
+
+/// "Repeat this expense", for a bill that comes back, with how often.
+class _RepeatOption extends StatelessWidget {
+  const _RepeatOption({
+    required this.repeat,
+    required this.frequency,
+    required this.enabled,
+    required this.onRepeatChanged,
+    required this.onFrequencyChanged,
+  });
+
+  final bool repeat;
+  final RecurrenceFrequency frequency;
+  final bool enabled;
+  final ValueChanged<bool> onRepeatChanged;
+  final ValueChanged<RecurrenceFrequency> onFrequencyChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          value: repeat,
+          onChanged: enabled
+              ? (value) => onRepeatChanged(value ?? false)
+              : null,
+          title: const Text('Repeat this expense'),
+          subtitle: const Text('Add it again automatically, like a bill'),
+        ),
+        if (repeat)
+          SegmentedButton<RecurrenceFrequency>(
+            // The tick would take room from the word, so the filled segment
+            // alone shows the choice.
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            ),
+            segments: [
+              for (final option in RecurrenceFrequency.values)
+                ButtonSegment(
+                  value: option,
+                  // One line that shrinks to fit instead of wrapping, so a larger
+                  // text size never pushes a word onto a second line.
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(option.label, maxLines: 1, softWrap: false),
+                  ),
+                ),
+            ],
+            selected: {frequency},
+            onSelectionChanged: enabled
+                ? (value) => onFrequencyChanged(value.first)
+                : null,
+          ),
+      ],
     );
   }
 }

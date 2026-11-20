@@ -20,4 +20,9 @@ abstract interface class RecurringRepository {
   /// being added twice, or a date being skipped, if the app is closed halfway.
   /// Throws `StorageException` if storage fails.
   Future<void> recordOccurrences(RecurringRule rule, List<Expense> expenses);
+
+  /// Saves a new [rule] together with the [first] expense it comes from, in one
+  /// step: either both are saved or neither is. [first] already says it
+  /// belongs to the rule. Throws `StorageException` if storage fails.
+  Future<void> createWithFirstExpense(RecurringRule rule, Expense first);
 }

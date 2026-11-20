@@ -34,6 +34,7 @@ import '../features/recurring/domain/entities/recurring_rule.dart';
 import '../features/recurring/domain/repositories/recurring_repository.dart';
 import '../features/recurring/domain/usecases/generate_due_expenses.dart';
 import '../features/recurring/domain/usecases/save_recurring_rule.dart';
+import '../features/recurring/domain/usecases/save_repeating_expense.dart';
 import '../features/recurring/presentation/cubit/recurring_cubit.dart';
 import '../features/recurring/presentation/cubit/recurring_form_cubit.dart';
 import '../features/recurring/presentation/pages/recurring_form_page.dart';
@@ -310,6 +311,9 @@ Widget _expenseForm(
         create: (_) => ExpenseFormCubit(
           saveExpense: SaveExpense(expenses),
           updateExpense: UpdateExpense(expenses),
+          saveRepeating: SaveRepeatingExpense(
+            context.read<RecurringRepository>(),
+          ),
           repository: expenses,
           original: original,
         ),

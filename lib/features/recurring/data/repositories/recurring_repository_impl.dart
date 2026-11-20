@@ -83,4 +83,17 @@ class RecurringRepositoryImpl implements RecurringRepository {
       throw StorageException(error);
     }
   }
+
+  @override
+  Future<void> createWithFirstExpense(RecurringRule rule, Expense first) async {
+    try {
+      // The rule goes in first because the expense points at it.
+      await _db.transaction(() async {
+        await _db.into(_db.recurringRules).insert(rule.toCompanion());
+        await _db.into(_db.expenses).insert(first.toCompanion());
+      });
+    } on Exception catch (error) {
+      throw StorageException(error);
+    }
+  }
 }

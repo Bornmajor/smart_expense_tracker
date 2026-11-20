@@ -459,6 +459,20 @@ class FakeRecurringRepository implements RecurringRepository {
     _changes.add(List.of(rules));
   }
 
+  /// Every first expense `createWithFirstExpense` was given, in order.
+  final created = <Expense>[];
+
+  @override
+  Future<void> createWithFirstExpense(RecurringRule rule, Expense first) async {
+    final error = saveError;
+    if (error != null) throw error;
+    created.add(first);
+    rules
+      ..removeWhere((r) => r.id == rule.id)
+      ..add(rule);
+    _changes.add(List.of(rules));
+  }
+
   @override
   Future<void> recordOccurrences(
     RecurringRule rule,
