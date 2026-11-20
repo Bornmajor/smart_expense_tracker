@@ -45,6 +45,8 @@ dependencies:
   local_auth: ^3.0.2
   image_picker: ^1.2.4
   google_mlkit_text_recognition: ^1.0.3
+  pdf: ^3.13.1
+  share_plus: ^13.3.1
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +81,8 @@ flutter:
 
   assets:
     - assets/illustrations/
+    # Inter, embedded into exported PDFs (see assets/fonts/Inter-LICENSE.txt).
+    - assets/fonts/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

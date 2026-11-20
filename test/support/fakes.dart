@@ -1,8 +1,13 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:smart_expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
+import 'package:smart_expense_tracker/features/export/domain/entities/monthly_report.dart';
+import 'package:smart_expense_tracker/features/export/domain/entities/report_file.dart';
+import 'package:smart_expense_tracker/features/export/domain/repositories/report_sharer.dart';
+import 'package:smart_expense_tracker/features/export/domain/repositories/report_writer.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'package:smart_expense_tracker/features/scan/domain/entities/ocr_line.dart';
@@ -289,4 +294,43 @@ class FakeOnboardingRepository implements OnboardingRepository {
 
   @override
   Future<void> complete() async => _completed = true;
+}
+
+/// Records what was shared instead of opening the share sheet.
+class FakeReportSharer implements ReportSharer {
+  final shared = <ReportFile>[];
+
+  /// When set, `share` throws it.
+  Object? error;
+
+  /// When set, `share` waits for it, so a test can look at the screen while an
+  /// export is still running.
+  Future<void>? gate;
+
+  @override
+  Future<void> share(ReportFile file) async {
+    await gate;
+    final failure = error;
+    if (failure != null) throw failure;
+    shared.add(file);
+  }
+}
+
+/// A writer that returns a small file, so use case tests do not need the real
+/// PDF or CSV code.
+class FakeReportWriter implements ReportWriter {
+  FakeReportWriter(this.extension);
+
+  final String extension;
+  final reports = <MonthlyReport>[];
+
+  @override
+  Future<ReportFile> write(MonthlyReport report) async {
+    reports.add(report);
+    return ReportFile(
+      name: report.fileName(extension),
+      mimeType: 'x/$extension',
+      bytes: Uint8List.fromList([1, 2, 3]),
+    );
+  }
 }

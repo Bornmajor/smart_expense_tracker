@@ -49,12 +49,12 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Settings: theme (system, light, dark) and About
 - [x] Optional fingerprint / face lock, turned on from Settings
 - [x] Scan a receipt: choose a photo and the app reads the vendor, date and total on your phone, suggests a category, and fills the expense form for you to check before saving. The photo is temporary and is deleted afterwards
+- [x] Export a month as a PDF report or a CSV spreadsheet from the Summary screen, shared or saved from the system share sheet. Nothing is uploaded by the app; the file goes only where you send it
 
 ### Planned
 
 **MVP: scan, track, export**
 - [ ] Scan a receipt with the camera (choosing a photo from the gallery works today; see the [roadmap](docs/roadmap.md))
-- [ ] Monthly report as PDF and CSV, shared or saved from the system share sheet
 
 **After the MVP** (see the [roadmap](docs/roadmap.md) for the build order)
 - [ ] Prompt sheet that introduces features and pending tasks, with "Remind me later" and "Not interested"
@@ -80,7 +80,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 | Camera | `camera` / `image_picker` | Planned |
 | On-device OCR | `google_mlkit_text_recognition` (ML Kit) | Planned |
 | Charts | `fl_chart` (if a chart is added) | Planned |
-| Export | `pdf`, `printing`, `csv`, `share_plus` | Planned |
+| Export | `pdf`, `share_plus` (CSV is written by hand) | In use |
 
 ## Architecture
 
