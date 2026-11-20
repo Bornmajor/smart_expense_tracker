@@ -235,12 +235,13 @@ The cubit emits a scanned result that fills the add-expense form, beside the rec
 ## Example: monthly report
 
 ```
-ExportPage (UI)
-  -> ExportCubit
-    -> BuildMonthlyReport (use case)  # domain: groups a month's expenses by category and day
-      -> ExpenseRepository            # reads the month's expenses
-    -> ReportExporter (datasource)    # builds PDF or CSV bytes
-    -> system share sheet             # share, or "Save to Files / Drive"
+SummaryPage (export button) -> export sheet (PDF or CSV)
+  -> ExportCubit                      # working / failed, ignores a second tap
+    -> ExportMonth (use case)         # the whole job, returns a Result
+      -> ExpenseRepository, CategoryRepository   # read the data once
+      -> BuildMonthlyReport           # domain: one month's rows and category totals
+      -> ReportWriter                 # PdfReportWriter or CsvReportWriter, bytes + file name
+      -> ReportSharer                 # share_plus: the system share sheet
 ```
 
-Grouping and totals are plain Dart and unit tested. The PDF and CSV generation sits behind the datasource. Sharing uses the system share sheet, so no custom download or storage-permission code is needed.
+`BuildMonthlyReport` produces one `MonthlyReport`, and both formats are made from it, so the PDF, the CSV and the Summary screen always show the same numbers (the category totals come from `SummarizeMonth`). Building the report and the CSV text are plain Dart and unit tested. The PDF writer is tested with the real Inter font. Only `SharePlusReportSharer`, the call that opens the share sheet, needs a phone, so it is a few lines that coverage skips. Sharing uses the system share sheet, so there is no custom download or storage-permission code.

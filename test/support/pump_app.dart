@@ -5,6 +5,7 @@ import 'package:smart_expense_tracker/app/app_router.dart';
 import 'package:smart_expense_tracker/core/theme/app_theme.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
+import 'package:smart_expense_tracker/features/export/domain/usecases/export_month.dart';
 import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_photo_source.dart';
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_text_reader.dart';
@@ -25,6 +26,9 @@ Future<LockSession> pumpRouterApp(
   FakeCategoryRepository? categories,
   FakeReceiptPhotoSource? photos,
   FakeReceiptTextReader? reader,
+  FakeReportSharer? sharer,
+  FakeReportWriter? pdfWriter,
+  FakeReportWriter? csvWriter,
   FakeSettingsRepository? settings,
   FakeSecurityRepository? security,
   FakeBiometricAuthenticator? authenticator,
@@ -47,6 +51,8 @@ Future<LockSession> pumpRouterApp(
 
   final onboardingRepo =
       onboarding ?? FakeOnboardingRepository(completed: true);
+  final expenseRepo = expenses ?? FakeExpenseRepository();
+  final categoryRepo = categories ?? FakeCategoryRepository();
   final securityRepo = security ?? FakeSecurityRepository();
   final auth = authenticator ?? FakeBiometricAuthenticator();
   final settingsRepo = settings ?? FakeSettingsRepository();
@@ -57,11 +63,16 @@ Future<LockSession> pumpRouterApp(
     MultiRepositoryProvider(
       providers: [
         RepositoryProvider<OnboardingRepository>.value(value: onboardingRepo),
-        RepositoryProvider<ExpenseRepository>.value(
-          value: expenses ?? FakeExpenseRepository(),
-        ),
-        RepositoryProvider<CategoryRepository>.value(
-          value: categories ?? FakeCategoryRepository(),
+        RepositoryProvider<ExpenseRepository>.value(value: expenseRepo),
+        RepositoryProvider<CategoryRepository>.value(value: categoryRepo),
+        RepositoryProvider<ExportMonth>.value(
+          value: ExportMonth(
+            expenses: expenseRepo,
+            categories: categoryRepo,
+            pdf: pdfWriter ?? FakeReportWriter('pdf'),
+            csv: csvWriter ?? FakeReportWriter('csv'),
+            sharer: sharer ?? FakeReportSharer(),
+          ),
         ),
         RepositoryProvider<BiometricAuthenticator>.value(value: auth),
         RepositoryProvider<ReceiptPhotoSource>.value(

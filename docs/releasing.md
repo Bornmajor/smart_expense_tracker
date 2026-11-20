@@ -32,6 +32,11 @@ Two flavors keep builds from your computer apart from the Play app. Android will
 - Fastlane picks up `build/app/outputs/bundle/prodRelease/app-prod-release.aab`.
 - Later, a Firebase or Google sign-in setup would need one config per app id.
 
+**The dev icon.** The dev app has a grey icon with a white "DEV" label, so it is never mistaken for the Play app. Its files live in `android/app/src/dev/res/` and override the main ones for that flavor only; `prod` keeps `android/app/src/main/res/`. To change it:
+1. Edit `tool/make_dev_icon.ps1` (it recolors the production artwork and adds the label), then run `powershell -File tool/make_dev_icon.ps1`. It writes `assets/branding/dev/`.
+2. Run `dart run flutter_launcher_icons`. The settings are in `flutter_launcher_icons-dev.yaml`.
+3. Commit the changed files under `android/app/src/dev/` and `assets/branding/dev/`.
+
 Without `key.properties` (a fresh clone), release builds fall back to the debug key so `flutter run --release` still works. Google Play rejects a debug-signed bundle, so that build can never be published by mistake.
 
 ### Fastlane lanes

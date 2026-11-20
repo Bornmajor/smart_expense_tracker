@@ -21,6 +21,8 @@ import '../features/expenses/presentation/cubit/expense_form_cubit.dart';
 import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
 import '../features/expenses/presentation/pages/expense_form_page.dart';
 import '../features/expenses/presentation/pages/expense_list_page.dart';
+import '../features/export/domain/usecases/export_month.dart';
+import '../features/export/presentation/cubit/export_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/scan/debug/ocr_debug_page.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
@@ -120,6 +122,9 @@ GoRouter createRouter({
                   BlocProvider(
                     create: (_) =>
                         SummaryCubit(context.read<ExpenseRepository>()),
+                  ),
+                  BlocProvider(
+                    create: (_) => ExportCubit(context.read<ExportMonth>()),
                   ),
                   BlocProvider(
                     create: (_) =>
