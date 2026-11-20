@@ -12,6 +12,8 @@ import '../core/links/link_opener.dart';
 import '../core/links/url_launcher_link_opener.dart';
 import '../core/utils/currency.dart';
 import '../core/theme/app_theme.dart';
+import '../features/budgets/data/repositories/budget_repository_impl.dart';
+import '../features/budgets/domain/repositories/budget_repository.dart';
 import '../features/categories/data/repositories/category_repository_impl.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/expenses/data/repositories/expense_repository_impl.dart';
@@ -122,6 +124,9 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<BiometricAuthenticator>.value(value: _authenticator),
         RepositoryProvider<ExpenseRepository>(
           create: (_) => ExpenseRepositoryImpl(widget.database),
+        ),
+        RepositoryProvider<BudgetRepository>(
+          create: (_) => BudgetRepositoryImpl(widget.database),
         ),
         RepositoryProvider<CategoryRepository>(
           create: (_) => CategoryRepositoryImpl(widget.database),

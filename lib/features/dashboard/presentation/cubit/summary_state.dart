@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../budgets/domain/entities/budget_progress.dart';
 import '../../domain/entities/month_summary.dart';
 
 sealed class SummaryState extends Equatable {
@@ -18,6 +19,7 @@ final class SummaryLoaded extends SummaryState {
     required this.month,
     required this.summary,
     required this.canGoNext,
+    this.budgets = const [],
   });
 
   /// First day of the month being shown.
@@ -25,8 +27,12 @@ final class SummaryLoaded extends SummaryState {
   final MonthSummary summary;
   final bool canGoNext;
 
+  /// Every budget measured against this month, the ones needing attention
+  /// first. Empty when no budget is set.
+  final List<BudgetProgress> budgets;
+
   @override
-  List<Object?> get props => [month, summary, canGoNext];
+  List<Object?> get props => [month, summary, canGoNext, budgets];
 }
 
 final class SummaryError extends SummaryState {

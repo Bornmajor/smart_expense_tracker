@@ -84,6 +84,27 @@ void main() {
       },
     );
 
+    test('upgrading from version 1 adds budgets and keeps the data', () async {
+      final db = openVersion1Database(withExpense: true);
+      addTearDown(db.close);
+
+      // The budgets table did not exist in version 1.
+      expect(await db.select(db.budgets).get(), isEmpty);
+      await db
+          .into(db.budgets)
+          .insert(
+            BudgetsCompanion.insert(
+              scopeId: '*',
+              limitMinor: 100000,
+              updatedAt: DateTime(2026, 11, 20),
+            ),
+          );
+
+      expect(await db.select(db.budgets).get(), hasLength(1));
+      expect(await db.select(db.expenses).get(), hasLength(1));
+      expect(await db.select(db.categories).get(), hasLength(1));
+    });
+
     test('an upgraded database can save a titled expense', () async {
       final db = openVersion1Database();
       addTearDown(db.close);

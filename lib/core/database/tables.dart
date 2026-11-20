@@ -30,3 +30,18 @@ class Expenses extends Table {
   @override
   Set<Column> get primaryKey => {id};
 }
+
+@DataClassName('BudgetRow')
+class Budgets extends Table {
+  /// A category id, or `*` for the overall budget. Added in schema version 3.
+  /// It is not a foreign key, because `*` is not a category; deleting a
+  /// category removes its budget in the same transaction instead.
+  TextColumn get scopeId => text()();
+
+  /// The monthly limit in minor units (cents).
+  IntColumn get limitMinor => integer()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {scopeId};
+}

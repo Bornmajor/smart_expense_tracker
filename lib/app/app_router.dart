@@ -3,6 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/budgets/domain/repositories/budget_repository.dart';
+import '../features/budgets/domain/usecases/remove_budget.dart';
+import '../features/budgets/domain/usecases/set_budget.dart';
+import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/budgets/presentation/pages/budgets_page.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/domain/usecases/create_category.dart';
 import '../features/categories/domain/usecases/delete_category.dart';
@@ -121,8 +126,10 @@ GoRouter createRouter({
               builder: (context, state) => MultiBlocProvider(
                 providers: [
                   BlocProvider(
-                    create: (_) =>
-                        SummaryCubit(context.read<ExpenseRepository>()),
+                    create: (_) => SummaryCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<BudgetRepository>(),
+                    ),
                   ),
                   BlocProvider(
                     create: (_) => ExportCubit(context.read<ExportMonth>()),
@@ -164,6 +171,28 @@ GoRouter createRouter({
             BlocProvider(create: (_) => _categoryActions(categories)),
           ],
           child: const CategoriesPage(),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.budgets,
+      builder: (context, state) {
+        final budgets = context.read<BudgetRepository>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => BudgetsCubit(
+                budgets,
+                setBudget: SetBudget(budgets),
+                removeBudget: RemoveBudget(budgets),
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: const BudgetsPage(),
         );
       },
     ),

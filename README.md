@@ -71,6 +71,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Export a month as a PDF report or a CSV spreadsheet from the Summary screen, shared or saved from the system share sheet. Nothing is uploaded by the app; the file goes only where you send it
 - [x] Choose the currency amounts are shown in (it starts with the currency of the phone's country). Saved amounts are relabelled, not converted
 - [x] Remember the category you use for each vendor, so the next expense or scan starts with it
+- [x] Monthly budgets for each category and overall, with progress bars on the Summary that turn amber near the limit and red when passed
 
 ### Planned
 

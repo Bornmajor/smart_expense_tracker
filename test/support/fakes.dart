@@ -3,6 +3,8 @@ import 'dart:typed_data';
 
 import 'package:smart_expense_tracker/core/links/link_opener.dart';
 import 'package:smart_expense_tracker/core/utils/currency.dart';
+import 'package:smart_expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:smart_expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:smart_expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
@@ -364,5 +366,44 @@ class FakeLinkOpener implements LinkOpener {
   Future<bool> open(Uri uri) async {
     opened.add(uri);
     return succeeds;
+  }
+}
+
+class FakeBudgetRepository implements BudgetRepository {
+  FakeBudgetRepository({List<Budget> initial = const []})
+    : saved = List.of(initial);
+
+  final List<Budget> saved;
+
+  /// When set, `save` throws it.
+  Object? saveError;
+
+  /// When set, `delete` throws it.
+  Object? deleteError;
+
+  final _changes = StreamController<List<Budget>>.broadcast();
+
+  @override
+  Stream<List<Budget>> watchAll() async* {
+    yield List.of(saved);
+    yield* _changes.stream;
+  }
+
+  @override
+  Future<void> save(Budget budget) async {
+    final error = saveError;
+    if (error != null) throw error;
+    saved
+      ..removeWhere((b) => b.scopeId == budget.scopeId)
+      ..add(budget);
+    _changes.add(List.of(saved));
+  }
+
+  @override
+  Future<void> delete(String scopeId) async {
+    final error = deleteError;
+    if (error != null) throw error;
+    saved.removeWhere((b) => b.scopeId == scopeId);
+    _changes.add(List.of(saved));
   }
 }

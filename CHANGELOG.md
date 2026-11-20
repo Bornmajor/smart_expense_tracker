@@ -28,3 +28,4 @@ First release. Nothing has been published to Google Play yet.
 - Choose the currency amounts are shown in, from Settings (it starts with the currency of your country)
 - The category you use for a vendor is remembered, and suggested the next time you scan or type that vendor
 - The app lock works on phones that only have a screen lock, and never leaves you locked out: if the phone can no longer check it's you, the lock screen explains why and offers to turn the lock off
+- Monthly budgets: set a limit for each category and one for everything, and see on the Summary how much of each you have used. The bar turns amber near the limit and red once it is passed

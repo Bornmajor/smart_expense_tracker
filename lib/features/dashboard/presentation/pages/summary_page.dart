@@ -17,6 +17,7 @@ import '../../../export/presentation/widgets/export_sheet.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../cubit/summary_cubit.dart';
 import '../cubit/summary_state.dart';
+import '../widgets/budget_section.dart';
 import '../widgets/category_breakdown_tile.dart';
 import '../widgets/month_switcher.dart';
 import '../widgets/total_card.dart';
@@ -137,6 +138,12 @@ class _SummaryContent extends StatelessWidget {
         TotalCard(
           totalMinor: summary.totalMinor,
           count: summary.count,
+          currency: currency,
+        ),
+        const Gap(AppSpacing.xl),
+        BudgetSection(
+          progress: state.budgets,
+          categoryNames: names,
           currency: currency,
         ),
         const Gap(AppSpacing.xl),
