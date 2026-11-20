@@ -19,6 +19,18 @@ SpendWise IQ is a smart, privacy-first expense tracker. Point your camera at a r
   </tr>
 </table>
 
+### Scanning a receipt
+
+Choose a receipt photo and the vendor, date and total are read on the phone and filled in. A note says what to double-check, and nothing is saved until you press Save.
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/scan-add-sheet.jpg" width="200" alt="Add expense sheet: enter manually or choose a receipt photo"><br><sub>1. Choose how to add</sub></td>
+    <td align="center"><img src="docs/screenshots/scan-review.jpg" width="200" alt="Add expense form filled in from a receipt, with a note to check the amount"><br><sub>2. Check what was read</sub></td>
+    <td align="center"><img src="docs/screenshots/scan-saved.jpg" width="200" alt="The expense saved in the list"><br><sub>3. Saved</sub></td>
+  </tr>
+</table>
+
 Captured on an Android phone with the dark theme. Scanning a receipt photo from the gallery works; taking the photo with the camera is still planned (see [Features](#features)).
 
 ## The problem it solves
