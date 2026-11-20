@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+import 'dart:io' show Directory;
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
@@ -27,7 +28,11 @@ import '../features/export/data/writers/pdf_report_writer.dart';
 import '../features/export/domain/usecases/export_month.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/scan/data/datasources/file_selector_chooser.dart';
+import '../features/scan/data/datasources/pdfx_page_renderer.dart';
+import '../features/scan/data/repositories/file_receipt_photo_source.dart';
 import '../features/scan/data/repositories/image_picker_photo_source.dart';
+import '../features/scan/data/repositories/routing_receipt_photo_source.dart';
 import '../features/scan/data/repositories/ml_kit_receipt_text_reader.dart';
 import '../features/scan/domain/repositories/receipt_photo_source.dart';
 import '../features/scan/domain/repositories/receipt_text_reader.dart';
@@ -172,7 +177,14 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         ),
         // Receipt scanning. Created only when a scan starts.
         RepositoryProvider<ReceiptPhotoSource>(
-          create: (_) => ImagePickerPhotoSource(ImagePicker()),
+          create: (_) => RoutingReceiptPhotoSource(
+            camera: ImagePickerPhotoSource(ImagePicker()),
+            file: FileReceiptPhotoSource(
+              chooser: const FileSelectorChooser(),
+              renderer: const PdfxPageRenderer(),
+              tempDirectory: Directory.systemTemp,
+            ),
+          ),
         ),
         RepositoryProvider<ReceiptTextReader>(
           create: (_) => MlKitReceiptTextReader(),

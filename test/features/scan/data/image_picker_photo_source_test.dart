@@ -88,12 +88,6 @@ void main() {
       expect(picker.source, ImageSource.camera);
     });
 
-    test('opens the gallery for the gallery source', () async {
-      await source.pick(ReceiptSource.gallery);
-
-      expect(picker.source, ImageSource.gallery);
-    });
-
     test('returns the path of the photo', () async {
       picker.path = '/cache/IMG_0042.jpg';
 
@@ -114,7 +108,7 @@ void main() {
     });
 
     test('skips the extra photo-library permission on iOS', () async {
-      await source.pick(ReceiptSource.gallery);
+      await source.pick(ReceiptSource.camera);
 
       expect(picker.requestFullMetadata, isFalse);
     });
@@ -132,7 +126,7 @@ void main() {
     test('a photo permission refusal is a permission problem', () async {
       picker.error = PlatformException(code: 'photo_access_denied');
 
-      final problem = await failureOf(ReceiptSource.gallery);
+      final problem = await failureOf(ReceiptSource.camera);
 
       expect(problem.problem, ScanProblem.permissionDenied);
     });

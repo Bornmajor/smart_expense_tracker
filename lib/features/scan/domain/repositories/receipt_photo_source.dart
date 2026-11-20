@@ -1,9 +1,9 @@
 import '../entities/receipt_source.dart';
 
-/// Gets a receipt photo from the camera or the gallery.
+/// Gets a receipt photo from the camera, or a photo or PDF from a file.
 abstract interface class ReceiptPhotoSource {
   /// The path of the chosen photo, or null when the user backed out.
-  /// Throws `ScanException` if the camera or gallery cannot be used.
+  /// Throws `ScanException` if the camera or the Files app cannot be used.
   Future<String?> pick(ReceiptSource source);
 
   /// A photo that was taken just before Android restarted the app, or null.

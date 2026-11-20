@@ -36,7 +36,7 @@ void main() {
       parse: ParseReceipt(now: () => DateTime(2026, 11, 18)),
     );
 
-    final picked = await scan.pick(ReceiptSource.gallery);
+    final picked = await scan.pick(ReceiptSource.file);
     final result = await scan.read((picked! as Success<String>).value);
     return (result as Success<ScanResult>).value;
   }

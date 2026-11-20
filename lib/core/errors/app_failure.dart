@@ -34,6 +34,13 @@ enum ScanProblem {
 
   /// The photo was taken but its text could not be read.
   unreadable,
+
+  /// The chosen file is not a photo or a PDF.
+  unsupportedFile,
+
+  /// The file could not be opened. A PDF may be protected with a password, or
+  /// damaged.
+  cannotOpenFile,
 }
 
 /// Taking or reading a receipt photo failed.

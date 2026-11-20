@@ -20,8 +20,8 @@ class AppShell extends StatelessWidget {
     switch (choice) {
       case AddExpenseChoice.manual:
         context.push(AppRoutes.addExpense);
-      case AddExpenseChoice.scanGallery:
-        context.push(AppRoutes.scan, extra: ReceiptSource.gallery);
+      case AddExpenseChoice.scanFile:
+        context.push(AppRoutes.scan, extra: ReceiptSource.file);
       case AddExpenseChoice.scanCamera:
         context.push(AppRoutes.scan, extra: ReceiptSource.camera);
     }

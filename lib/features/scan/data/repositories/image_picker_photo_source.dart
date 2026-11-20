@@ -8,11 +8,11 @@ import '../../domain/entities/receipt_source.dart';
 import '../../domain/repositories/receipt_photo_source.dart';
 import '../../domain/scan_exception.dart';
 
-/// Takes a receipt photo with the system camera, or picks one from the
-/// gallery, using `image_picker`.
+/// Takes a receipt photo with the system camera, using `image_picker`.
 ///
 /// The system camera app does the capturing, so this app never asks for the
-/// camera permission itself. Gallery picks need no permission either.
+/// camera permission itself. Choosing an existing file is done by
+/// `FileReceiptPhotoSource`.
 class ImagePickerPhotoSource implements ReceiptPhotoSource {
   /// [supportsRecovery] is only for tests. Recovering a lost photo exists on
   /// Android alone, and it is the default there.
@@ -29,10 +29,12 @@ class ImagePickerPhotoSource implements ReceiptPhotoSource {
   @override
   Future<String?> pick(ReceiptSource source) async {
     try {
+      assert(
+        source == ReceiptSource.camera,
+        'This source only uses the camera',
+      );
       final file = await _picker.pickImage(
-        source: source == ReceiptSource.camera
-            ? ImageSource.camera
-            : ImageSource.gallery,
+        source: ImageSource.camera,
         maxWidth: _maxWidth,
         imageQuality: _quality,
         // Skips the extra photo-library permission on iOS.

@@ -54,7 +54,7 @@ void main() {
   Future<void> chooseReceiptPhoto(WidgetTester tester) async {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    await tapText(tester, 'Choose a receipt photo');
+    await tapText(tester, 'Choose a receipt file');
   }
 
   /// The receipt photo in the review panel (the part that can be tapped).
@@ -285,7 +285,7 @@ void main() {
       photos.pickError = null;
       await tapText(tester, 'Try again');
 
-      expect(photos.picked, [ReceiptSource.gallery, ReceiptSource.gallery]);
+      expect(photos.picked, [ReceiptSource.file, ReceiptSource.file]);
       expect(find.text('Add expense'), findsOneWidget);
     });
 

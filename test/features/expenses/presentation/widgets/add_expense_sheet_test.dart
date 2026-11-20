@@ -40,7 +40,7 @@ void main() {
       await openSheet(tester, cameraEnabled: false);
 
       final manual = tester.getTopLeft(find.text('Enter manually')).dy;
-      final photo = tester.getTopLeft(find.text('Choose a receipt photo')).dy;
+      final photo = tester.getTopLeft(find.text('Choose a receipt file')).dy;
       expect(manual, lessThan(photo));
     });
 
@@ -53,7 +53,7 @@ void main() {
     testWidgets('show the camera last when it is switched on', (tester) async {
       await openSheet(tester, cameraEnabled: true);
 
-      final photo = tester.getTopLeft(find.text('Choose a receipt photo')).dy;
+      final photo = tester.getTopLeft(find.text('Choose a receipt file')).dy;
       final camera = tester
           .getTopLeft(find.text('Take a photo of a receipt'))
           .dy;
@@ -109,10 +109,10 @@ void main() {
     testWidgets('a receipt photo from the gallery', (tester) async {
       await openSheet(tester, cameraEnabled: true);
 
-      await tester.tap(find.text('Choose a receipt photo'));
+      await tester.tap(find.text('Choose a receipt file'));
       await tester.pumpAndSettle();
 
-      expect(chosen, AddExpenseChoice.scanGallery);
+      expect(chosen, AddExpenseChoice.scanFile);
     });
 
     testWidgets('a photo from the camera', (tester) async {

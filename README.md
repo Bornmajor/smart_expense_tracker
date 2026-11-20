@@ -27,7 +27,7 @@ The APK is signed with a different key than the one Google Play uses, so a copy 
 
 ### Scanning a receipt
 
-Choose a receipt photo and the vendor, date and total are read on the phone and filled in. A note says what to double-check, and nothing is saved until you press Save.
+Choose a receipt photo or PDF and the vendor, date and total are read on the phone and filled in. A note says what to double-check, and nothing is saved until you press Save.
 
 <table>
   <tr>
@@ -38,7 +38,7 @@ Choose a receipt photo and the vendor, date and total are read on the phone and 
   </tr>
 </table>
 
-Captured on an Android phone with the dark theme. Scanning a receipt photo from the gallery works; taking the photo with the camera is still planned (see [Features](#features)).
+Captured on an Android phone with the dark theme. Scanning a receipt photo or PDF chosen from the Files app works; taking the photo with the camera is still planned (see [Features](#features)).
 
 ## The problem it solves
 
@@ -77,7 +77,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 ### Planned
 
 **MVP: scan, track, export**
-- [ ] Scan a receipt with the camera (choosing a photo from the gallery works today; see the [roadmap](docs/roadmap.md))
+- [ ] Scan a receipt with the camera (choosing a photo or PDF from the Files app works today; see the [roadmap](docs/roadmap.md))
 
 **After the MVP** (see the [roadmap](docs/roadmap.md) for the build order)
 - [ ] Prompt sheet that introduces features and pending tasks, with "Remind me later" and "Not interested"
@@ -102,6 +102,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 | On-device OCR | `google_mlkit_text_recognition` (ML Kit) | Planned |
 | Charts | `fl_chart` (if a chart is added) | Planned |
 | Export | `pdf`, `share_plus` (CSV is written by hand) | In use |
+| Receipt files | `file_selector` (Files app), `pdfx` (draws a PDF page) | In use |
 
 ## Architecture
 
