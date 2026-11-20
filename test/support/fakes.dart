@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:smart_expense_tracker/core/links/link_opener.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
 import 'package:smart_expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
@@ -245,15 +246,25 @@ class ErrorCategoryRepository implements CategoryRepository {
 }
 
 class FakeSettingsRepository implements SettingsRepository {
-  FakeSettingsRepository({this.mode = AppThemeMode.system});
+  FakeSettingsRepository({
+    this.mode = AppThemeMode.system,
+    this.selectedCurrency = Currency.none,
+  });
 
   AppThemeMode mode;
+  Currency selectedCurrency;
 
   @override
   AppThemeMode get themeMode => mode;
 
   @override
   Future<void> setThemeMode(AppThemeMode value) async => mode = value;
+
+  @override
+  Currency get currency => selectedCurrency;
+
+  @override
+  Future<void> setCurrency(Currency value) async => selectedCurrency = value;
 }
 
 class FakeSecurityRepository implements SecurityRepository {

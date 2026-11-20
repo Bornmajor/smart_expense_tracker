@@ -36,6 +36,9 @@ List<String> scanReviewNotes(ScanResult scan) {
     if (draft.date == null)
       'We couldn\'t read the date, so today\'s date is filled in.',
     if (scan.suggestedCategoryId != null)
-      'We suggested a category. Change it if it\'s wrong.',
+      scan.categoryFromHistory
+          ? 'We chose the category you used for this vendor before. '
+                'Change it if it\'s wrong.'
+          : 'We suggested a category. Change it if it\'s wrong.',
   ];
 }

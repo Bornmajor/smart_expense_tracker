@@ -1,17 +1,22 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
 import 'package:smart_expense_tracker/features/export/data/writers/csv_report_writer.dart';
 import 'package:smart_expense_tracker/features/export/domain/entities/monthly_report.dart';
 
 void main() {
   const writer = CsvReportWriter();
 
-  MonthlyReport reportOf(List<ReportRow> rows) => MonthlyReport(
+  MonthlyReport reportOf(
+    List<ReportRow> rows, {
+    Currency currency = Currency.none,
+  }) => MonthlyReport(
     month: DateTime(2026, 11),
     rows: rows,
     categories: const [],
     totalMinor: rows.fold(0, (sum, r) => sum + r.amountMinor),
+    currency: currency,
   );
 
   ReportRow row({
@@ -38,7 +43,7 @@ void main() {
   test('starts with the column names', () async {
     final lines = await linesOf(reportOf([row()]));
 
-    expect(lines.first, 'Date,Title,Vendor,Category,Amount');
+    expect(lines.first, 'Date,Title,Vendor,Category,Amount,Currency');
   });
 
   test(
@@ -57,17 +62,41 @@ void main() {
       );
 
       expect(lines, [
-        'Date,Title,Vendor,Category,Amount',
-        '2026-11-05,Lunch,Cafe,Food,12.50',
-        '2026-11-20,,Bus,Transport,1234.56',
+        'Date,Title,Vendor,Category,Amount,Currency',
+        '2026-11-05,Lunch,Cafe,Food,12.50,',
+        '2026-11-20,,Bus,Transport,1234.56,',
       ]);
     },
   );
 
+  test('puts the currency code on every line', () async {
+    final lines = await linesOf(
+      reportOf([row(), row(vendor: 'Bus')], currency: Currency.kes),
+    );
+
+    expect(lines[1], endsWith(',12.50,KES'));
+    expect(lines[2], endsWith(',12.50,KES'));
+  });
+
+  test('leaves the currency cell empty when there is no currency', () async {
+    final lines = await linesOf(reportOf([row()]));
+
+    expect(lines[1], endsWith(',12.50,'));
+  });
+
+  test('keeps the amount a plain number, whatever the currency', () async {
+    final lines = await linesOf(
+      reportOf([row(amountMinor: 123456)], currency: Currency.usd),
+    );
+
+    expect(lines[1], contains(',1234.56,'));
+    expect(lines[1], isNot(contains(r"$")));
+  });
+
   test('an empty month still has the header line', () async {
     final lines = await linesOf(reportOf(const []));
 
-    expect(lines, ['Date,Title,Vendor,Category,Amount']);
+    expect(lines, ['Date,Title,Vendor,Category,Amount,Currency']);
   });
 
   test('is named for the month and typed as CSV', () async {
@@ -127,7 +156,7 @@ void main() {
     test('a vendor with a comma stays in one column', () async {
       final lines = await linesOf(reportOf([row(vendor: 'A, B')]));
 
-      expect(lines[1], '2026-11-05,,"A, B",Food,12.50');
+      expect(lines[1], '2026-11-05,,"A, B",Food,12.50,');
     });
   });
 }

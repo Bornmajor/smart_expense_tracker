@@ -17,6 +17,7 @@ import '../features/expenses/domain/entities/expense.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
 import '../features/expenses/domain/usecases/update_expense.dart';
+import '../features/expenses/domain/usecases/vendor_category_memory.dart';
 import '../features/expenses/presentation/cubit/expense_form_cubit.dart';
 import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
 import '../features/expenses/presentation/pages/expense_form_page.dart';
@@ -177,6 +178,7 @@ GoRouter createRouter({
             photos: context.read<ReceiptPhotoSource>(),
             reader: context.read<ReceiptTextReader>(),
             categories: context.read<CategoryRepository>(),
+            memory: context.read<VendorCategoryMemory>(),
           ),
         ),
         child: ScanPage(source: state.extra! as ReceiptSource),

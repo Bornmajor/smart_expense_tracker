@@ -25,3 +25,5 @@ First release. Nothing has been published to Google Play yet.
 - Everything is stored on the phone and works offline, with no account
 - A downloadable APK on the GitHub Releases page, for installing without Google Play
 - A Privacy policy link under Settings, About
+- Choose the currency amounts are shown in, from Settings (it starts with the currency of your country)
+- The category you use for a vendor is remembered, and suggested the next time you scan or type that vendor

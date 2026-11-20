@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/result.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_x.dart';
+import '../../../../core/utils/currency.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../../categories/domain/entities/category.dart';
@@ -13,7 +15,9 @@ import '../../../categories/presentation/cubit/category_actions_cubit.dart';
 import '../../../categories/presentation/widgets/category_name_sheet.dart';
 import '../../../scan/domain/entities/scan_result.dart';
 import '../../../scan/presentation/widgets/scan_review_panel.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/expense.dart';
+import '../../domain/usecases/vendor_category_memory.dart';
 import '../../domain/validation/expense_rules.dart';
 import '../../domain/validation/expense_validation.dart';
 import '../cubit/expense_form_cubit.dart';
@@ -51,6 +55,15 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   late final TextEditingController _amount;
   late DateTime _date;
   late String? _categoryId;
+  final _vendorFocus = FocusNode();
+
+  /// True while the category was filled in from the user's earlier expenses
+  /// at this vendor, and not chosen by them. Only then may a new vendor
+  /// replace it; a category the user picked is never changed behind their back.
+  bool _categoryIsAuto = false;
+
+  /// Says why the category was filled in. Gone once the user picks one.
+  String? _categoryHint;
 
   bool get _isEditing => widget.original != null;
 
@@ -79,16 +92,51 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     );
     _date = original?.date ?? draft?.date ?? DateTime.now();
     _categoryId = original?.categoryId ?? scan?.suggestedCategoryId;
+    // A suggestion from the scan can be replaced if the user fixes the vendor.
+    _categoryIsAuto = scan?.suggestedCategoryId != null;
+    if (!_isEditing) _vendorFocus.addListener(_onVendorFocusChanged);
   }
 
   @override
   void dispose() {
     final scan = widget.scan;
     if (scan != null) widget.discardPhoto?.call(scan.photoPath);
+    _vendorFocus.dispose();
     _title.dispose();
     _vendor.dispose();
     _amount.dispose();
     super.dispose();
+  }
+
+  /// When the user leaves the vendor field, picks the category they gave this
+  /// vendor before. It never replaces a category the user chose themselves.
+  void _onVendorFocusChanged() {
+    if (!_vendorFocus.hasFocus) _suggestCategory();
+  }
+
+  Future<void> _suggestCategory() async {
+    if (_categoryId != null && !_categoryIsAuto) return;
+
+    final vendor = _vendor.text.trim();
+    final id = await context.read<VendorCategoryMemory>().categoryFor(vendor);
+
+    // The user may have picked a category, or left, while this was running.
+    if (!mounted || id == null || id == _categoryId) return;
+    if (_categoryId != null && !_categoryIsAuto) return;
+
+    setState(() {
+      _categoryId = id;
+      _categoryIsAuto = true;
+      _categoryHint = 'Chosen from your earlier expenses at $vendor.';
+    });
+  }
+
+  void _selectCategory(String id) {
+    setState(() {
+      _categoryId = id;
+      _categoryIsAuto = false;
+      _categoryHint = null;
+    });
   }
 
   void _submit() {
@@ -127,9 +175,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     );
 
     final category = chosen;
-    if (category != null && mounted) {
-      setState(() => _categoryId = category.id);
-    }
+    if (category != null && mounted) _selectCategory(category.id);
   }
 
   Future<void> _confirmDelete() async {
@@ -186,6 +232,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       listener: _onStateChanged,
       builder: (context, state) {
         final saving = state.status == ExpenseFormStatus.saving;
+        final currency = context.select<SettingsCubit, Currency>(
+          (cubit) => cubit.state.currency,
+        );
         return Scaffold(
           appBar: AppBar(
             title: Text(_isEditing ? 'Edit expense' : 'Add expense'),
@@ -234,6 +283,8 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       const Gap(AppSpacing.md),
                       TextField(
                         controller: _vendor,
+                        focusNode: _vendorFocus,
+                        textInputAction: TextInputAction.next,
                         textCapitalization: TextCapitalization.words,
                         decoration: const InputDecoration(
                           labelText: 'Vendor (optional)',
@@ -249,7 +300,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                         ],
                         decoration: InputDecoration(
-                          labelText: 'Amount',
+                          labelText: currency.code.isEmpty
+                              ? 'Amount'
+                              : 'Amount (${currency.code})',
                           errorText: _error(state, ExpenseField.amount),
                         ),
                       ),
@@ -263,9 +316,13 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       CategoryPicker(
                         selectedId: _categoryId,
                         errorText: _error(state, ExpenseField.category),
-                        onSelected: (id) => setState(() => _categoryId = id),
+                        onSelected: _selectCategory,
                         onAdd: _addCategory,
                       ),
+                      if (_categoryHint != null) ...[
+                        const Gap(AppSpacing.sm),
+                        Text(_categoryHint!, style: context.text.bodySmall),
+                      ],
                     ],
                   ),
                 ),

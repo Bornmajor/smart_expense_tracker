@@ -10,12 +10,19 @@ import '../../domain/entities/report_file.dart';
 import '../../domain/repositories/report_writer.dart';
 
 /// One expense per row, for opening in a spreadsheet: Date, Title, Vendor,
-/// Category, Amount. Dates are year-month-day and amounts are plain numbers
+/// Category, Amount, Currency. Dates are year-month-day and amounts are plain numbers
 /// such as 1234.50, so a spreadsheet can sort and add them up.
 class CsvReportWriter implements ReportWriter {
   const CsvReportWriter();
 
-  static const header = ['Date', 'Title', 'Vendor', 'Category', 'Amount'];
+  static const header = [
+    'Date',
+    'Title',
+    'Vendor',
+    'Category',
+    'Amount',
+    'Currency',
+  ];
 
   @override
   Future<ReportFile> write(MonthlyReport report) async {
@@ -29,6 +36,7 @@ class CsvReportWriter implements ReportWriter {
           row.vendor,
           row.categoryName,
           Money.toInputText(row.amountMinor),
+          report.currency.code,
         ],
     ];
 

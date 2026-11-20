@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../../../core/utils/currency.dart';
+
 /// One expense as it appears in a report, with the category's name already
 /// looked up.
 class ReportRow extends Equatable {
@@ -49,6 +51,7 @@ class MonthlyReport extends Equatable {
     required this.rows,
     required this.categories,
     required this.totalMinor,
+    required this.currency,
   });
 
   /// First day of the month.
@@ -61,6 +64,10 @@ class MonthlyReport extends Equatable {
   final List<ReportCategory> categories;
   final int totalMinor;
 
+  /// How the amounts are written. Only the report's text uses it; the amounts
+  /// themselves are plain numbers.
+  final Currency currency;
+
   /// Name for the exported file, such as "spendwise-iq-2026-11.pdf".
   String fileName(String extension) {
     final mm = month.month.toString().padLeft(2, '0');
@@ -68,5 +75,5 @@ class MonthlyReport extends Equatable {
   }
 
   @override
-  List<Object?> get props => [month, rows, categories, totalMinor];
+  List<Object?> get props => [month, rows, categories, totalMinor, currency];
 }

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
-import '../../../../core/utils/money.dart';
+import '../../../../core/utils/currency.dart';
+import '../../../../shared/widgets/amount_row.dart';
 
 /// One category row: name, amount, and a bar showing its share of the month.
 class CategoryBreakdownTile extends StatelessWidget {
@@ -11,6 +12,7 @@ class CategoryBreakdownTile extends StatelessWidget {
     required this.name,
     required this.totalMinor,
     required this.share,
+    required this.currency,
   });
 
   final String name;
@@ -18,6 +20,7 @@ class CategoryBreakdownTile extends StatelessWidget {
 
   /// Fraction of the month's total, from 0 to 1.
   final double share;
+  final Currency currency;
 
   @override
   Widget build(BuildContext context) {
@@ -27,11 +30,10 @@ class CategoryBreakdownTile extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(child: Text(name, style: context.text.titleMedium)),
-                Text(Money.format(totalMinor), style: context.text.titleMedium),
-              ],
+            AmountRow(
+              leading: Text(name, style: context.text.titleMedium),
+              amount: currency.format(totalMinor),
+              amountStyle: context.text.titleMedium,
             ),
             const Gap(AppSpacing.md),
             Row(

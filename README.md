@@ -69,6 +69,8 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Optional fingerprint / face lock, turned on from Settings
 - [x] Scan a receipt: choose a photo and the app reads the vendor, date and total on your phone, suggests a category, and fills the expense form for you to check before saving. The photo is temporary and is deleted afterwards
 - [x] Export a month as a PDF report or a CSV spreadsheet from the Summary screen, shared or saved from the system share sheet. Nothing is uploaded by the app; the file goes only where you send it
+- [x] Choose the currency amounts are shown in (it starts with the currency of the phone's country). Saved amounts are relabelled, not converted
+- [x] Remember the category you use for each vendor, so the next expense or scan starts with it
 
 ### Planned
 
