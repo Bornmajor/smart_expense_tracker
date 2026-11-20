@@ -3,6 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/budgets/domain/repositories/budget_repository.dart';
+import '../features/budgets/domain/usecases/remove_budget.dart';
+import '../features/budgets/domain/usecases/set_budget.dart';
+import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/budgets/presentation/pages/budgets_page.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/domain/usecases/create_category.dart';
 import '../features/categories/domain/usecases/delete_category.dart';
@@ -17,6 +22,7 @@ import '../features/expenses/domain/entities/expense.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
 import '../features/expenses/domain/usecases/update_expense.dart';
+import '../features/expenses/domain/usecases/vendor_category_memory.dart';
 import '../features/expenses/presentation/cubit/expense_form_cubit.dart';
 import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
 import '../features/expenses/presentation/pages/expense_form_page.dart';
@@ -120,8 +126,10 @@ GoRouter createRouter({
               builder: (context, state) => MultiBlocProvider(
                 providers: [
                   BlocProvider(
-                    create: (_) =>
-                        SummaryCubit(context.read<ExpenseRepository>()),
+                    create: (_) => SummaryCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<BudgetRepository>(),
+                    ),
                   ),
                   BlocProvider(
                     create: (_) => ExportCubit(context.read<ExportMonth>()),
@@ -167,6 +175,28 @@ GoRouter createRouter({
       },
     ),
     GoRoute(
+      path: AppRoutes.budgets,
+      builder: (context, state) {
+        final budgets = context.read<BudgetRepository>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => BudgetsCubit(
+                budgets,
+                setBudget: SetBudget(budgets),
+                removeBudget: RemoveBudget(budgets),
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: const BudgetsPage(),
+        );
+      },
+    ),
+    GoRoute(
       path: AppRoutes.scan,
       // The photo source arrives as `extra`; without it there is nothing to do.
       redirect: (context, state) =>
@@ -177,6 +207,7 @@ GoRouter createRouter({
             photos: context.read<ReceiptPhotoSource>(),
             reader: context.read<ReceiptTextReader>(),
             categories: context.read<CategoryRepository>(),
+            memory: context.read<VendorCategoryMemory>(),
           ),
         ),
         child: ScanPage(source: state.extra! as ReceiptSource),

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/usecases/vendor_category_memory.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
 import 'package:smart_expense_tracker/core/errors/result.dart';
 import 'package:smart_expense_tracker/core/errors/storage_exception.dart';
@@ -45,6 +46,7 @@ void main() {
     photos: photos,
     reader: reader,
     categories: categories,
+    memory: VendorCategoryMemory(FakeExpenseRepository()),
     // A fixed "today", so the test does not depend on the real date.
     parse: ParseReceipt(now: () => DateTime(2026, 11, 18)),
   );

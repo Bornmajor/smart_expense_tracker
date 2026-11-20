@@ -6,7 +6,7 @@ What is planned, in the order we intend to build it. Items move to the README fe
 
 1. **Release setup and early testers** (code done, your setup remains). The `dev`, `uat` and `main` flow is built: `uat` sends a build to Play internal testing and `main` sends one to production after approval (see [branching](branching.md) and [releasing](releasing.md)). Still needed: the GitHub secrets, a first internal release, and a **closed test with testers started early**, because new personal accounts have needed 12 testers for 14 days before production.
 2. **Scan a receipt with the camera** (the gallery route is done). The camera path, its "Use this photo / Retake" preview and the recovery of a photo lost to an app restart are built and tested, but switched off (`ScanFeatures.cameraEnabled` in `lib/features/scan/scan_features.dart`). On the Infinix X6528 test phone (3.8 GB RAM, swap nearly full) Android kills the app about two seconds after the system camera opens, which looks like a crash; the photo is recovered, but the restart is rough. Before turning it on: test a release build, read the kill reason from `adb logcat` right after a kill (the low-memory killer naming the app, or a vendor cleaner), and choose between keeping the system camera, an in-app camera (`camera` package) or Google's ML Kit document scanner. Recovery also needs wiring at app start, after the biometric unlock, so a recovered photo opens straight on the preview.
-**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, and adding a category from the expense form, scanning a receipt photo from the gallery, and exporting a month as a PDF or CSV from the Summary screen.
+**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, and adding a category from the expense form, scanning a receipt photo from the gallery, and exporting a month as a PDF or CSV from the Summary screen., choosing a currency, remembering the category for each vendor, and monthly budgets with progress on the Summary.
 
 **Still to look at for export:** the PDF embeds the Inter font (`assets/fonts`), which covers Latin, Greek and Cyrillic. A vendor name in another script (Chinese, Arabic, and so on) would show as blank boxes in the PDF; the CSV is fine. Try the share sheet on a real phone before the first release. The privacy policy needs one line saying a report leaves the app only when the user shares it.
 
@@ -18,6 +18,21 @@ What is planned, in the order we intend to build it. Items move to the README fe
 - Keep the policy, the Data safety form and the real behavior in step whenever something changes (for example when report export ships).
 
 **Before the first public release:** remove the temporary OCR test screen (`lib/features/scan/debug/`, its route in `app_router.dart` and the Developer entry in Settings). On iOS, ML Kit needs two manual Xcode steps (linker flags and the Latin model bundle) that are not done yet; see the plugin's README.
+
+## TODO: app PIN (brainstormed, not built)
+
+An optional PIN of the app's own, besides the biometric and phone-screen-lock check that exists now. The main reason: on a shared phone, family may know the phone's PIN, and a separate app PIN keeps spending private from them. It also helps phones with no screen lock.
+
+**Decided so far**
+- Settings, Security gets "App lock" with three modes: Off, Phone lock (fingerprint, face or phone screen lock, as today), and App PIN with an optional fingerprint shortcut.
+- 4 to 6 digits, entered twice to set. The PIN is never stored: only a salted slow hash, in Android's secure storage (`flutter_secure_storage`).
+- After 5 wrong tries the lock waits 30 seconds, then longer each time, and the wait survives closing the app. Nothing erases automatically, because that risks losing data.
+- Forgot the PIN: there is no account to recover through. Reset it by confirming with the phone's own screen lock, and only if there is none, offer erase and start over with a clear warning. Backup and restore to a file (see Later) softens that case.
+- The PIN hashing and the attempt limit are plain Dart and the best things to test. One reusable PIN pad widget.
+
+**Still to decide:** PIN length (4 to 6, or fixed at 6), whether the fingerprint shortcut is offered, whether to add "hide in recent apps", and an auto-lock delay setting (the app locks after 30 seconds away today).
+
+**Honest limits:** the PIN is a gate on the screen, not encryption. The database stays unencrypted, and a short PIN could be guessed offline by someone who extracts the hash. It stops casual snooping, not forensics. Encrypting the database from the PIN is possible later but is a much bigger job.
 
 ## Planned: prompt sheet
 
@@ -51,11 +66,11 @@ A bottom sheet that tells the user about a feature they have not tried, or a tas
 
 ## Later
 
-- Budgets with progress and alerts.
+- **Decided next, in this order:** recurring expenses and subscriptions (added when the app opens, no background service); insights written in plain Dart (month against last month, biggest change, budget pace, subscription cost, unusual expenses), with a plain-text wording layer so a language model can be added later on phones that support it; then backup and restore to a file.
 - Search and filters.
 - More charts.
-- Recurring expenses.
-- Multi-currency.
+
+- A different currency on each expense (today one currency is used for all amounts).
 - Optional receipt attachment.
 - Use the bundled Inter font in the app itself (the files are already in assets/fonts for the PDF; set `AppTypography.fontFamily` and declare them under `fonts:` in pubspec.yaml).
 - Change the iOS bundle id from `com.example.smartExpenseTracker` when iOS work starts.

@@ -66,9 +66,12 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Add a category from the expense form with the New chip, without losing what you typed
 - [x] Monthly summary: total and spending by category, with a month switcher
 - [x] Settings: theme (system, light, dark) and About
-- [x] Optional fingerprint / face lock, turned on from Settings
+- [x] Optional app lock with fingerprint, face or the phone's screen lock, turned on from Settings. If the phone can no longer check you, the lock screen offers to turn the lock off, so you are never locked out of your own data
 - [x] Scan a receipt: choose a photo and the app reads the vendor, date and total on your phone, suggests a category, and fills the expense form for you to check before saving. The photo is temporary and is deleted afterwards
 - [x] Export a month as a PDF report or a CSV spreadsheet from the Summary screen, shared or saved from the system share sheet. Nothing is uploaded by the app; the file goes only where you send it
+- [x] Choose the currency amounts are shown in (it starts with the currency of the phone's country). Saved amounts are relabelled, not converted
+- [x] Remember the category you use for each vendor, so the next expense or scan starts with it
+- [x] Monthly budgets for each category and overall, with progress bars on the Summary that turn amber near the limit and red when passed
 
 ### Planned
 

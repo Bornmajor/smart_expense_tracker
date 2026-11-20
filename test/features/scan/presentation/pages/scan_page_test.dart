@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/usecases/vendor_category_memory.dart';
 import 'package:go_router/go_router.dart';
 import 'package:smart_expense_tracker/app/app_routes.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
@@ -31,6 +32,7 @@ void main() {
         photos: photos,
         reader: reader,
         categories: FakeCategoryRepository(),
+        memory: VendorCategoryMemory(FakeExpenseRepository()),
       ),
     );
 

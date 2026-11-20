@@ -84,6 +84,11 @@ class CategoryRepositoryImpl implements CategoryRepository {
                 updatedAt: Value(_now()),
               ),
             );
+        // The category's budget goes with it, or it would be left measuring a
+        // category that no longer exists.
+        await (_db.delete(
+          _db.budgets,
+        )..where((b) => b.scopeId.equals(id))).go();
         await (_db.delete(_db.categories)..where((c) => c.id.equals(id))).go();
         return moved;
       });

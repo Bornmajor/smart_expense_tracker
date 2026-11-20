@@ -122,7 +122,7 @@ class PdfReportWriter implements ReportWriter {
           ),
           pw.SizedBox(height: 4),
           pw.Text(
-            Money.format(report.totalMinor),
+            report.currency.formatWithCode(report.totalMinor),
             style: pw.TextStyle(font: bold, fontSize: 26, color: _ink),
           ),
           pw.SizedBox(height: 2),
@@ -138,7 +138,7 @@ class PdfReportWriter implements ReportWriter {
   pw.Widget _categoryTable(MonthlyReport report, pw.Font bold) {
     return _table(
       bold: bold,
-      headers: const ['Category', 'Share', 'Amount'],
+      headers: ['Category', 'Share', _amountHeader(report)],
       rows: [
         for (final c in report.categories)
           [c.name, '${(c.share * 100).round()}%', Money.format(c.totalMinor)],
@@ -153,7 +153,7 @@ class PdfReportWriter implements ReportWriter {
     final dateFormat = DateFormat.yMMMd();
     return _table(
       bold: bold,
-      headers: const ['Date', 'Description', 'Category', 'Amount'],
+      headers: ['Date', 'Description', 'Category', _amountHeader(report)],
       rows: [
         for (final row in report.rows)
           [
@@ -167,6 +167,12 @@ class PdfReportWriter implements ReportWriter {
       rightAligned: const {3},
     );
   }
+
+  /// "Amount (KES)": the code, not the symbol, because a PDF reader may lack
+  /// the symbol's glyph.
+  String _amountHeader(MonthlyReport report) => report.currency.code.isEmpty
+      ? 'Amount'
+      : 'Amount (${report.currency.code})';
 
   /// The title when there is one, with the vendor after it.
   String _description(ReportRow row) {

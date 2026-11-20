@@ -6,10 +6,12 @@ import '../../../../app/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/utils/color_contrast.dart';
+import '../../../../core/utils/currency.dart';
 import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../categories/presentation/cubit/categories_cubit.dart';
 import '../../../categories/presentation/cubit/categories_state.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_day_group.dart';
 import '../cubit/expense_list_cubit.dart';
@@ -82,6 +84,9 @@ class _ExpenseList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
+    final currency = context.select<SettingsCubit, Currency>(
+      (cubit) => cubit.state.currency,
+    );
     final categoryNames = context.select<CategoriesCubit, Map<String, String>>(
       (cubit) => switch (cubit.state) {
         CategoriesLoaded(:final categories) => {
@@ -104,7 +109,7 @@ class _ExpenseList extends StatelessWidget {
         if (item is ExpenseDayGroup) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: DayHeader(group: item, now: now),
+            child: DayHeader(group: item, now: now, currency: currency),
           );
         }
 
@@ -116,6 +121,7 @@ class _ExpenseList extends StatelessWidget {
             onDelete: () => onDelete(expense),
             child: ExpenseTile(
               expense: expense,
+              currency: currency,
               categoryName: categoryNames[expense.categoryId],
               onTap: () => context.push(AppRoutes.editExpense, extra: expense),
             ),

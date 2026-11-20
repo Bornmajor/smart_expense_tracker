@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:smart_expense_tracker/core/links/link_opener.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
+import 'package:smart_expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:smart_expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:smart_expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
@@ -16,6 +19,7 @@ import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_sour
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_photo_source.dart';
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_text_reader.dart';
 import 'package:smart_expense_tracker/features/scan/domain/scan_exception.dart';
+import 'package:smart_expense_tracker/features/security/domain/entities/auth_outcome.dart';
 import 'package:smart_expense_tracker/features/security/domain/repositories/biometric_authenticator.dart';
 import 'package:smart_expense_tracker/features/security/domain/repositories/security_repository.dart';
 import 'package:smart_expense_tracker/features/settings/domain/entities/app_theme_mode.dart';
@@ -245,15 +249,25 @@ class ErrorCategoryRepository implements CategoryRepository {
 }
 
 class FakeSettingsRepository implements SettingsRepository {
-  FakeSettingsRepository({this.mode = AppThemeMode.system});
+  FakeSettingsRepository({
+    this.mode = AppThemeMode.system,
+    this.selectedCurrency = Currency.none,
+  });
 
   AppThemeMode mode;
+  Currency selectedCurrency;
 
   @override
   AppThemeMode get themeMode => mode;
 
   @override
   Future<void> setThemeMode(AppThemeMode value) async => mode = value;
+
+  @override
+  Currency get currency => selectedCurrency;
+
+  @override
+  Future<void> setCurrency(Currency value) async => selectedCurrency = value;
 }
 
 class FakeSecurityRepository implements SecurityRepository {
@@ -273,15 +287,19 @@ class FakeBiometricAuthenticator implements BiometricAuthenticator {
 
   bool available;
   bool succeeds;
+
+  /// When set, `authenticate` ends this way, whatever [succeeds] says. Use it
+  /// for the cases other than a plain pass or fail.
+  AuthOutcome? outcome;
   int authenticateCalls = 0;
 
   @override
   Future<bool> isAvailable() async => available;
 
   @override
-  Future<bool> authenticate({required String reason}) async {
+  Future<AuthOutcome> authenticate({required String reason}) async {
     authenticateCalls++;
-    return succeeds;
+    return outcome ?? (succeeds ? AuthOutcome.success : AuthOutcome.failed);
   }
 }
 
@@ -348,5 +366,44 @@ class FakeLinkOpener implements LinkOpener {
   Future<bool> open(Uri uri) async {
     opened.add(uri);
     return succeeds;
+  }
+}
+
+class FakeBudgetRepository implements BudgetRepository {
+  FakeBudgetRepository({List<Budget> initial = const []})
+    : saved = List.of(initial);
+
+  final List<Budget> saved;
+
+  /// When set, `save` throws it.
+  Object? saveError;
+
+  /// When set, `delete` throws it.
+  Object? deleteError;
+
+  final _changes = StreamController<List<Budget>>.broadcast();
+
+  @override
+  Stream<List<Budget>> watchAll() async* {
+    yield List.of(saved);
+    yield* _changes.stream;
+  }
+
+  @override
+  Future<void> save(Budget budget) async {
+    final error = saveError;
+    if (error != null) throw error;
+    saved
+      ..removeWhere((b) => b.scopeId == budget.scopeId)
+      ..add(budget);
+    _changes.add(List.of(saved));
+  }
+
+  @override
+  Future<void> delete(String scopeId) async {
+    final error = deleteError;
+    if (error != null) throw error;
+    saved.removeWhere((b) => b.scopeId == scopeId);
+    _changes.add(List.of(saved));
   }
 }

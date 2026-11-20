@@ -10,6 +10,7 @@ import '../../../../shared/widgets/section_header.dart';
 import '../cubit/settings_cubit.dart';
 import '../cubit/settings_state.dart';
 import '../widgets/biometric_switch_tile.dart';
+import '../widgets/currency_tile.dart';
 import '../widgets/privacy_policy_tile.dart';
 import '../widgets/theme_mode_selector.dart';
 
@@ -41,12 +42,26 @@ class SettingsPage extends StatelessWidget {
           const Gap(AppSpacing.xl),
           const SectionHeader('Spending'),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.category_outlined),
-              title: const Text('Categories'),
-              subtitle: const Text('Add, rename or delete categories'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(AppRoutes.categories),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.category_outlined),
+                  title: const Text('Categories'),
+                  subtitle: const Text('Add, rename or delete categories'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.categories),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.savings_outlined),
+                  title: const Text('Budgets'),
+                  subtitle: const Text('Set monthly spending limits'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.budgets),
+                ),
+                const Divider(),
+                const CurrencyTile(),
+              ],
             ),
           ),
           const Gap(AppSpacing.xl),

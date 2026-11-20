@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/usecases/vendor_category_memory.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
 import 'package:smart_expense_tracker/features/scan/domain/entities/ocr_line.dart';
 import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_draft.dart';
@@ -59,6 +60,7 @@ void main() {
     photos: photos,
     reader: reader,
     categories: categories,
+    memory: VendorCategoryMemory(FakeExpenseRepository()),
     parse: ParseReceipt(now: () => DateTime(2026, 11, 18)),
   );
 

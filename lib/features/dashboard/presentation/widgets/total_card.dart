@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
-import '../../../../core/utils/money.dart';
+import '../../../../core/utils/currency.dart';
 
 /// Highlighted card with the month's total.
 class TotalCard extends StatelessWidget {
-  const TotalCard({super.key, required this.totalMinor, required this.count});
+  const TotalCard({
+    super.key,
+    required this.totalMinor,
+    required this.count,
+    required this.currency,
+  });
 
   final int totalMinor;
   final int count;
+  final Currency currency;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +35,7 @@ class TotalCard extends StatelessWidget {
             ),
             const Gap(AppSpacing.sm),
             Text(
-              Money.format(totalMinor),
+              currency.format(totalMinor),
               style: context.text.headlineMedium?.copyWith(
                 color: onPrimary,
                 fontSize: 34,

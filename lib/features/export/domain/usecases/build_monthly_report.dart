@@ -1,3 +1,4 @@
+import '../../../../core/utils/currency.dart';
 import '../../../categories/domain/entities/category.dart';
 import '../../../dashboard/domain/usecases/summarize_month.dart';
 import '../../../expenses/domain/entities/expense.dart';
@@ -17,8 +18,9 @@ class BuildMonthlyReport {
   MonthlyReport call(
     List<Expense> expenses,
     List<Category> categories,
-    DateTime month,
-  ) {
+    DateTime month, {
+    required Currency currency,
+  }) {
     final names = {for (final c in categories) c.id: c.name};
     String nameOf(String id) => names[id] ?? unknownCategory;
 
@@ -57,6 +59,7 @@ class BuildMonthlyReport {
           ),
       ],
       totalMinor: summary.totalMinor,
+      currency: currency,
     );
   }
 }

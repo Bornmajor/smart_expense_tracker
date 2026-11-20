@@ -5,8 +5,10 @@ import 'package:smart_expense_tracker/app/app_router.dart';
 import 'package:smart_expense_tracker/core/links/app_links.dart';
 import 'package:smart_expense_tracker/core/links/link_opener.dart';
 import 'package:smart_expense_tracker/core/theme/app_theme.dart';
+import 'package:smart_expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/usecases/vendor_category_memory.dart';
 import 'package:smart_expense_tracker/features/export/domain/usecases/export_month.dart';
 import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_photo_source.dart';
@@ -25,6 +27,7 @@ Future<LockSession> pumpRouterApp(
   WidgetTester tester, {
   FakeOnboardingRepository? onboarding,
   FakeExpenseRepository? expenses,
+  FakeBudgetRepository? budgets,
   FakeCategoryRepository? categories,
   FakeReceiptPhotoSource? photos,
   FakeReceiptTextReader? reader,
@@ -68,7 +71,13 @@ Future<LockSession> pumpRouterApp(
       providers: [
         RepositoryProvider<OnboardingRepository>.value(value: onboardingRepo),
         RepositoryProvider<ExpenseRepository>.value(value: expenseRepo),
+        RepositoryProvider<VendorCategoryMemory>.value(
+          value: VendorCategoryMemory(expenseRepo),
+        ),
         RepositoryProvider<CategoryRepository>.value(value: categoryRepo),
+        RepositoryProvider<BudgetRepository>.value(
+          value: budgets ?? FakeBudgetRepository(),
+        ),
         RepositoryProvider<ExportMonth>.value(
           value: ExportMonth(
             expenses: expenseRepo,
@@ -76,6 +85,7 @@ Future<LockSession> pumpRouterApp(
             pdf: pdfWriter ?? FakeReportWriter('pdf'),
             csv: csvWriter ?? FakeReportWriter('csv'),
             sharer: sharer ?? FakeReportSharer(),
+            currency: () => settingsRepo.currency,
           ),
         ),
         RepositoryProvider<AppLinks>.value(value: appLinks),
