@@ -1,12 +1,17 @@
 name: CI
 
-# Runs for every pull request into, and every push to, the three long-lived
-# branches. See docs/branching.md for how they are used.
+# Runs for every pull request into the three long-lived branches, and for every
+# push to dev. See docs/branching.md for how they are used.
+#
+# A push to uat or main is not listed here: release.yml runs on those pushes and
+# calls this workflow as its first job ("workflow_call"), so CI runs once and
+# the release can only go ahead if it passes.
 on:
   pull_request:
     branches: [dev, uat, main]
   push:
-    branches: [dev, uat, main]
+    branches: [dev]
+  workflow_call:
 
 # A newer push to the same PR/branch cancels the older run.
 concurrency:

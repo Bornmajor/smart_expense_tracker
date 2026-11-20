@@ -4,15 +4,21 @@ name: Release to Google Play
 # version code than the last (Google Play requires that across all tracks).
 #
 #   push to uat   ->  CI passes  ->  internal testing track (testers)
+#                                    + a GitHub pre-release with the APK
 #   push to main  ->  CI passes  ->  you approve  ->  production track
-#                                                    + a GitHub release with the APK
+#                                    + a GitHub release with the APK
+#
+# This runs on the push itself, and calls CI as its first job. That matters:
+# a workflow started by another workflow finishing ("workflow_run") is always
+# read from the default branch (main), so a change to this file on uat would
+# not take effect until it reached main. Started by a push, the file comes
+# from the branch that was pushed.
 #
 # Nothing is uploaded for dev. A failing CI run never reaches Play. You can
-# also start it by hand from the Actions tab, on uat or main only.
+# also start it by hand from the Actions tab, on uat or main only; CI still
+# runs first.
 on:
-  workflow_run:
-    workflows: ["CI"]
-    types: [completed]
+  push:
     branches: [uat, main]
   workflow_dispatch:
 
@@ -25,26 +31,26 @@ concurrency:
 
 env:
   FLUTTER_VERSION: "3.47.2"
-  # The branch being released: the one CI ran on, or the one chosen by hand.
-  RELEASE_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
-  RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
+  # The branch and commit being released: the one pushed, or chosen by hand.
+  RELEASE_BRANCH: ${{ github.ref_name }}
+  RELEASE_SHA: ${{ github.sha }}
 
 jobs:
+  ci:
+    name: CI
+    uses: ./.github/workflows/ci.yml
+
   release:
     name: Build and upload
+    needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 40
     # The "production" environment holds the run until you approve it (set up
     # required reviewers in GitHub, see docs/releasing.md). "internal" has none.
-    environment: ${{ (github.event.workflow_run.head_branch || github.ref_name) == 'main' && 'production' || 'internal' }}
-    # A green push, or a manual run on uat or main. The "push" check keeps pull
-    # requests (including ones from forks) out.
-    if: >-
-      (github.event_name == 'workflow_dispatch' &&
-       (github.ref_name == 'uat' || github.ref_name == 'main')) ||
-      (github.event_name == 'workflow_run' &&
-       github.event.workflow_run.conclusion == 'success' &&
-       github.event.workflow_run.event == 'push')
+    environment: ${{ github.ref_name == 'main' && 'production' || 'internal' }}
+    # Only uat and main are released. This also stops a manual run on any
+    # other branch. It runs only when CI passed.
+    if: github.ref_name == 'uat' || github.ref_name == 'main'
     outputs:
       track: ${{ steps.track.outputs.track }}
       version: ${{ steps.track.outputs.version }}
@@ -166,8 +172,7 @@ jobs:
       - name: Keep the files for the release job
         uses: actions/upload-artifact@v4
         with:
-          # One per track. Uat runs keep theirs for two weeks as a rehearsal;
-          # only production publishes a release.
+          # Handed to the job that publishes the GitHub release. One per track.
           name: release-files-${{ steps.track.outputs.track }}
           path: release-files/
           retention-days: 14
@@ -180,13 +185,14 @@ jobs:
         # The lane has the same name as the track: internal or production.
         run: bundle exec fastlane ${{ steps.track.outputs.track }}
 
-  # After a production upload, mark the commit with the version, such as
-  # v1.2.0, and publish a GitHub release with the APK, its checksum and the
-  # notes from CHANGELOG.md. The repository is public, so anyone can download it.
-  tag:
+  # After the Play upload, publish the same files to GitHub Releases: the APK,
+  # its checksum and the notes from CHANGELOG.md. The repository is public, so
+  # anyone can download them.
+  #   uat  -> a pre-release, v1.2.0-uat.<run number>, for testing
+  #   main -> the release v1.2.0, marked as the latest (after your approval)
+  publish:
     name: Publish the GitHub release
     needs: release
-    if: needs.release.outputs.track == 'production'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
@@ -194,16 +200,36 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: release-files-production
+          name: release-files-${{ needs.release.outputs.track }}
           path: release-files
 
       - name: Create the release, or add the files to it
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ needs.release.outputs.version }}
+          TRACK: ${{ needs.release.outputs.track }}
         run: |
-          tag="v$VERSION"
           apk="release-files/spendwise-iq-${VERSION}.apk"
+          if [ "$TRACK" = "production" ]; then
+            tag="v$VERSION"
+            title="SpendWise IQ $tag"
+            kind="--latest"
+            notes="release-files/notes.md"
+          else
+            # A test build from uat. Each push gets its own pre-release, so
+            # earlier ones stay downloadable, and none becomes the "Latest"
+            # release that the README links to.
+            tag="v$VERSION-uat.$GITHUB_RUN_NUMBER"
+            title="SpendWise IQ $tag (test build)"
+            kind="--prerelease"
+            notes="release-files/notes-uat.md"
+            {
+              echo "> **Test build** from the \`uat\` branch, made for testing before production. It is not the production release."
+              echo
+              cat release-files/notes.md
+            } > "$notes"
+          fi
+
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" > /dev/null 2>&1; then
             # A run started again, or a release written by hand: keep its text
             # and make sure the files are on it.
@@ -213,6 +239,5 @@ jobs:
           else
             gh release create "$tag" "$apk" "$apk.sha256" \
               --repo "$GITHUB_REPOSITORY" --target "$RELEASE_SHA" \
-              --title "SpendWise IQ $tag" --notes-file release-files/notes.md \
-              --latest
+              --title "$title" --notes-file "$notes" "$kind"
           fi
