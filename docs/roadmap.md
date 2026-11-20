@@ -73,11 +73,12 @@ All of it is plain Dart on the phone: exact numbers worked out in code, shown wi
 3. **Backup and restore to a file**, optionally protected with a password, plus CSV import. This replaces cloud sync: a new phone gets the data back without a server.
 4. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
 5. **Rollover and rebalancing.** Optional: unused budget carries over, and the app suggests moving money from an unused category to an overspent one. Without a history of old limits, rollover uses today's limit.
-6. **Split expenses and IOUs.** A first version: a "my share" amount on an expense, and a simple list of who owes whom. Totals count only the user's share. The largest piece of work.
 
-## TODO: more ways to capture (later, not planned yet)
+## TODO: later, not planned yet
 
-Both feed the same pre-filled add-expense form as scanning and M-Pesa capture, and nothing saves without the user checking it.
+**Split expenses and IOUs.** Goal: personal totals show what the user actually spent, and money lent to friends does not distort the budget. A first version: a "my share" amount on an expense (a new nullable column, empty meaning the full amount), and a simple list of who owes whom, which the user marks settled or part-paid (people and debts tables). The Summary, budgets, exports and the expense list would all use one shared "effective amount" rule, so no total is missed. Everything stays on the phone, so settling up is manual. The largest piece of work (effort: large), and the most valuable for chamas and lending.
+
+**More ways to capture.** Typed quick add and app shortcuts feed the same pre-filled add-expense form as scanning and M-Pesa capture, and nothing saves without the user checking it.
 
 - **Typed quick add.** Type one line such as "lunch 350 cafe yesterday" and get the form filled in. A plain Dart parser finds the amount (including "1.5k"), the date words (today, yesterday, a weekday, "on 12 Nov") and the vendor after "at"; the rest becomes the title. The category comes from vendor memory, then the word list used for scanning. It guesses, so the form still shows. English only to start; Swahili words such as "jana" could be added. Effort: small to medium.
 - **App shortcuts.** Long-press the app icon for "Add expense" or "Scan receipt", using the `quick_actions` package. If the app lock is on, the shortcut waits until the user unlocks and then continues. Android shows only a few shortcuts and launchers differ a little. A home-screen widget is a separate, larger job with native code. Effort: small.
