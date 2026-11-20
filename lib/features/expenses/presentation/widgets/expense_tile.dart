@@ -35,6 +35,7 @@ class ExpenseTile extends StatelessWidget {
     if (_hasTitle && expense.vendor != ExpenseRules.unknownVendor)
       expense.vendor,
     ?categoryName,
+    if (expense.recurringRuleId != null) 'Repeats',
   ].join(' · ');
 
   @override

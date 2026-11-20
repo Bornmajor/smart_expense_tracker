@@ -27,6 +27,14 @@ class Expenses extends Table {
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
 
+  /// The recurring rule that added this expense, if one did. Added in schema
+  /// version 4. Deleting the rule only clears this; the expense stays.
+  TextColumn get recurringRuleId => text().nullable().references(
+    RecurringRules,
+    #id,
+    onDelete: KeyAction.setNull,
+  )();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -44,4 +52,33 @@ class Budgets extends Table {
 
   @override
   Set<Column> get primaryKey => {scopeId};
+}
+
+@DataClassName('RecurringRuleRow')
+class RecurringRules extends Table {
+  TextColumn get id => text()();
+
+  /// Optional short note such as "Family plan". Empty when not set. Added in
+  /// schema version 4, with the rest of this table.
+  TextColumn get title => text().withDefault(const Constant(''))();
+  TextColumn get vendor => text()();
+
+  /// What each occurrence costs, in minor units (cents).
+  IntColumn get amountMinor => integer()();
+  TextColumn get categoryId => text().references(Categories, #id)();
+
+  /// The name of a `RecurrenceFrequency`: weekly, monthly or yearly.
+  TextColumn get frequency => text()();
+
+  /// The date the schedule is counted from, so month-end dates do not drift.
+  DateTimeColumn get anchor => dateTime()();
+
+  /// The next date an expense is added for.
+  DateTimeColumn get nextDue => dateTime()();
+  BoolColumn get isActive => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get createdAt => dateTime()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }

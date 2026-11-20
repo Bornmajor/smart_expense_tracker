@@ -72,6 +72,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Choose the currency amounts are shown in (it starts with the currency of the phone's country). Saved amounts are relabelled, not converted
 - [x] Remember the category you use for each vendor, so the next expense or scan starts with it
 - [x] Monthly budgets for each category and overall, with progress bars on the Summary that turn amber near the limit and red when passed
+- [x] Recurring expenses and subscriptions, added automatically when they come due (weekly, monthly or yearly), with what they add up to each month
 
 ### Planned
 
@@ -83,7 +84,6 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [ ] Budgets with progress and alerts
 - [ ] Search and filters (date, category, amount, vendor)
 - [ ] More charts and insights
-- [ ] Recurring expenses
 - [ ] Multi-currency
 - [ ] Optional receipt attachment
 

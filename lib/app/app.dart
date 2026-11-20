@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
@@ -30,6 +31,9 @@ import '../features/scan/data/repositories/image_picker_photo_source.dart';
 import '../features/scan/data/repositories/ml_kit_receipt_text_reader.dart';
 import '../features/scan/domain/repositories/receipt_photo_source.dart';
 import '../features/scan/domain/repositories/receipt_text_reader.dart';
+import '../features/recurring/data/repositories/recurring_repository_impl.dart';
+import '../features/recurring/domain/repositories/recurring_repository.dart';
+import '../features/recurring/domain/usecases/generate_due_expenses.dart';
 import '../features/security/data/repositories/local_auth_biometric_authenticator.dart';
 import '../features/security/data/repositories/security_repository_impl.dart';
 import '../features/security/domain/repositories/biometric_authenticator.dart';
@@ -81,6 +85,13 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
   late final SecurityRepository _security = SecurityRepositoryImpl(
     widget.preferences,
   );
+
+  // Recurring expenses that have come due are added when the app opens and
+  // when it comes back to the front. There is no background service.
+  late final RecurringRepository _recurring = RecurringRepositoryImpl(
+    widget.database,
+  );
+  late final GenerateDueExpenses _generateDue = GenerateDueExpenses(_recurring);
   late final BiometricAuthenticator _authenticator =
       widget.biometricAuthenticator ?? LocalAuthBiometricAuthenticator();
 
@@ -97,9 +108,14 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
   @override
   void initState() {
     super.initState();
+    unawaited(_generateDue());
     _lifecycle = AppLifecycleListener(
       onHide: _lockSession.didEnterBackground,
-      onShow: _lockSession.didReturnToForeground,
+      onShow: () {
+        _lockSession.didReturnToForeground();
+        // A new day may have started while the app was in the background.
+        unawaited(_generateDue());
+      },
     );
   }
 
@@ -125,6 +141,8 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<ExpenseRepository>(
           create: (_) => ExpenseRepositoryImpl(widget.database),
         ),
+        RepositoryProvider<RecurringRepository>.value(value: _recurring),
+        RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<BudgetRepository>(
           create: (_) => BudgetRepositoryImpl(widget.database),
         ),

@@ -6,6 +6,8 @@ import 'package:smart_expense_tracker/core/links/app_links.dart';
 import 'package:smart_expense_tracker/core/links/link_opener.dart';
 import 'package:smart_expense_tracker/core/theme/app_theme.dart';
 import 'package:smart_expense_tracker/features/budgets/domain/repositories/budget_repository.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/usecases/generate_due_expenses.dart';
 import 'package:smart_expense_tracker/features/categories/domain/repositories/category_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/usecases/vendor_category_memory.dart';
@@ -28,6 +30,7 @@ Future<LockSession> pumpRouterApp(
   FakeOnboardingRepository? onboarding,
   FakeExpenseRepository? expenses,
   FakeBudgetRepository? budgets,
+  FakeRecurringRepository? recurring,
   FakeCategoryRepository? categories,
   FakeReceiptPhotoSource? photos,
   FakeReceiptTextReader? reader,
@@ -60,6 +63,7 @@ Future<LockSession> pumpRouterApp(
       onboarding ?? FakeOnboardingRepository(completed: true);
   final expenseRepo = expenses ?? FakeExpenseRepository();
   final categoryRepo = categories ?? FakeCategoryRepository();
+  final recurringRepo = recurring ?? FakeRecurringRepository();
   final securityRepo = security ?? FakeSecurityRepository();
   final auth = authenticator ?? FakeBiometricAuthenticator();
   final settingsRepo = settings ?? FakeSettingsRepository();
@@ -77,6 +81,10 @@ Future<LockSession> pumpRouterApp(
         RepositoryProvider<CategoryRepository>.value(value: categoryRepo),
         RepositoryProvider<BudgetRepository>.value(
           value: budgets ?? FakeBudgetRepository(),
+        ),
+        RepositoryProvider<RecurringRepository>.value(value: recurringRepo),
+        RepositoryProvider<GenerateDueExpenses>.value(
+          value: GenerateDueExpenses(recurringRepo),
         ),
         RepositoryProvider<ExportMonth>.value(
           value: ExportMonth(

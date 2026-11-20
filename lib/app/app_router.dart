@@ -30,6 +30,14 @@ import '../features/expenses/presentation/pages/expense_list_page.dart';
 import '../features/export/domain/usecases/export_month.dart';
 import '../features/export/presentation/cubit/export_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/recurring/domain/entities/recurring_rule.dart';
+import '../features/recurring/domain/repositories/recurring_repository.dart';
+import '../features/recurring/domain/usecases/generate_due_expenses.dart';
+import '../features/recurring/domain/usecases/save_recurring_rule.dart';
+import '../features/recurring/presentation/cubit/recurring_cubit.dart';
+import '../features/recurring/presentation/cubit/recurring_form_cubit.dart';
+import '../features/recurring/presentation/pages/recurring_form_page.dart';
+import '../features/recurring/presentation/pages/recurring_page.dart';
 import '../features/scan/debug/ocr_debug_page.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
 import '../features/scan/domain/entities/scan_result.dart';
@@ -171,6 +179,43 @@ GoRouter createRouter({
             BlocProvider(create: (_) => _categoryActions(categories)),
           ],
           child: const CategoriesPage(),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.recurring,
+      builder: (context, state) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => RecurringCubit(context.read<RecurringRepository>()),
+          ),
+          BlocProvider(
+            create: (_) => CategoriesCubit(context.read<CategoryRepository>()),
+          ),
+        ],
+        child: const RecurringPage(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.recurringForm,
+      builder: (context, state) {
+        final repository = context.read<RecurringRepository>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => RecurringFormCubit(
+                saveRule: SaveRecurringRule(repository),
+                repository: repository,
+                generateDue: context.read<GenerateDueExpenses>(),
+                original: state.extra as RecurringRule?,
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: RecurringFormPage(original: state.extra as RecurringRule?),
         );
       },
     ),

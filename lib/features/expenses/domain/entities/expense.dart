@@ -10,6 +10,7 @@ class Expense extends Equatable {
     required this.createdAt,
     required this.updatedAt,
     this.title = '',
+    this.recurringRuleId,
   });
 
   final String id;
@@ -25,6 +26,10 @@ class Expense extends Equatable {
   final DateTime createdAt;
   final DateTime updatedAt;
 
+  /// The recurring rule that added this expense, or null when the user added
+  /// it. It is kept when the expense is edited.
+  final String? recurringRuleId;
+
   @override
   List<Object?> get props => [
     id,
@@ -35,5 +40,6 @@ class Expense extends Equatable {
     categoryId,
     createdAt,
     updatedAt,
+    recurringRuleId,
   ];
 }

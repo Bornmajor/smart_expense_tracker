@@ -14,6 +14,8 @@ import 'package:smart_expense_tracker/features/export/domain/repositories/report
 import 'package:smart_expense_tracker/features/export/domain/repositories/report_writer.dart';
 import 'package:smart_expense_tracker/features/expenses/domain/repositories/expense_repository.dart';
 import 'package:smart_expense_tracker/features/onboarding/domain/repositories/onboarding_repository.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/entities/recurring_rule.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/repositories/recurring_repository.dart';
 import 'package:smart_expense_tracker/features/scan/domain/entities/ocr_line.dart';
 import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_source.dart';
 import 'package:smart_expense_tracker/features/scan/domain/repositories/receipt_photo_source.dart';
@@ -405,5 +407,69 @@ class FakeBudgetRepository implements BudgetRepository {
     if (error != null) throw error;
     saved.removeWhere((b) => b.scopeId == scopeId);
     _changes.add(List.of(saved));
+  }
+}
+
+class FakeRecurringRepository implements RecurringRepository {
+  FakeRecurringRepository({List<RecurringRule> initial = const []})
+    : rules = List.of(initial);
+
+  final List<RecurringRule> rules;
+
+  /// Every expense `recordOccurrences` was given, in order.
+  final recorded = <Expense>[];
+
+  /// When set, `recordOccurrences` throws it, and nothing is changed.
+  Object? recordError;
+
+  /// When set, `getAll` throws it.
+  Object? readError;
+
+  /// When set, `save` throws it.
+  Object? saveError;
+
+  final _changes = StreamController<List<RecurringRule>>.broadcast();
+
+  @override
+  Stream<List<RecurringRule>> watchAll() async* {
+    yield List.of(rules);
+    yield* _changes.stream;
+  }
+
+  @override
+  Future<List<RecurringRule>> getAll() async {
+    final error = readError;
+    if (error != null) throw error;
+    return List.of(rules);
+  }
+
+  @override
+  Future<void> save(RecurringRule rule) async {
+    final error = saveError;
+    if (error != null) throw error;
+    rules
+      ..removeWhere((r) => r.id == rule.id)
+      ..add(rule);
+    _changes.add(List.of(rules));
+  }
+
+  @override
+  Future<void> delete(String id) async {
+    rules.removeWhere((r) => r.id == id);
+    _changes.add(List.of(rules));
+  }
+
+  @override
+  Future<void> recordOccurrences(
+    RecurringRule rule,
+    List<Expense> expenses,
+  ) async {
+    final error = recordError;
+    if (error != null) throw error;
+    recorded.addAll(expenses);
+    rules
+      ..removeWhere((r) => r.id == rule.id)
+      ..add(rule);
+    _changes.add(List.of(rules));
   }
 }
