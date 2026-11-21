@@ -13,12 +13,14 @@ Push, merge to `dev`, promote to `uat`, and try the build on a few phones. Then 
 - Recurring expenses and the Repeat box (on a dev build, Settings, Developer, Pretend today is, shows a bill being added on its due date).
 - The currency converter with and without internet, Safe to spend, and the heads-up cards.
 - Cold start time on a release build.
+- The receipt preview on the add form: from the small thumbnail and from the top-bar "View receipt" button, including after scrolling down the form, with pinch and double-tap zoom, for a photo, a camera picture and a PDF.
+- Back up and restore: with and without a password, and restoring on a second phone or after a reinstall.
 
 ## Build next, in this order
 
 All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model could be added later behind a switch, on phones that support it.
 
-1. **Backup and restore to a file**, optionally protected with a password, plus CSV import. This replaces cloud sync: a new phone gets the data back without a server.
+1. **CSV import** (backup and restore to a file is built). Bring expenses in from a spreadsheet or another app.
 2. **Search and filters** on the expense list: by text (vendor, title), category, date range and amount. The first thing a real user misses once there are many expenses.
 3. **Typed quick add.** Type one line such as "lunch 350 cafe yesterday" and get the form filled in. A plain Dart parser finds the amount (including "1.5k"), the date words (today, yesterday, a weekday, "on 12 Nov") and the vendor after "at"; the rest becomes the title. The category comes from vendor memory, then the word list used for scanning. It guesses, so the form still shows. English only to start; Swahili words such as "jana" could be added. Effort: small to medium.
 4. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
@@ -36,7 +38,7 @@ Most reviewers will not install the app, so the repository has to show it.
 
 ## Done
 
-**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt from a photo or a PDF in the Files app, the camera option with recovery of a photo lost to an app restart, exporting a month as a PDF or CSV, choosing a currency (the Kenyan shilling by default), converting an amount from another currency with the daily rate, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, recurring expenses added when they come due, a Repeat box on the add form, Safe to spend, heads-up cards for duplicates, large expenses and a category above normal, the app version in Settings, and a dev-only Pretend today is tool.
+**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt from a photo or a PDF in the Files app, the camera option with recovery of a photo lost to an app restart, exporting a month as a PDF or CSV, choosing a currency (the Kenyan shilling by default), converting an amount from another currency with the daily rate, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, recurring expenses added when they come due, backup and restore to a file (optionally password-protected), a Repeat box on the add form, Safe to spend, heads-up cards for duplicates, large expenses and a category above normal, the app version in Settings, and a dev-only Pretend today is tool.
 
 ## TODO: app PIN (brainstormed, not built; part of Polish above)
 

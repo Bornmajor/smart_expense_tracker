@@ -17,6 +17,7 @@ abstract final class AppRoutes {
   static const budgets = '/budgets';
   static const recurring = '/recurring';
   static const recurringForm = '/recurring/form';
+  static const backup = '/backup';
 
   /// TEMPORARY, debug builds only: see what the scanner reads.
   static const ocrDebug = '/debug/ocr';

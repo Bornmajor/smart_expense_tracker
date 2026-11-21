@@ -7,6 +7,11 @@ import '../features/budgets/domain/repositories/budget_repository.dart';
 import '../features/budgets/domain/usecases/remove_budget.dart';
 import '../features/budgets/domain/usecases/set_budget.dart';
 import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/backup/domain/repositories/backup_file_picker.dart';
+import '../features/backup/domain/usecases/create_backup.dart';
+import '../features/backup/domain/usecases/restore_backup.dart';
+import '../features/backup/presentation/cubit/backup_cubit.dart';
+import '../features/backup/presentation/pages/backup_page.dart';
 import '../features/budgets/presentation/pages/budgets_page.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/domain/usecases/create_category.dart';
@@ -193,6 +198,17 @@ GoRouter createRouter({
           child: const CategoriesPage(),
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.backup,
+      builder: (context, state) => BlocProvider(
+        create: (_) => BackupCubit(
+          context.read<CreateBackup>(),
+          context.read<RestoreBackup>(),
+          context.read<BackupFilePicker>(),
+        ),
+        child: const BackupPage(),
+      ),
     ),
     GoRoute(
       path: AppRoutes.recurring,
