@@ -1,6 +1,5 @@
 import 'dart:async' show unawaited;
 import 'dart:io' show Directory;
-import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/database/app_database.dart';
+import '../core/debug/test_clock.dart';
 import '../core/links/app_links.dart';
 import '../core/links/link_opener.dart';
 import '../core/links/url_launcher_link_opener.dart';
@@ -79,13 +79,10 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
   late final OnboardingRepository _onboarding = OnboardingRepositoryImpl(
     widget.preferences,
   );
-  // Until the user picks a currency, use the one for the country the phone is
-  // set to (or plain numbers if there is none for it).
+  // Until the user picks a currency, use the Kenyan shilling.
   late final SettingsRepository _settings = SettingsRepositoryImpl(
     widget.preferences,
-    fallbackCurrency:
-        widget.fallbackCurrency ??
-        Currency.forRegion(PlatformDispatcher.instance.locale.countryCode),
+    fallbackCurrency: widget.fallbackCurrency ?? Currency.kes,
   );
   late final SecurityRepository _security = SecurityRepositoryImpl(
     widget.preferences,
@@ -96,7 +93,10 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
   late final RecurringRepository _recurring = RecurringRepositoryImpl(
     widget.database,
   );
-  late final GenerateDueExpenses _generateDue = GenerateDueExpenses(_recurring);
+  late final GenerateDueExpenses _generateDue = GenerateDueExpenses(
+    _recurring,
+    now: TestClock.now,
+  );
   late final BiometricAuthenticator _authenticator =
       widget.biometricAuthenticator ?? LocalAuthBiometricAuthenticator();
 

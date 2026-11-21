@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/app_routes.dart';
+import '../../../../core/debug/test_clock.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_logo.dart';
 import '../../../../shared/widgets/section_header.dart';
@@ -12,6 +13,7 @@ import '../cubit/settings_state.dart';
 import '../widgets/biometric_switch_tile.dart';
 import '../widgets/currency_tile.dart';
 import '../widgets/privacy_policy_tile.dart';
+import '../widgets/test_date_tile.dart';
 import '../widgets/theme_mode_selector.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -99,10 +101,14 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const PrivacyPolicyTile(),
-          // TEMPORARY developer tool, shown only in debug builds.
-          if (kDebugMode) ...[
+          // TEMPORARY developer tools, only in debug builds and the dev flavor.
+          if (developerToolsEnabled) ...[
             const Gap(AppSpacing.xl),
             const SectionHeader('Developer'),
+            const TestDateTile(),
+          ],
+          if (kDebugMode) ...[
+            const Gap(AppSpacing.md),
             Card(
               child: ListTile(
                 leading: const Icon(Icons.bug_report_outlined),
