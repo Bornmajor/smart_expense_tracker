@@ -7,6 +7,11 @@ import '../features/budgets/domain/repositories/budget_repository.dart';
 import '../features/budgets/domain/usecases/remove_budget.dart';
 import '../features/budgets/domain/usecases/set_budget.dart';
 import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/backup/domain/repositories/backup_file_picker.dart';
+import '../features/backup/domain/usecases/create_backup.dart';
+import '../features/backup/domain/usecases/restore_backup.dart';
+import '../features/backup/presentation/cubit/backup_cubit.dart';
+import '../features/backup/presentation/pages/backup_page.dart';
 import '../features/budgets/presentation/pages/budgets_page.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/domain/usecases/create_category.dart';
@@ -19,6 +24,7 @@ import '../features/categories/presentation/pages/categories_page.dart';
 import '../features/dashboard/presentation/cubit/summary_cubit.dart';
 import '../features/dashboard/presentation/pages/summary_page.dart';
 import '../features/expenses/domain/entities/expense.dart';
+import '../features/expenses/domain/entities/expense_filter.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
 import '../features/expenses/domain/usecases/update_expense.dart';
@@ -193,6 +199,41 @@ GoRouter createRouter({
           child: const CategoriesPage(),
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.filteredExpenses,
+      // The filter arrives as `extra`; without it there is nothing to show.
+      redirect: (context, state) =>
+          state.extra is ExpenseFilter ? null : AppRoutes.expenses,
+      builder: (context, state) {
+        final filter = state.extra! as ExpenseFilter;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => ExpenseListCubit(
+                context.read<ExpenseRepository>(),
+                filter: filter,
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: ExpenseListPage(filter: filter),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.backup,
+      builder: (context, state) => BlocProvider(
+        create: (_) => BackupCubit(
+          context.read<CreateBackup>(),
+          context.read<RestoreBackup>(),
+          context.read<BackupFilePicker>(),
+        ),
+        child: const BackupPage(),
+      ),
     ),
     GoRoute(
       path: AppRoutes.recurring,

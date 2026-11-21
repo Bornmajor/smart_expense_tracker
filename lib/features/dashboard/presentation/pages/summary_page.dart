@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
+import '../../../../app/app_routes.dart';
 
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -10,6 +13,7 @@ import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../categories/presentation/cubit/categories_cubit.dart';
 import '../../../categories/presentation/cubit/categories_state.dart';
+import '../../../expenses/domain/entities/expense_filter.dart';
 import '../../../export/presentation/cubit/export_cubit.dart';
 import '../../../export/presentation/cubit/export_state.dart';
 import '../../../export/presentation/export_messages.dart';
@@ -117,6 +121,13 @@ class _SummaryContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<SummaryCubit>();
     final summary = state.summary;
+
+    // The expenses behind a row: one category in the month shown, or the whole
+    // month when [categoryId] is null.
+    void openExpenses(String? categoryId) => context.push(
+      AppRoutes.filteredExpenses,
+      extra: ExpenseFilter(categoryId: categoryId, month: state.month),
+    );
     final currency = context.select<SettingsCubit, Currency>(
       (cubit) => cubit.state.currency,
     );
@@ -158,6 +169,7 @@ class _SummaryContent extends StatelessWidget {
           progress: state.budgets,
           categoryNames: names,
           currency: currency,
+          onOpen: openExpenses,
         ),
         const Gap(AppSpacing.xl),
         if (summary.count == 0)
@@ -177,6 +189,7 @@ class _SummaryContent extends StatelessWidget {
               totalMinor: category.totalMinor,
               share: category.share,
               currency: currency,
+              onTap: () => openExpenses(category.categoryId),
             ),
             const Gap(AppSpacing.sm),
           ],

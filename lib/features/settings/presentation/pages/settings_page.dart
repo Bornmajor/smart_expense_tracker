@@ -103,6 +103,19 @@ class SettingsPage extends StatelessWidget {
           const SectionHeader('Security'),
           const Card(child: BiometricSwitchTile()),
           const Gap(AppSpacing.xl),
+          const SectionHeader('Your data'),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.backup_outlined),
+              title: const Text('Back up and restore'),
+              subtitle: const Text(
+                'Save everything to a file, or bring it back',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.backup),
+            ),
+          ),
+          const Gap(AppSpacing.xl),
           const SectionHeader('About'),
           Card(
             child: ListTile(

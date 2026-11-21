@@ -15,6 +15,14 @@ import '../core/links/link_opener.dart';
 import '../core/links/url_launcher_link_opener.dart';
 import '../core/utils/currency.dart';
 import '../core/theme/app_theme.dart';
+import '../features/backup/data/crypto/cryptography_backup_cipher.dart';
+import '../features/backup/data/repositories/backup_repository_impl.dart';
+import '../features/backup/data/repositories/file_selector_backup_picker.dart';
+import '../features/backup/domain/backup_codec.dart';
+import '../features/backup/domain/repositories/backup_file_picker.dart';
+import '../features/backup/domain/repositories/backup_repository.dart';
+import '../features/backup/domain/usecases/create_backup.dart';
+import '../features/backup/domain/usecases/restore_backup.dart';
 import '../features/budgets/data/repositories/budget_repository_impl.dart';
 import '../features/currency_conversion/data/datasources/http_rates_source.dart';
 import '../features/currency_conversion/data/repositories/exchange_rate_repository_impl.dart';
@@ -134,6 +142,23 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
   late final AlertDismissals _alertDismissals = AlertDismissalsImpl(
     widget.preferences,
   );
+  late final BackupRepository _backupRepository = BackupRepositoryImpl(
+    widget.database,
+  );
+  late final BackupCodec _backupCodec = BackupCodec(CryptographyBackupCipher());
+  late final CreateBackup _createBackup = CreateBackup(
+    repository: _backupRepository,
+    codec: _backupCodec,
+    sharer: const SharePlusReportSharer(),
+    currencyCode: () {
+      final code = _settings.currency.code;
+      return code.isEmpty ? null : code;
+    },
+  );
+  late final RestoreBackup _restoreBackup = RestoreBackup(
+    _backupRepository,
+    _backupCodec,
+  );
   late final AppLifecycleListener _lifecycle;
 
   @override
@@ -179,6 +204,11 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
         RepositoryProvider<AppVersion>.value(value: widget.appVersion),
+        RepositoryProvider<CreateBackup>.value(value: _createBackup),
+        RepositoryProvider<RestoreBackup>.value(value: _restoreBackup),
+        RepositoryProvider<BackupFilePicker>(
+          create: (_) => const FileSelectorBackupPicker(),
+        ),
         RepositoryProvider<AlertDismissals>.value(value: _alertDismissals),
         RepositoryProvider<BudgetRepository>(
           create: (_) => BudgetRepositoryImpl(widget.database),
