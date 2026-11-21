@@ -7,6 +7,7 @@ import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_sour
 import 'package:smart_expense_tracker/features/scan/domain/scan_exception.dart';
 import 'package:smart_expense_tracker/features/scan/presentation/widgets/scan_review_panel.dart';
 
+import '../features/backup/backup_fakes.dart';
 import '../support/fakes.dart';
 import '../support/pump_app.dart';
 
@@ -423,6 +424,18 @@ void main() {
       );
       expect(find.text('Use this photo'), findsNothing);
     });
+
+    testWidgets(
+      'says so and reopens Back up when a backup pick was cut short',
+      (tester) async {
+        final picker = FakeBackupFilePicker()..interrupted = true;
+        await pumpRouterApp(tester, backupPicker: picker, photos: photos);
+
+        expect(find.textContaining('while you chose a backup'), findsOneWidget);
+        expect(find.text('Back up and restore'), findsOneWidget);
+        expect(picker.interrupted, isFalse);
+      },
+    );
 
     testWidgets('leaves the list alone when there is none', (tester) async {
       await openApp(tester);

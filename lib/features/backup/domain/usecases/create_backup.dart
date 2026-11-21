@@ -12,8 +12,10 @@ import '../entities/backup_data.dart';
 import '../repositories/backup_history.dart';
 import '../repositories/backup_repository.dart';
 
-/// Makes a backup file of everything in the app and opens the share sheet with
-/// it, where the user can save it to Drive, Files or send it to themselves.
+/// Makes a backup file of everything in the app and saves it to the phone's
+/// Downloads folder, from where the user can copy it to Drive or send it to
+/// themselves. (On a phone too old to save there directly, the share sheet
+/// opens instead.)
 class CreateBackup {
   CreateBackup({
     required this._repository,

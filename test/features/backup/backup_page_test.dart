@@ -148,7 +148,7 @@ void main() {
 
     expect(h.sharer.shared, hasLength(1));
     expect(h.codec.isEncrypted(h.sharer.shared.single.bytes), isTrue);
-    expect(find.textContaining('Backup created'), findsOneWidget);
+    expect(find.textContaining('Backup saved'), findsOneWidget);
   });
 
   group('BackupPasswordRules', () {

@@ -43,7 +43,7 @@ When you enter an amount in another currency, the app converts it using exchange
 
 ## Backup files you create
 
-You can save everything in the app (expenses, categories, budgets and recurring expenses) to one backup file, and restore from it later. The file is made on your phone and handed to Android's share sheet. It goes only where you choose to send it, such as your Google Drive. The app does not upload it, and the developer does not receive it. You can lock the file with a password; it is then encrypted on your phone (AES-256), and if you forget the password nobody, including the developer, can open it. Restoring replaces what is on the phone with the contents of the file, after you confirm.
+You can save everything in the app (expenses, categories, budgets and recurring expenses) to one backup file, and restore from it later. The file is made on your phone and saved to your phone's Downloads folder. It goes nowhere else unless you copy or send it yourself, for example to your Google Drive. The app does not upload it, and the developer does not receive it. You can lock the file with a password; it is then encrypted on your phone (AES-256), and if you forget the password nobody, including the developer, can open it. Restoring replaces what is on the phone with the contents of the file, after you confirm.
 
 ## M-Pesa messages you paste
 

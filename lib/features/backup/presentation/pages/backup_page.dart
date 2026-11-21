@@ -49,7 +49,10 @@ class _BackupPageState extends State<BackupPage> {
     final cubit = context.read<BackupCubit>();
     switch (state) {
       case BackupCreated():
-        context.showSuccess('Backup created. Keep the file somewhere safe.');
+        context.showSuccess(
+          'Backup saved to your Downloads folder. Copy it somewhere safe, '
+          'such as Google Drive.',
+        );
         _password.clear();
         _confirm.clear();
         setState(() {
@@ -141,10 +144,11 @@ class _BackupPageState extends State<BackupPage> {
               children: [
                 const SectionHeader('Back up'),
                 Text(
-                  'Save everything in the app to one file: expenses, '
-                  'categories, budgets and recurring expenses. Keep it '
-                  'somewhere safe, such as Google Drive, to bring your data '
-                  'back on a new phone. Nothing is uploaded by the app.',
+                  'Save everything in the app to one file in your Downloads '
+                  'folder: expenses, categories, budgets and recurring '
+                  'expenses. Copy it somewhere safe, such as Google Drive, to '
+                  'bring your data back on a new phone. Nothing is uploaded by '
+                  'the app.',
                   style: context.text.bodyMedium,
                 ),
                 const Gap(AppSpacing.sm),
