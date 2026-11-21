@@ -23,11 +23,11 @@ import '../domain/entities/month_comparison.dart';
     final change = comparison.biggestChangeMinor;
     biggest =
         'Biggest change: ${categoryName ?? 'Uncategorized'}, '
-        '${change > 0 ? 'up' : 'down'} ${currency.format(change.abs())}';
+        '${change > 0 ? 'up' : 'down'} ${currency.formatGlance(change.abs())}';
   }
 
   return (
-    headline: '${currency.format(comparison.currentMinor)} so far',
+    headline: '${currency.formatGlance(comparison.currentMinor)} so far',
     detail: detail,
     biggest: biggest,
   );

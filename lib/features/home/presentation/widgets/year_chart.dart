@@ -95,7 +95,7 @@ class YearChart extends StatelessWidget {
                   style: context.text.titleMedium,
                 ),
               ),
-              amount: currency.format(yearTotal),
+              amount: currency.formatGlance(yearTotal),
               amountStyle: context.text.bodySmall,
             ),
             const Gap(AppSpacing.md),
@@ -112,7 +112,7 @@ class YearChart extends StatelessWidget {
                   const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
-                      'Monthly budget ${currency.format(budget)}',
+                      'Monthly budget ${currency.formatGlance(budget)}',
                       style: context.text.bodySmall,
                     ),
                   ),
@@ -133,7 +133,7 @@ class YearChart extends StatelessWidget {
                             child: _Bar(
                               label: _letters[i],
                               semantics:
-                                  '${_names[i]}: ${currency.format(totals[i])}',
+                                  '${_names[i]}: ${currency.formatGlance(totals[i])}',
                               fraction: tallest == 0 ? 0 : totals[i] / tallest,
                               current: i + 1 == currentMonth,
                               future: i + 1 > currentMonth,

@@ -128,6 +128,25 @@ class Currency extends Equatable {
     return hasLetters ? '$sign$symbol $digits' : '$sign$symbol$digits';
   }
 
+  /// The amount for a quick look, on Home and the Summary: whole units when
+  /// the amount is $glanceFrom or more, or has no cents anyway ("KSh 28,946",
+  /// "KSh 350"), and the exact amount otherwise ("KSh 450.50"). Cents on a big
+  /// number are noise at a glance. Lists, forms and exports keep using [format].
+  String formatGlance(int minorUnits) {
+    final exact = minorUnits.abs() < glanceFrom && minorUnits % 100 != 0;
+    if (exact) return format(minorUnits);
+    final sign = minorUnits < 0 ? '-' : '';
+    final digits = Money.formatWhole(minorUnits.abs());
+    if (symbol.isEmpty) return '$sign$digits';
+    final hasLetters = RegExp('[A-Za-z]').hasMatch(symbol);
+    // A no-break space, as in [format], so the symbol is never left alone at a
+    // line end.
+    return hasLetters ? '$sign$symbol $digits' : '$sign$symbol$digits';
+  }
+
+  /// From this amount up (1,000.00), glance numbers drop the cents.
+  static const glanceFrom = 100000;
+
   /// The amount with the code, for places that may lack the symbol's glyph,
   /// such as a PDF: "KES 1,234.56".
   String formatWithCode(int minorUnits) {

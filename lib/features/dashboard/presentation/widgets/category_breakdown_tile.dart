@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
@@ -6,7 +8,12 @@ import '../../../../core/utils/currency.dart';
 import '../../../../shared/widgets/amount_row.dart';
 import '../../../budgets/domain/entities/budget_progress.dart';
 
-/// One category row: name, amount, and a bar showing its share of the month.
+/// One category row: its name and amount for the month, and one bar.
+///
+/// With a budget, the bar is the budget: how much of it is used, and in bold
+/// what is left. Without one, the bar is the category's share of the month's
+/// spending, and says so. The two are never mixed, because a full bar of
+/// "share" next to a budget line reads as "budget used up".
 class CategoryBreakdownTile extends StatelessWidget {
   const CategoryBreakdownTile({
     super.key,
@@ -25,7 +32,7 @@ class CategoryBreakdownTile extends StatelessWidget {
   final VoidCallback? onTap;
 
   /// This category's budget measured against the month, or null when it has
-  /// none. It adds a line to the card and nothing when absent.
+  /// none.
   final BudgetProgress? budget;
 
   /// Fraction of the month's total, from 0 to 1.
@@ -34,6 +41,7 @@ class CategoryBreakdownTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final budget = this.budget;
     return Card(
       clipBehavior: Clip.antiAlias,
       child: InkWell(
@@ -45,35 +53,18 @@ class CategoryBreakdownTile extends StatelessWidget {
             children: [
               AmountRow(
                 leading: Text(name, style: context.text.titleMedium),
-                amount: currency.format(totalMinor),
+                amount: currency.formatGlance(totalMinor),
                 amountStyle: context.text.titleMedium,
               ),
               const Gap(AppSpacing.md),
-              Row(
-                children: [
-                  Expanded(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: share,
-                        minHeight: 8,
-                        color: context.scheme.primary,
-                        backgroundColor: context.scheme.outline,
-                      ),
-                    ),
-                  ),
-                  const Gap(AppSpacing.md),
-                  Text(
-                    '${(share * 100).round()}%',
-                    style: context.text.bodySmall,
-                  ),
-                  if (onTap != null) const Icon(Icons.chevron_right, size: 20),
-                ],
-              ),
-              if (budget != null) ...[
-                const Gap(AppSpacing.sm),
-                _BudgetLine(progress: budget!, currency: currency),
-              ],
+              if (budget != null)
+                _BudgetBar(
+                  progress: budget,
+                  currency: currency,
+                  chevron: onTap != null,
+                )
+              else
+                _ShareBar(share: share, chevron: onTap != null),
             ],
           ),
         ),
@@ -82,34 +73,101 @@ class CategoryBreakdownTile extends StatelessWidget {
   }
 }
 
-/// One quiet line on a category card: how much of its budget is left, or by
-/// how much it is over. It turns amber near the limit and red past it.
-class _BudgetLine extends StatelessWidget {
-  const _BudgetLine({required this.progress, required this.currency});
+/// The category's share of the month, with a label that says what it is.
+class _ShareBar extends StatelessWidget {
+  const _ShareBar({required this.share, required this.chevron});
+
+  final double share;
+  final bool chevron;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: share,
+              minHeight: 8,
+              color: context.scheme.primary,
+              backgroundColor: context.scheme.outline,
+            ),
+          ),
+        ),
+        const Gap(AppSpacing.md),
+        Text(
+          '${(share * 100).round()}% of spending',
+          style: context.text.bodySmall,
+        ),
+        if (chevron) const Icon(Icons.chevron_right, size: 20),
+      ],
+    );
+  }
+}
+
+/// The category's budget: a bar for how much is used, and what is left in bold.
+class _BudgetBar extends StatelessWidget {
+  const _BudgetBar({
+    required this.progress,
+    required this.currency,
+    required this.chevron,
+  });
 
   final BudgetProgress progress;
   final Currency currency;
+  final bool chevron;
 
   @override
   Widget build(BuildContext context) {
     final color = switch (progress.level) {
-      BudgetLevel.onTrack => context.text.bodySmall?.color,
+      BudgetLevel.onTrack => context.scheme.primary,
       BudgetLevel.near => context.semantic.warning,
       BudgetLevel.over => context.semantic.danger,
     };
-    final limit = currency.format(progress.limitMinor);
-    final text = progress.level == BudgetLevel.over
-        ? '${currency.format(-progress.remainingMinor)} over its $limit budget'
-        : '${currency.format(progress.remainingMinor)} left of $limit';
-    return Row(
+    final over = progress.level == BudgetLevel.over;
+    final limit = currency.formatGlance(progress.limitMinor);
+    final answer = over
+        ? '${currency.formatGlance(-progress.remainingMinor)} over'
+        : '${currency.formatGlance(progress.remainingMinor)} left';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(Icons.savings_outlined, size: 14, color: color),
-        const SizedBox(width: AppSpacing.xs),
-        Expanded(
-          child: Text(
-            text,
-            style: context.text.bodySmall?.copyWith(color: color),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: LinearProgressIndicator(
+            value: math.min(progress.fraction, 1),
+            minHeight: 8,
+            color: color,
+            backgroundColor: context.scheme.outline,
           ),
+        ),
+        const Gap(AppSpacing.sm),
+        Row(
+          children: [
+            Expanded(
+              child: Text.rich(
+                TextSpan(
+                  children: [
+                    TextSpan(
+                      text: answer,
+                      style: context.text.titleSmall?.copyWith(
+                        color: progress.level == BudgetLevel.onTrack
+                            ? null
+                            : color,
+                      ),
+                    ),
+                    TextSpan(
+                      text: over ? ' · budget $limit' : ' of $limit budget',
+                      style: context.text.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            if (chevron) const Icon(Icons.chevron_right, size: 20),
+          ],
         ),
       ],
     );

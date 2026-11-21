@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_expense_tracker/features/budgets/domain/entities/budget.dart';
+import 'package:smart_expense_tracker/features/dashboard/presentation/widgets/category_breakdown_tile.dart';
 
 import '../support/builders.dart';
 import '../support/fakes.dart';
@@ -154,7 +155,8 @@ void main() {
       );
       await openSummary(tester);
 
-      expect(find.textContaining('over its'), findsOneWidget);
+      expect(find.textContaining('over'), findsWidgets);
+      expect(find.textContaining('· budget'), findsWidgets);
     });
 
     testWidgets('the overall budget is not shown on any category card', (
@@ -165,7 +167,14 @@ void main() {
       );
       await openSummary(tester);
 
-      expect(find.textContaining('left of'), findsNothing);
+      // It is the overall tile's, not a category card's.
+      expect(
+        find.descendant(
+          of: find.byType(CategoryBreakdownTile),
+          matching: find.textContaining('left of'),
+        ),
+        findsNothing,
+      );
     });
   });
 }

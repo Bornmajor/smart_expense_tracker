@@ -29,13 +29,13 @@ class SafeToSpendCard extends StatelessWidget {
     final color = over ? context.semantic.danger : null;
 
     final headline = over
-        ? '${currency.format(-item.remainingMinor)} over'
-        : '${currency.format(item.perDayMinor)} a day';
+        ? '${currency.formatGlance(-item.remainingMinor)} over'
+        : '${currency.formatGlance(item.perDayMinor)} a day';
     final subtitle = over
         ? 'Your budget is already spoken for this month'
-        : '${currency.format(item.remainingMinor)} left · $_daysText';
+        : '${currency.formatGlance(item.remainingMinor)} left · $_daysText';
     final bills = item.upcomingMinor > 0
-        ? 'After ${currency.format(item.upcomingMinor)} of bills still to come'
+        ? 'After ${currency.formatGlance(item.upcomingMinor)} of bills still to come'
         : null;
 
     return Semantics(

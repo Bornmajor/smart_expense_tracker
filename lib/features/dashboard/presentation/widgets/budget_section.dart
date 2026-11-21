@@ -8,13 +8,14 @@ import '../../../../core/utils/currency.dart';
 import '../../../budgets/domain/entities/budget_progress.dart';
 import '../../../budgets/presentation/widgets/budget_progress_tile.dart';
 
-/// The budgets on the Summary: how much of each limit this month has used. With
-/// no budget set it offers to set one.
+/// The overall budget on the Summary: how much of it this month has used, and
+/// what is left. Each category's own budget shows on that category's card, so it
+/// is not listed again here. With no overall budget it offers to set one, and
+/// Edit opens the screen with every budget.
 class BudgetSection extends StatelessWidget {
   const BudgetSection({
     super.key,
     required this.progress,
-    required this.categoryNames,
     required this.currency,
     this.onOpen,
   });
@@ -25,13 +26,12 @@ class BudgetSection extends StatelessWidget {
   /// overall budget (the whole month).
   final void Function(String? categoryId)? onOpen;
 
-  /// Category id -> name. A budget whose category is not in here is left out.
-  final Map<String, String> categoryNames;
   final Currency currency;
 
   @override
   Widget build(BuildContext context) {
-    if (progress.isEmpty) {
+    final overall = progress.where((p) => p.budget.isOverall).firstOrNull;
+    if (overall == null) {
       return Card(
         clipBehavior: Clip.antiAlias,
         child: ListTile(
@@ -62,24 +62,15 @@ class BudgetSection extends StatelessWidget {
           ],
         ),
         const Gap(AppSpacing.xs),
-        for (final item in progress)
-          if (item.budget.isOverall ||
-              categoryNames[item.budget.scopeId] != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-              child: BudgetProgressTile(
-                name: item.budget.isOverall
-                    ? 'All spending'
-                    : categoryNames[item.budget.scopeId]!,
-                progress: item,
-                currency: currency,
-                onTap: onOpen == null
-                    ? null
-                    : () => onOpen!(
-                        item.budget.isOverall ? null : item.budget.scopeId,
-                      ),
-              ),
-            ),
+        Padding(
+          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+          child: BudgetProgressTile(
+            name: 'All spending',
+            progress: overall,
+            currency: currency,
+            onTap: onOpen == null ? null : () => onOpen!(null),
+          ),
+        ),
       ],
     );
   }

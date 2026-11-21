@@ -181,7 +181,6 @@ class _SummaryContent extends StatelessWidget {
         const Gap(AppSpacing.xl),
         BudgetSection(
           progress: state.budgets,
-          categoryNames: names,
           currency: currency,
           onOpen: openExpenses,
         ),

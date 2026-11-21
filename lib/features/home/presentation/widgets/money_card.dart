@@ -64,7 +64,7 @@ class MoneyCard extends StatelessWidget {
       children: [
         Text('Spent this month', style: context.text.bodyMedium),
         const Gap(AppSpacing.xs),
-        _amount(context, currency.format(spentMinor)),
+        _amount(context, currency.formatGlance(spentMinor)),
         const Gap(AppSpacing.md),
         Text(
           'Set a monthly budget to see how much you have left, and what is '
@@ -90,7 +90,7 @@ class MoneyCard extends StatelessWidget {
         ? null
         : safe.isOver
         ? 'The rest of the month is already spoken for'
-        : '${currency.format(safe.perDayMinor)} a day · '
+        : '${currency.formatGlance(safe.perDayMinor)} a day · '
               '${safe.daysLeft == 1 ? 'last day' : '${safe.daysLeft} days to go'}';
 
     return Column(
@@ -98,10 +98,10 @@ class MoneyCard extends StatelessWidget {
       children: [
         Text('This month', style: context.text.bodyMedium),
         const Gap(AppSpacing.xs),
-        _amount(context, currency.format(spentMinor)),
+        _amount(context, currency.formatGlance(spentMinor)),
         const Gap(AppSpacing.xs),
         Text(
-          'of ${currency.format(overall.limitMinor)} budget',
+          'of ${currency.formatGlance(overall.limitMinor)} budget',
           style: context.text.bodyMedium,
         ),
         const Gap(AppSpacing.md),
@@ -117,8 +117,8 @@ class MoneyCard extends StatelessWidget {
         const Gap(AppSpacing.sm),
         Text(
           over
-              ? '${currency.format(-progress.remainingMinor)} over'
-              : '${currency.format(progress.remainingMinor)} left',
+              ? '${currency.formatGlance(-progress.remainingMinor)} over'
+              : '${currency.formatGlance(progress.remainingMinor)} left',
           style: context.text.titleSmall?.copyWith(color: over ? color : null),
         ),
         if (line != null) ...[
