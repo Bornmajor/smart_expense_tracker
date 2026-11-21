@@ -1,3 +1,4 @@
+import 'package:smart_expense_tracker/features/insights/domain/repositories/alert_dismissals.dart';
 import 'package:smart_expense_tracker/features/currency_conversion/domain/entities/exchange_rates.dart';
 import 'package:smart_expense_tracker/features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
 
@@ -518,4 +519,15 @@ class FakeExchangeRateRepository implements ExchangeRateRepository {
     refreshCalls++;
     return rates;
   }
+}
+
+/// Remembers dismissed alerts in memory.
+class FakeAlertDismissals implements AlertDismissals {
+  final Set<String> closed = {};
+
+  @override
+  Set<String> dismissed() => Set.of(closed);
+
+  @override
+  Future<void> dismiss(String id) async => closed.add(id);
 }

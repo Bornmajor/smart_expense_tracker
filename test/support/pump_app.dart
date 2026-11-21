@@ -1,3 +1,4 @@
+import 'package:smart_expense_tracker/features/insights/domain/repositories/alert_dismissals.dart';
 import 'package:smart_expense_tracker/core/info/app_version.dart';
 import 'package:smart_expense_tracker/features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
 import 'package:flutter/material.dart';
@@ -89,6 +90,7 @@ Future<LockSession> pumpRouterApp(
         RepositoryProvider<ExchangeRateRepository>.value(
           value: rates ?? FakeExchangeRateRepository(),
         ),
+        RepositoryProvider<AlertDismissals>.value(value: FakeAlertDismissals()),
         RepositoryProvider<AppVersion>.value(
           value: const AppVersion(name: '1.2.3', build: '45'),
         ),

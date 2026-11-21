@@ -33,6 +33,7 @@ First release. Nothing has been published to Google Play yet.
 - A "Repeat this expense" box when adding an expense, so a bill you just scanned or typed can repeat from then on (weekly, monthly or yearly). The expense you save is the first one
 - Enter an amount in another currency ("Different currency?" under the amount) and it is converted to your currency with the latest daily rate. The rate and its date are shown, and what you paid is kept with the expense. Rates are downloaded once a day and saved, so it also works offline
 - A "Safe to spend" card on the Summary for the current month: what you can spend each day for the rest of the month, worked out from your overall budget, what you have spent, and the recurring bills still to come. It turns red when the budget is already spoken for
+- Heads-up cards on the Summary, worked out on your phone: a possible duplicate charge, an unusually large expense for its category, and a category running well above a usual month. Each can be dismissed and does not come back
 - The app version is shown in Settings, so you can tell which one you have installed
 - Your currency now starts as the Kenyan shilling
 - A budget that is passed shows how much it is over (for example "KSh 1,510 over") instead of a percentage above 100

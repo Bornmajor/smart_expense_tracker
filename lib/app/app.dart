@@ -28,6 +28,8 @@ import '../features/expenses/domain/usecases/vendor_category_memory.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../features/insights/data/repositories/alert_dismissals_impl.dart';
+import '../features/insights/domain/repositories/alert_dismissals.dart';
 import '../features/export/data/repositories/share_plus_report_sharer.dart';
 import '../features/export/data/writers/bundled_fonts.dart';
 import '../features/export/data/writers/csv_report_writer.dart';
@@ -129,6 +131,9 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         widget.preferences,
         HttpRatesSource(http.Client()),
       );
+  late final AlertDismissals _alertDismissals = AlertDismissalsImpl(
+    widget.preferences,
+  );
   late final AppLifecycleListener _lifecycle;
 
   @override
@@ -174,6 +179,7 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
         RepositoryProvider<AppVersion>.value(value: widget.appVersion),
+        RepositoryProvider<AlertDismissals>.value(value: _alertDismissals),
         RepositoryProvider<BudgetRepository>(
           create: (_) => BudgetRepositoryImpl(widget.database),
         ),
