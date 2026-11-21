@@ -32,7 +32,13 @@ class EmptyState extends StatelessWidget {
           children: [
             Icon(icon, size: 48, color: context.scheme.onSurfaceVariant),
             const Gap(AppSpacing.lg),
-            Text(title, style: context.text.titleMedium),
+            // Centered too: a long title such as "No expenses in November 2026"
+            // wraps on a narrow phone, and its lines must stay centered.
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: context.text.titleMedium,
+            ),
             const Gap(AppSpacing.sm),
             Text(
               message,

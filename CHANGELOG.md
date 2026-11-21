@@ -49,6 +49,7 @@ First release. Nothing has been published to Google Play yet.
 - A heads-up when something you pay every month for the same amount (a subscription) changes price, up or down
 - The monthly budget is drawn as a dashed line on the year chart on Home, so months over it stand out
 - A clearer Summary and Home: amounts show in whole shillings at a glance (KSh 28,946, not KSh 28,946.09; lists, forms and exports keep the exact cents), the amount left is the bold figure on a budget, a category card has one bar (its budget when it has one, otherwise its share, labelled "of spending"), and each budget is listed once
+- Empty screens keep their words centered, including a long title that wraps on a narrow phone, and the month name above the Summary no longer overflows on a narrow phone
 - Onboarding asks for an optional first name for the greeting, and Settings has a "Your name" row to change it. The name stays on the phone
 - Your currency now starts as the Kenyan shilling
 - A budget that is passed shows how much it is over (for example "KSh 1,510 over") instead of a percentage above 100

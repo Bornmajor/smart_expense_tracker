@@ -141,25 +141,30 @@ class _Welcome extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Centered, like every other empty screen.
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.waving_hand_outlined, color: context.scheme.primary),
-            const Gap(AppSpacing.md),
-            Text(
-              'Let\'s add your first expense',
-              style: context.text.titleMedium,
-            ),
-            const Gap(AppSpacing.sm),
-            Text(
-              'Adding an expense is effortless: scan a receipt, type it in one '
-              'line, or paste an M-Pesa message.',
-              style: context.text.bodyMedium,
-            ),
-          ],
+        child: SizedBox(
+          width: double.infinity,
+          child: Column(
+            children: [
+              Icon(Icons.waving_hand_outlined, color: context.scheme.primary),
+              const Gap(AppSpacing.md),
+              Text(
+                'Let\'s add your first expense',
+                textAlign: TextAlign.center,
+                style: context.text.titleMedium,
+              ),
+              const Gap(AppSpacing.sm),
+              Text(
+                'Adding an expense is effortless: scan a receipt, type it in one '
+                'line, or paste an M-Pesa message.',
+                textAlign: TextAlign.center,
+                style: context.text.bodyMedium,
+              ),
+            ],
+          ),
         ),
       ),
     );
