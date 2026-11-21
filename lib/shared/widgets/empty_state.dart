@@ -10,11 +10,15 @@ class EmptyState extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.message,
+    this.action,
   });
 
   final IconData icon;
   final String title;
   final String message;
+
+  /// Something to do about it, such as a button, shown under the message.
+  final Widget? action;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +37,7 @@ class EmptyState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: context.text.bodyMedium,
             ),
+            if (action != null) ...[const Gap(AppSpacing.lg), action!],
           ],
         ),
       ),
