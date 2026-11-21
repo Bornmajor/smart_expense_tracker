@@ -6,6 +6,8 @@ import '../shared/widgets/app_snack_bar.dart';
 
 import '../features/expenses/presentation/widgets/add_expense_sheet.dart';
 import '../features/scan/domain/entities/recovered_photo.dart';
+import '../features/quick_add/domain/usecases/quick_add.dart';
+import '../features/quick_add/presentation/widgets/quick_add_sheet.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
 import '../features/scan/domain/repositories/receipt_photo_source.dart';
 import 'app_routes.dart';
@@ -57,6 +59,12 @@ class _AppShellState extends State<AppShell> {
     switch (choice) {
       case AddExpenseChoice.manual:
         context.push(AppRoutes.addExpense);
+      case AddExpenseChoice.quickAdd:
+        final text = await showQuickAddSheet(context);
+        if (text == null || !context.mounted) return;
+        final result = await context.read<QuickAdd>()(text);
+        if (!context.mounted) return;
+        context.push(AppRoutes.addExpense, extra: result);
       case AddExpenseChoice.scanFile:
         context.push(AppRoutes.scan, extra: ReceiptSource.file);
       case AddExpenseChoice.scanCamera:

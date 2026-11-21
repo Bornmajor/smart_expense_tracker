@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../scan/scan_features.dart';
 
-enum AddExpenseChoice { manual, scanCamera, scanFile }
+enum AddExpenseChoice { manual, quickAdd, scanCamera, scanFile }
 
 /// Bottom sheet asking how the user wants to add an expense.
 /// Manual entry is listed first because scanning is optional.
@@ -39,6 +39,12 @@ class _AddExpenseSheet extends StatelessWidget {
               title: const Text('Enter manually'),
               subtitle: const Text('Type in the details'),
               onTap: () => Navigator.pop(context, AddExpenseChoice.manual),
+            ),
+            ListTile(
+              leading: const Icon(Icons.bolt),
+              title: const Text('Type it in one line'),
+              subtitle: const Text('For example: lunch 350 at Java yesterday'),
+              onTap: () => Navigator.pop(context, AddExpenseChoice.quickAdd),
             ),
             ListTile(
               leading: const Icon(Icons.upload_file_outlined),

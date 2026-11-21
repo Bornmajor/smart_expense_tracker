@@ -39,5 +39,6 @@ First release. Nothing has been published to Google Play yet.
 - After a scan, the receipt can be opened large from a "View receipt" button at the top of the form (even when scrolled down), as well as from its thumbnail, with pinch and double-tap zoom. The thumbnail now shows that it can be enlarged
 - Tap a category (or a budget) on the Summary to see the expenses behind it for that month, with the month, count and total on top. You can edit or delete them from there
 - Search the expense list by vendor or title (every word has to match), and filter it by category, dates and amount. Active filters show as chips you can remove, with how many expenses match and what they add up to
+- Type an expense in one line, such as "lunch 350 at Java yesterday" or "ksh 1,200 airtime". The amount, date, vendor and title are read on your phone (also in Swahili: leo, jana, juzi), a category is suggested, and the expense form opens filled in for you to check
 - Your currency now starts as the Kenyan shilling
 - A budget that is passed shows how much it is over (for example "KSh 1,510 over") instead of a percentage above 100
