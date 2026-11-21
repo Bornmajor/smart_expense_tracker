@@ -40,7 +40,9 @@ class BudgetProgressTile extends StatelessWidget {
     final color = _color(context);
     final percent = (progress.fraction * 100).round();
     return Semantics(
-      label: '$name budget, $percent percent used, ${_caption()}',
+      label: progress.level == BudgetLevel.over
+          ? '$name budget, over by ${currency.format(-progress.remainingMinor)}'
+          : '$name budget, $percent percent used, ${_caption()}',
       excludeSemantics: true,
       child: Card(
         child: Padding(
@@ -81,7 +83,10 @@ class BudgetProgressTile extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Text('$percent%', style: context.text.bodySmall),
+                  // Past the limit the amount over says it all; a figure such as
+                  // 251% is harder to read than "KSh 1,510 over".
+                  if (progress.level != BudgetLevel.over)
+                    Text('$percent%', style: context.text.bodySmall),
                 ],
               ),
             ],
