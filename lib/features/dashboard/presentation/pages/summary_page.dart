@@ -124,6 +124,11 @@ class _SummaryContent extends StatelessWidget {
 
     // The expenses behind a row: one category in the month shown, or the whole
     // month when [categoryId] is null.
+    // Each category's budget, so its card can show how much is left.
+    final budgetFor = {
+      for (final progress in state.budgets)
+        if (!progress.budget.isOverall) progress.budget.scopeId: progress,
+    };
     void openExpenses(String? categoryId) => context.push(
       AppRoutes.filteredExpenses,
       extra: ExpenseFilter(categoryId: categoryId, month: state.month),
@@ -193,6 +198,7 @@ class _SummaryContent extends StatelessWidget {
               share: category.share,
               currency: currency,
               onTap: () => openExpenses(category.categoryId),
+              budget: budgetFor[category.categoryId],
             ),
             const Gap(AppSpacing.sm),
           ],

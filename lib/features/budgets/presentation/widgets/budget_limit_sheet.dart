@@ -20,6 +20,10 @@ Future<BudgetSheetResult?> showBudgetSheet(
   required Future<String?> Function(String amountText) onSave,
   Future<bool> Function()? onRemove,
   String initialText = '',
+
+  /// A line under the field, such as what was spent this month, to help pick a
+  /// number.
+  String? hint,
 }) => showModalBottomSheet<BudgetSheetResult>(
   context: context,
   isScrollControlled: true,
@@ -28,6 +32,7 @@ Future<BudgetSheetResult?> showBudgetSheet(
     title: title,
     currency: currency,
     initialText: initialText,
+    hint: hint,
     onSave: onSave,
     onRemove: onRemove,
   ),
@@ -38,6 +43,7 @@ class _BudgetLimitSheet extends StatefulWidget {
     required this.title,
     required this.currency,
     required this.initialText,
+    required this.hint,
     required this.onSave,
     required this.onRemove,
   });
@@ -45,6 +51,7 @@ class _BudgetLimitSheet extends StatefulWidget {
   final String title;
   final Currency currency;
   final String initialText;
+  final String? hint;
   final Future<String?> Function(String amountText) onSave;
   final Future<bool> Function()? onRemove;
 
@@ -141,6 +148,7 @@ class _BudgetLimitSheetState extends State<_BudgetLimitSheet> {
                       ? 'Monthly limit'
                       : 'Monthly limit ($code)',
                   errorText: _error,
+                  helperText: widget.hint,
                 ),
               ),
               const Gap(AppSpacing.lg),

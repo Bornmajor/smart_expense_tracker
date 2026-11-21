@@ -255,6 +255,17 @@ GoRouter createRouter({
                 filter: filter,
               ),
             ),
+            // For the budget at the top of a category's page.
+            BlocProvider(
+              create: (_) {
+                final budgets = context.read<BudgetRepository>();
+                return BudgetsCubit(
+                  budgets,
+                  setBudget: SetBudget(budgets),
+                  removeBudget: RemoveBudget(budgets),
+                );
+              },
+            ),
             BlocProvider(
               create: (_) =>
                   CategoriesCubit(context.read<CategoryRepository>()),
