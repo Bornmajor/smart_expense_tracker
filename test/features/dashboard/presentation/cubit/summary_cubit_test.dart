@@ -4,6 +4,8 @@ import 'package:smart_expense_tracker/core/errors/storage_exception.dart';
 import 'package:smart_expense_tracker/features/budgets/domain/entities/budget.dart';
 import 'package:smart_expense_tracker/features/budgets/domain/entities/budget_progress.dart';
 import 'package:smart_expense_tracker/features/dashboard/domain/entities/month_summary.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/entities/recurrence_frequency.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/entities/recurring_rule.dart';
 import 'package:smart_expense_tracker/features/dashboard/presentation/cubit/summary_cubit.dart';
 import 'package:smart_expense_tracker/features/dashboard/presentation/cubit/summary_state.dart';
 
@@ -14,14 +16,16 @@ void main() {
   final now = DateTime(2026, 11, 17);
   late FakeExpenseRepository repository;
   late FakeBudgetRepository budgets;
+  late FakeRecurringRepository recurring;
 
   SummaryCubit buildCubit() =>
-      SummaryCubit(repository, budgets, now: () => now);
+      SummaryCubit(repository, budgets, recurring, now: () => now);
 
   const emptySummary = MonthSummary(totalMinor: 0, count: 0, categories: []);
 
   setUp(() {
     budgets = FakeBudgetRepository();
+    recurring = FakeRecurringRepository();
     repository = FakeExpenseRepository(
       initial: [
         buildExpense(id: '1', amountMinor: 700, date: DateTime(2026, 11, 3)),
@@ -95,6 +99,65 @@ void main() {
       ],
     );
 
+    group('safe to spend', () {
+      const overall = Budget(scopeId: Budget.overallId, limitMinor: 100000);
+
+      Future<SummaryCubit> start() async {
+        budgets = FakeBudgetRepository(initial: const [overall]);
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        await pumpEventQueue();
+        return cubit;
+      }
+
+      test('is worked out for the current month', () async {
+        final cubit = await start();
+
+        final safe = (cubit.state as SummaryLoaded).safeToSpend!;
+        expect(safe.spentMinor, 700);
+        expect(safe.daysLeft, 14); // 17 to 30 November
+      });
+
+      test('sets aside a bill still to come this month', () async {
+        await recurring.save(
+          RecurringRule(
+            id: 'r1',
+            vendor: 'Landlord',
+            amountMinor: 20000,
+            categoryId: 'bills',
+            frequency: RecurrenceFrequency.monthly,
+            anchor: DateTime(2026, 11, 25),
+            nextDue: DateTime(2026, 11, 25),
+            createdAt: DateTime(2026, 10, 1),
+            updatedAt: DateTime(2026, 10, 1),
+          ),
+        );
+        final cubit = await start();
+
+        expect(
+          (cubit.state as SummaryLoaded).safeToSpend!.upcomingMinor,
+          20000,
+        );
+      });
+
+      test('is absent without an overall budget', () async {
+        budgets = FakeBudgetRepository();
+        final cubit = buildCubit();
+        addTearDown(cubit.close);
+        await pumpEventQueue();
+
+        expect((cubit.state as SummaryLoaded).safeToSpend, isNull);
+      });
+
+      test('is absent for a past month', () async {
+        final cubit = await start();
+
+        cubit.previousMonth();
+
+        expect((cubit.state as SummaryLoaded).safeToSpend, isNull);
+      });
+    });
+
     group('budgets', () {
       Future<SummaryCubit> start(List<Budget> list) async {
         budgets = FakeBudgetRepository(initial: list);
@@ -151,6 +214,7 @@ void main() {
         final cubit = SummaryCubit(
           repository,
           _BrokenBudgets(),
+          FakeRecurringRepository(),
           now: () => now,
         );
         addTearDown(cubit.close);
@@ -164,8 +228,12 @@ void main() {
 
     blocTest<SummaryCubit, SummaryState>(
       'emits an error state when the stream fails',
-      build: () =>
-          SummaryCubit(ErrorExpenseRepository(), budgets, now: () => now),
+      build: () => SummaryCubit(
+        ErrorExpenseRepository(),
+        budgets,
+        FakeRecurringRepository(),
+        now: () => now,
+      ),
       expect: () => const [SummaryError()],
     );
   });

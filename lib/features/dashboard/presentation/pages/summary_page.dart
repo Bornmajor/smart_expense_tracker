@@ -18,6 +18,9 @@ import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../cubit/summary_cubit.dart';
 import '../cubit/summary_state.dart';
 import '../widgets/budget_section.dart';
+import '../../../insights/presentation/cubit/alerts_cubit.dart';
+import '../../../insights/presentation/widgets/alerts_section.dart';
+import '../../../safe_to_spend/presentation/widgets/safe_to_spend_card.dart';
 import '../widgets/category_breakdown_tile.dart';
 import '../widgets/month_switcher.dart';
 import '../widgets/total_card.dart';
@@ -134,12 +137,22 @@ class _SummaryContent extends StatelessWidget {
           onPrevious: cubit.previousMonth,
           onNext: state.canGoNext ? cubit.nextMonth : null,
         ),
+        AlertsSection(
+          alerts: context.watch<AlertsCubit>().state,
+          categoryNames: names,
+          currency: currency,
+          onDismiss: context.read<AlertsCubit>().dismiss,
+        ),
         const Gap(AppSpacing.md),
         TotalCard(
           totalMinor: summary.totalMinor,
           count: summary.count,
           currency: currency,
         ),
+        if (state.safeToSpend != null) ...[
+          const Gap(AppSpacing.md),
+          SafeToSpendCard(safeToSpend: state.safeToSpend!, currency: currency),
+        ],
         const Gap(AppSpacing.xl),
         BudgetSection(
           progress: state.budgets,

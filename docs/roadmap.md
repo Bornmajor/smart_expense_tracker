@@ -2,25 +2,43 @@
 
 What is planned, in the order we intend to build it. Items move to the README feature list as they ship. Anything never built is deleted before release.
 
-## Up next
+**Current goal: a portfolio-quality app.** It should visibly solve the expense-tracking problem, be smart in ways a reviewer can see in a demo, and show careful engineering. Publishing to the Play Store is not the goal for now; the store work is parked below, and the GitHub release APK is enough for demos.
 
-1. **Release setup and early testers** (code done, your setup remains). The `dev`, `uat` and `main` flow is built: `uat` sends a build to Play internal testing and `main` sends one to production after approval (see [branching](branching.md) and [releasing](releasing.md)). Still needed: the GitHub secrets, a first internal release, and a **closed test with testers started early**, because new personal accounts have needed 12 testers for 14 days before production.
-2. **Scan a receipt with the camera** (the gallery route is done). The camera path, its "Use this photo / Retake" preview and the recovery of a photo lost to an app restart are built and tested, but switched off (`ScanFeatures.cameraEnabled` in `lib/features/scan/scan_features.dart`). On the Infinix X6528 test phone (3.8 GB RAM, swap nearly full) Android kills the app about two seconds after the system camera opens, which looks like a crash; the photo is recovered, but the restart is rough. Before turning it on: test a release build, read the kill reason from `adb logcat` right after a kill (the low-memory killer naming the app, or a vendor cleaner), and choose between keeping the system camera, an in-app camera (`camera` package) or Google's ML Kit document scanner. Recovery also needs wiring at app start, after the biometric unlock, so a recovered photo opens straight on the preview.
+## Now: test what is built
 
-**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt photo from the gallery, exporting a month as a PDF or CSV from the Summary screen, choosing a currency, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, and recurring expenses that are added when they come due.
+Push, merge to `dev`, promote to `uat`, and try the build on a few phones. Then use the app for real for about two weeks: real use finds what tests cannot, and gives honest stories for the case study.
 
-**Still to look at for export:** the PDF embeds the Inter font (`assets/fonts`), which covers Latin, Greek and Cyrillic. A vendor name in another script (Chinese, Arabic, and so on) would show as blank boxes in the PDF; the CSV is fine. Try the share sheet on a real phone before the first release. The privacy policy needs one line saying a report leaves the app only when the user shares it.
+- Camera scan and the recovery of a photo lost when Android closes the app (it is switched on; see `ScanFeatures.cameraEnabled`). On the Infinix X6528 test phone (3.8 GB RAM) Android can kill the app seconds after the system camera opens. Read the kill reason from `adb logcat` if it happens, and test a release build, not a debug one.
+- A PDF receipt, a large photo, a password-protected PDF, and the message shown when Android closes the app while a file is being chosen.
+- Recurring expenses and the Repeat box (on a dev build, Settings, Developer, Pretend today is, shows a bill being added on its due date).
+- The currency converter with and without internet, Safe to spend, and the heads-up cards.
+- Cold start time on a release build.
 
-**Privacy and store forms (before the first public release):**
-- Publish the privacy policy as a web page on Google Sites (not a PDF, not editable, public, no sign-in). The text is in [privacy-policy.md](privacy-policy.md), with an optional HTML version. Paste the text straight into the page rather than embedding it.
-- The "Privacy policy" row under Settings, About is built (it opens the page in the browser). The published address is set in `lib/core/links/app_links.dart` (the row stays hidden if it is ever emptied); Google requires the link inside the app as well as in the Play listing.
-- Data safety form: do not answer "no data collected". Google says ML Kit sends performance and usage metrics to Google, and the release app has the `INTERNET` permission because of it. Declare it as the form's questions require, and check the current form before submitting.
-- Decide about device backups: `android:allowBackup` is not set, so Android may back the app's data up to the user's Google account. The policy says so. Setting it to `false` would keep expenses out of backups, at the cost of not restoring them on a new phone.
-- Keep the policy, the Data safety form and the real behavior in step whenever something changes (for example when report export ships).
+## Build next, in this order
 
-**Before the first public release:** remove the temporary OCR test screen (`lib/features/scan/debug/`, its route in `app_router.dart` and the Developer entry in Settings). On iOS, ML Kit needs two manual Xcode steps (linker flags and the Latin model bundle) that are not done yet; see the plugin's README.
+All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model could be added later behind a switch, on phones that support it.
 
-## TODO: app PIN (brainstormed, not built)
+1. **Backup and restore to a file**, optionally protected with a password, plus CSV import. This replaces cloud sync: a new phone gets the data back without a server.
+2. **Search and filters** on the expense list: by text (vendor, title), category, date range and amount. The first thing a real user misses once there are many expenses.
+3. **Typed quick add.** Type one line such as "lunch 350 cafe yesterday" and get the form filled in. A plain Dart parser finds the amount (including "1.5k"), the date words (today, yesterday, a weekday, "on 12 Nov") and the vendor after "at"; the rest becomes the title. The category comes from vendor memory, then the word list used for scanning. It guesses, so the form still shows. English only to start; Swahili words such as "jana" could be added. Effort: small to medium.
+4. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
+5. **Better insights.** A spending-trend chart, this month against last month (and the biggest change), and an alert for a subscription that changed price. The heads-up cards and Safe to spend are built; these make the insights easier to see at a glance.
+6. **Polish.** Use the bundled Inter font in the app itself (the files are already in `assets/fonts` for the PDF; set `AppTypography.fontFamily` and declare them under `fonts:` in `pubspec.yaml`), the app PIN below as a fallback to biometrics, and a pass over empty states and onboarding.
+
+## Portfolio showcase (cheap, high value)
+
+Most reviewers will not install the app, so the repository has to show it.
+
+- **Sample-data mode** (dev flavor): fills the app with realistic expenses, budgets and recurring bills so screenshots and demos look alive, and so anyone can try it.
+- **README:** current screenshots (the old ones predate scanning files, converting, Safe to spend and alerts), a 60 to 90 second demo video or GIFs, CI and coverage badges, a one-line link to the release APK, and a short architecture diagram.
+- **Case study page:** the problem, the decisions and trade-offs (on-device ML Kit OCR instead of a cloud service, plain Dart insights, no account), the testing and release pipeline, and what would come next. This roadmap already holds most of the material.
+- Be plain about what "smart" means here: on-device receipt reading, a vendor-to-category memory, and rule-based insights. No cloud AI, by choice, for privacy.
+
+## Done
+
+**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt from a photo or a PDF in the Files app, the camera option with recovery of a photo lost to an app restart, exporting a month as a PDF or CSV, choosing a currency (the Kenyan shilling by default), converting an amount from another currency with the daily rate, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, recurring expenses added when they come due, a Repeat box on the add form, Safe to spend, heads-up cards for duplicates, large expenses and a category above normal, the app version in Settings, and a dev-only Pretend today is tool.
+
+## TODO: app PIN (brainstormed, not built; part of Polish above)
 
 An optional PIN of the app's own, besides the biometric and phone-screen-lock check that exists now. The main reason: on a shared phone, family may know the phone's PIN, and a separate app PIN keeps spending private from them. It also helps phones with no screen lock.
 
@@ -65,16 +83,9 @@ A bottom sheet that tells the user about a feature they have not tried, or a tas
 - A cubit shows the chosen prompt, and a sheet widget (with a widget test) is shown by the app shell.
 - Choices are saved in `shared_preferences`, one entry per prompt id.
 
-## Decided next, in this order
-
-All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model can be added later behind a switch, on phones that support it.
-
-1. **Safe-to-spend and smart alerts.** A card such as "KSh 850 a day left this month", from the overall budget, spending so far and upcoming recurring bills, with the sum shown. Plus in-app alerts: a possible duplicate charge, a subscription that changed price, a category running well above normal this month, an unusually large expense. Month against last month, and the biggest change. Alerts show when the app is open; push alerts from the background are not planned, because some phones kill background apps.
-2. **Backup and restore to a file**, optionally protected with a password, plus CSV import. This replaces cloud sync: a new phone gets the data back without a server.
-3. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
-4. **Rollover and rebalancing.** Optional: unused budget carries over, and the app suggests moving money from an unused category to an overspent one. Without a history of old limits, rollover uses today's limit.
-
 ## TODO: later, not planned yet
+
+**Rollover and rebalancing.** Optional: unused budget carries over, and the app suggests moving money from an unused category to an overspent one. Without a history of old limits, rollover uses today's limit.
 
 **More ways to get a PDF receipt in (not decided).** Choosing a PDF or photo from the Files app is done (page 1 of a PDF is read; a password-protected PDF is refused). Two ideas remain:
 - **Share a receipt to the app:** from the email app, Share and choose SpendWise IQ (PDF or image). It uses the same Android share-target code as M-Pesa capture, so build them together if both are done.
@@ -92,12 +103,26 @@ All of it is plain Dart on the phone: exact numbers worked out in code, shown wi
 - **App shortcuts.** Long-press the app icon for "Add expense" or "Scan receipt", using the `quick_actions` package. If the app lock is on, the shortcut waits until the user unlocks and then continues. Android shows only a few shortcuts and launchers differ a little. A home-screen widget is a separate, larger job with native code. Effort: small.
 - **Voice entry** is not planned: phone speech services can send audio to Google. If wanted, make it opt-in.
 
-## Later
+**More later ideas**
 
-- Search and filters.
-- More charts.
-
-- A different currency on each expense (today one currency is used for all amounts).
+- Auto-open the converter when a scan sees "$" or "USD" in the receipt.
+- A different currency on each expense (today one currency is used for all amounts, with the original amount kept on a converted expense).
 - Optional receipt attachment.
-- Use the bundled Inter font in the app itself (the files are already in assets/fonts for the PDF; set `AppTypography.fontFamily` and declare them under `fonts:` in pubspec.yaml).
 - Change the iOS bundle id from `com.example.smartExpenseTracker` when iOS work starts.
+
+## Parked: Play Store launch (not a goal for now)
+
+1. **Release setup and early testers** (code done, your setup remains). The `dev`, `uat` and `main` flow is built: `uat` sends a build to Play internal testing and `main` sends one to production after approval (see [branching](branching.md) and [releasing](releasing.md)). Still needed: the GitHub secrets, a first internal release, and a **closed test with testers started early**, because new personal accounts have needed 12 testers for 14 days before production.
+
+**Still to look at for export:** the PDF embeds the Inter font (`assets/fonts`), which covers Latin, Greek and Cyrillic. A vendor name in another script (Chinese, Arabic, and so on) would show as blank boxes in the PDF; the CSV is fine. Try the share sheet on a real phone before the first release. The privacy policy needs one line saying a report leaves the app only when the user shares it.
+
+**Privacy and store forms (before the first public release):**
+- Publish the privacy policy as a web page on Google Sites (not a PDF, not editable, public, no sign-in). The text is in [privacy-policy.md](privacy-policy.md), with an optional HTML version. Paste the text straight into the page rather than embedding it.
+- The "Privacy policy" row under Settings, About is built (it opens the page in the browser). The published address is set in `lib/core/links/app_links.dart` (the row stays hidden if it is ever emptied); Google requires the link inside the app as well as in the Play listing.
+- Data safety form: do not answer "no data collected". Google says ML Kit sends performance and usage metrics to Google, and the release app has the `INTERNET` permission because of it. Declare it as the form's questions require, and check the current form before submitting.
+- Decide about device backups: `android:allowBackup` is not set, so Android may back the app's data up to the user's Google account. The policy says so. Setting it to `false` would keep expenses out of backups, at the cost of not restoring them on a new phone.
+- Keep the policy, the Data safety form and the real behavior in step whenever something changes (for example when report export ships).
+
+**Before the first public release:** remove the temporary OCR test screen (`lib/features/scan/debug/`, its route in `app_router.dart` and the Developer entry in Settings). On iOS, ML Kit needs two manual Xcode steps (linker flags and the Latin model bundle) that are not done yet; see the plugin's README.
+
+Also for a public release: the Financial features declaration, a store listing with screenshots, and the Play Data safety form must mention the exchange-rate download (no personal data is sent).

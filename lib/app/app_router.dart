@@ -32,6 +32,8 @@ import '../features/export/presentation/cubit/export_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/recurring/domain/entities/recurring_rule.dart';
 import '../features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
+import '../features/insights/domain/repositories/alert_dismissals.dart';
+import '../features/insights/presentation/cubit/alerts_cubit.dart';
 import '../features/recurring/domain/repositories/recurring_repository.dart';
 import '../features/recurring/domain/usecases/generate_due_expenses.dart';
 import '../features/recurring/domain/usecases/save_recurring_rule.dart';
@@ -140,10 +142,17 @@ GoRouter createRouter({
                     create: (_) => SummaryCubit(
                       context.read<ExpenseRepository>(),
                       context.read<BudgetRepository>(),
+                      context.read<RecurringRepository>(),
                     ),
                   ),
                   BlocProvider(
                     create: (_) => ExportCubit(context.read<ExportMonth>()),
+                  ),
+                  BlocProvider(
+                    create: (_) => AlertsCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<AlertDismissals>(),
+                    ),
                   ),
                   BlocProvider(
                     create: (_) =>

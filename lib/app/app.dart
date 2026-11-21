@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/database/app_database.dart';
+import '../core/info/app_version.dart';
 import '../core/debug/test_clock.dart';
 import '../core/links/app_links.dart';
 import '../core/links/link_opener.dart';
@@ -27,6 +28,8 @@ import '../features/expenses/domain/usecases/vendor_category_memory.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../features/insights/data/repositories/alert_dismissals_impl.dart';
+import '../features/insights/domain/repositories/alert_dismissals.dart';
 import '../features/export/data/repositories/share_plus_report_sharer.dart';
 import '../features/export/data/writers/bundled_fonts.dart';
 import '../features/export/data/writers/csv_report_writer.dart';
@@ -67,6 +70,7 @@ class SpendWiseApp extends StatefulWidget {
     this.biometricAuthenticator,
     this.fallbackCurrency,
     this.exchangeRates,
+    this.appVersion = AppVersion.unknown,
   });
 
   final AppDatabase database;
@@ -80,6 +84,9 @@ class SpendWiseApp extends StatefulWidget {
 
   /// Replaced in tests; defaults to the real service.
   final ExchangeRateRepository? exchangeRates;
+
+  /// The installed version, shown in Settings. Replaced in tests.
+  final AppVersion appVersion;
 
   @override
   State<SpendWiseApp> createState() => _SpendWiseAppState();
@@ -124,6 +131,9 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         widget.preferences,
         HttpRatesSource(http.Client()),
       );
+  late final AlertDismissals _alertDismissals = AlertDismissalsImpl(
+    widget.preferences,
+  );
   late final AppLifecycleListener _lifecycle;
 
   @override
@@ -168,6 +178,8 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<RecurringRepository>.value(value: _recurring),
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
+        RepositoryProvider<AppVersion>.value(value: widget.appVersion),
+        RepositoryProvider<AlertDismissals>.value(value: _alertDismissals),
         RepositoryProvider<BudgetRepository>(
           create: (_) => BudgetRepositoryImpl(widget.database),
         ),
