@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
-import '../../../../core/utils/money.dart';
+import '../../../../core/utils/currency.dart';
+import '../../../../shared/widgets/amount_row.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/validation/expense_rules.dart';
 
@@ -14,11 +15,13 @@ class ExpenseTile extends StatelessWidget {
   const ExpenseTile({
     super.key,
     required this.expense,
+    required this.currency,
     this.categoryName,
     this.onTap,
   });
 
   final Expense expense;
+  final Currency currency;
 
   /// Shown on the second line. Left out when the category is not known.
   final String? categoryName;
@@ -32,6 +35,7 @@ class ExpenseTile extends StatelessWidget {
     if (_hasTitle && expense.vendor != ExpenseRules.unknownVendor)
       expense.vendor,
     ?categoryName,
+    if (expense.recurringRuleId != null) 'Repeats',
   ].join(' · ');
 
   @override
@@ -43,28 +47,22 @@ class ExpenseTile extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: AppSpacing.card,
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _hasTitle ? expense.title : expense.vendor,
-                      style: context.text.titleMedium,
-                    ),
-                    if (details.isNotEmpty) ...[
-                      const Gap(AppSpacing.xs),
-                      Text(details, style: context.text.bodySmall),
-                    ],
-                  ],
+          child: AmountRow(
+            leading: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _hasTitle ? expense.title : expense.vendor,
+                  style: context.text.titleMedium,
                 ),
-              ),
-              Text(
-                Money.format(expense.amountMinor),
-                style: context.text.titleMedium,
-              ),
-            ],
+                if (details.isNotEmpty) ...[
+                  const Gap(AppSpacing.xs),
+                  Text(details, style: context.text.bodySmall),
+                ],
+              ],
+            ),
+            amount: currency.format(expense.amountMinor),
+            amountStyle: context.text.titleMedium,
           ),
         ),
       ),

@@ -8,6 +8,8 @@ class ExpenseDraft extends Equatable {
     required this.date,
     required this.categoryId,
     this.title = '',
+    this.originalAmountMinor,
+    this.originalCurrency,
   });
 
   /// Optional. Blank means no title.
@@ -19,6 +21,19 @@ class ExpenseDraft extends Equatable {
   final DateTime date;
   final String? categoryId;
 
+  /// When [amountMinor] was converted from another currency: the amount the
+  /// user typed and its ISO code. Both are null for an ordinary expense.
+  final int? originalAmountMinor;
+  final String? originalCurrency;
+
   @override
-  List<Object?> get props => [title, vendor, amountMinor, date, categoryId];
+  List<Object?> get props => [
+    title,
+    vendor,
+    amountMinor,
+    date,
+    categoryId,
+    originalAmountMinor,
+    originalCurrency,
+  ];
 }

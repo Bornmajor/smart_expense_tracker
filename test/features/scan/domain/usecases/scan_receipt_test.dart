@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/usecases/vendor_category_memory.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
 import 'package:smart_expense_tracker/core/errors/result.dart';
 import 'package:smart_expense_tracker/core/errors/storage_exception.dart';
@@ -45,6 +46,7 @@ void main() {
     photos: photos,
     reader: reader,
     categories: categories,
+    memory: VendorCategoryMemory(FakeExpenseRepository()),
     // A fixed "today", so the test does not depend on the real date.
     parse: ParseReceipt(now: () => DateTime(2026, 11, 18)),
   );
@@ -131,9 +133,9 @@ void main() {
 
     test('asks for the camera or the gallery, as it was told', () async {
       await scan(ReceiptSource.camera);
-      await scan(ReceiptSource.gallery);
+      await scan(ReceiptSource.file);
 
-      expect(photos.picked, [ReceiptSource.camera, ReceiptSource.gallery]);
+      expect(photos.picked, [ReceiptSource.camera, ReceiptSource.file]);
     });
   });
 
@@ -178,7 +180,7 @@ void main() {
     test('has no photo to delete', () async {
       photos.path = null;
 
-      await scan(ReceiptSource.gallery);
+      await scan(ReceiptSource.file);
 
       expect(photos.discarded, isEmpty);
     });

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/usecases/vendor_category_memory.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
 import 'package:smart_expense_tracker/features/scan/domain/entities/ocr_line.dart';
 import 'package:smart_expense_tracker/features/scan/domain/entities/receipt_draft.dart';
@@ -59,6 +60,7 @@ void main() {
     photos: photos,
     reader: reader,
     categories: categories,
+    memory: VendorCategoryMemory(FakeExpenseRepository()),
     parse: ParseReceipt(now: () => DateTime(2026, 11, 18)),
   );
 
@@ -85,14 +87,14 @@ void main() {
     blocTest<ScanCubit, ScanState>(
       'is read straight away, with no preview',
       build: build,
-      act: (cubit) => cubit.start(ReceiptSource.gallery),
+      act: (cubit) => cubit.start(ReceiptSource.file),
       expect: () => [
         const ScanWorking(ScanStage.picking),
         const ScanWorking(ScanStage.reading),
         ScanDone(resultFor('/tmp/a.jpg')),
       ],
       verify: (_) {
-        expect(photos.picked, [ReceiptSource.gallery]);
+        expect(photos.picked, [ReceiptSource.file]);
         expect(photos.discarded, isEmpty, reason: 'the form still needs it');
       },
     );
@@ -174,7 +176,7 @@ void main() {
       'an unreadable photo is a failure, and the photo is deleted',
       build: build,
       setUp: () => reader.error = const ScanException(ScanProblem.unreadable),
-      act: (cubit) => cubit.start(ReceiptSource.gallery),
+      act: (cubit) => cubit.start(ReceiptSource.file),
       expect: () => const [
         ScanWorking(ScanStage.picking),
         ScanWorking(ScanStage.reading),
@@ -187,7 +189,7 @@ void main() {
       'an unexpected bug is reported, and the screen still ends in a failure',
       build: build,
       setUp: () => reader.error = StateError('a bug'),
-      act: (cubit) => cubit.start(ReceiptSource.gallery),
+      act: (cubit) => cubit.start(ReceiptSource.file),
       expect: () => const [
         ScanWorking(ScanStage.picking),
         ScanWorking(ScanStage.reading),
@@ -326,7 +328,7 @@ void main() {
       reader = slowReader;
       final cubit = build();
 
-      final starting = cubit.start(ReceiptSource.gallery);
+      final starting = cubit.start(ReceiptSource.file);
       await pumpEventQueue();
       expect(cubit.state, const ScanWorking(ScanStage.reading));
       await cubit.close();
@@ -338,7 +340,7 @@ void main() {
 
     test('after finishing does not delete the photo the form shows', () async {
       final cubit = build();
-      await cubit.start(ReceiptSource.gallery);
+      await cubit.start(ReceiptSource.file);
 
       await cubit.close();
 

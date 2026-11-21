@@ -5,7 +5,7 @@ import 'tables.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Categories, Expenses])
+@DriftDatabase(tables: [Categories, Expenses, Budgets, RecurringRules])
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
@@ -14,7 +14,7 @@ class AppDatabase extends _$AppDatabase {
       AppDatabase(driftDatabase(name: 'spendwise_iq'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -25,6 +25,20 @@ class AppDatabase extends _$AppDatabase {
     onUpgrade: (migrator, from, to) async {
       // Version 2 added an optional title. Existing expenses get no title.
       if (from < 2) await migrator.addColumn(expenses, expenses.title);
+      // Version 3 added budgets. Nothing to carry over: there were none.
+      if (from < 3) await migrator.createTable(budgets);
+      // Version 4 added recurring rules, and a marker on expenses saying which
+      // rule added them. Existing expenses were all added by hand.
+      if (from < 4) {
+        await migrator.createTable(recurringRules);
+        await migrator.addColumn(expenses, expenses.recurringRuleId);
+      }
+      // Version 5 added the original amount of a converted expense. Existing
+      // expenses were all entered in the one currency, so both stay empty.
+      if (from < 5) {
+        await migrator.addColumn(expenses, expenses.originalAmountMinor);
+        await migrator.addColumn(expenses, expenses.originalCurrency);
+      }
     },
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );

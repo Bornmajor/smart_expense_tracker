@@ -2,6 +2,7 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/errors/storage_exception.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
+import '../../../expenses/domain/usecases/vendor_category_memory.dart';
 import '../entities/receipt_source.dart';
 import '../entities/scan_result.dart';
 import '../parsing/receipt_rows.dart';
@@ -24,6 +25,7 @@ class ScanReceipt {
     required this._photos,
     required this._reader,
     required this._categories,
+    required this._memory,
     ParseReceipt? parse,
     this._suggest = const SuggestCategory(),
   }) : _parse = parse ?? ParseReceipt();
@@ -31,10 +33,11 @@ class ScanReceipt {
   final ReceiptPhotoSource _photos;
   final ReceiptTextReader _reader;
   final CategoryRepository _categories;
+  final VendorCategoryMemory _memory;
   final ParseReceipt _parse;
   final SuggestCategory _suggest;
 
-  /// Takes a photo with the camera, or picks one from the gallery.
+  /// Takes a photo with the camera, or picks a photo or PDF file.
   /// Returns null when the user backs out without choosing one.
   Future<Result<String>?> pick(ReceiptSource source) async {
     try {
@@ -55,16 +58,26 @@ class ScanReceipt {
     try {
       final lines = ReceiptRows.build(await _reader.read(photoPath));
       final draft = _parse(lines);
+      final availableIds = await _categoryIds();
+
+      // What the user did with this vendor before beats a guess from words.
+      final remembered = await _memory.categoryFor(
+        draft.vendor,
+        availableIds: availableIds,
+      );
 
       return Success(
         ScanResult(
           photoPath: photoPath,
           draft: draft,
-          suggestedCategoryId: _suggest(
-            vendor: draft.vendor,
-            lines: lines,
-            availableIds: await _categoryIds(),
-          ),
+          suggestedCategoryId:
+              remembered ??
+              _suggest(
+                vendor: draft.vendor,
+                lines: lines,
+                availableIds: availableIds,
+              ),
+          categoryFromHistory: remembered != null,
         ),
       );
     } on ScanException catch (e) {

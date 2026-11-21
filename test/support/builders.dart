@@ -8,6 +8,8 @@ Expense buildExpense({
   DateTime? date,
   String categoryId = 'food',
   DateTime? createdAt,
+  int? originalAmountMinor,
+  String? originalCurrency,
 }) {
   final day = date ?? DateTime(2026, 11, 16);
   return Expense(
@@ -19,5 +21,7 @@ Expense buildExpense({
     categoryId: categoryId,
     createdAt: createdAt ?? day,
     updatedAt: day,
+    originalAmountMinor: originalAmountMinor,
+    originalCurrency: originalCurrency,
   );
 }

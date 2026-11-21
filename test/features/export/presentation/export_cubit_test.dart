@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
 import 'package:smart_expense_tracker/features/export/domain/entities/export_format.dart';
 import 'package:smart_expense_tracker/features/export/domain/export_exception.dart';
@@ -25,6 +26,7 @@ void main() {
         pdf: FakeReportWriter('pdf'),
         csv: FakeReportWriter('csv'),
         sharer: sharer,
+        currency: () => Currency.none,
       ),
     );
   }

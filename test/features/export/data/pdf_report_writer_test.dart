@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
 import 'package:smart_expense_tracker/features/export/data/writers/pdf_report_writer.dart';
 import 'package:smart_expense_tracker/features/export/domain/entities/monthly_report.dart';
 
@@ -35,6 +36,7 @@ void main() {
       ),
     ],
     totalMinor: rows.fold(0, (sum, r) => sum + r.amountMinor),
+    currency: Currency.none,
   );
 
   /// How many pages the PDF has, read from its page tree.

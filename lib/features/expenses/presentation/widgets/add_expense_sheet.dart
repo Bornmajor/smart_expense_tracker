@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../scan/scan_features.dart';
 
-enum AddExpenseChoice { manual, scanCamera, scanGallery }
+enum AddExpenseChoice { manual, scanCamera, scanFile }
 
 /// Bottom sheet asking how the user wants to add an expense.
 /// Manual entry is listed first because scanning is optional.
@@ -41,10 +41,10 @@ class _AddExpenseSheet extends StatelessWidget {
               onTap: () => Navigator.pop(context, AddExpenseChoice.manual),
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choose a receipt photo'),
-              subtitle: const Text('Read the vendor, date, and total'),
-              onTap: () => Navigator.pop(context, AddExpenseChoice.scanGallery),
+              leading: const Icon(Icons.upload_file_outlined),
+              title: const Text('Choose a receipt file'),
+              subtitle: const Text('A photo or a PDF'),
+              onTap: () => Navigator.pop(context, AddExpenseChoice.scanFile),
             ),
             if (cameraEnabled)
               ListTile(

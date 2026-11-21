@@ -27,7 +27,7 @@ The APK is signed with a different key than the one Google Play uses, so a copy 
 
 ### Scanning a receipt
 
-Choose a receipt photo and the vendor, date and total are read on the phone and filled in. A note says what to double-check, and nothing is saved until you press Save.
+Choose a receipt photo or PDF and the vendor, date and total are read on the phone and filled in. A note says what to double-check, and nothing is saved until you press Save.
 
 <table>
   <tr>
@@ -38,7 +38,7 @@ Choose a receipt photo and the vendor, date and total are read on the phone and 
   </tr>
 </table>
 
-Captured on an Android phone with the dark theme. Scanning a receipt photo from the gallery works; taking the photo with the camera is still planned (see [Features](#features)).
+Captured on an Android phone with the dark theme. Scanning a receipt photo or PDF chosen from the Files app works; taking the photo with the camera is still planned (see [Features](#features)).
 
 ## The problem it solves
 
@@ -66,21 +66,24 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Add a category from the expense form with the New chip, without losing what you typed
 - [x] Monthly summary: total and spending by category, with a month switcher
 - [x] Settings: theme (system, light, dark) and About
-- [x] Optional fingerprint / face lock, turned on from Settings
+- [x] Optional app lock with fingerprint, face or the phone's screen lock, turned on from Settings. If the phone can no longer check you, the lock screen offers to turn the lock off, so you are never locked out of your own data
 - [x] Scan a receipt: choose a photo and the app reads the vendor, date and total on your phone, suggests a category, and fills the expense form for you to check before saving. The photo is temporary and is deleted afterwards
 - [x] Export a month as a PDF report or a CSV spreadsheet from the Summary screen, shared or saved from the system share sheet. Nothing is uploaded by the app; the file goes only where you send it
+- [x] Choose the currency amounts are shown in (it starts with the currency of the phone's country). Saved amounts are relabelled, not converted
+- [x] Remember the category you use for each vendor, so the next expense or scan starts with it
+- [x] Monthly budgets for each category and overall, with progress bars on the Summary that turn amber near the limit and red when passed
+- [x] Recurring expenses and subscriptions, added automatically when they come due (weekly, monthly or yearly), with what they add up to each month. A "Repeat this expense" box on the add form turns a scanned or typed bill into one
+- [x] Convert an amount in another currency with the latest daily rate (downloaded once a day, saved on the phone, rate and date shown)
 
 ### Planned
 
 **MVP: scan, track, export**
-- [ ] Scan a receipt with the camera (choosing a photo from the gallery works today; see the [roadmap](docs/roadmap.md))
+- [ ] Scan a receipt with the camera (choosing a photo or PDF from the Files app works today; see the [roadmap](docs/roadmap.md))
 
 **After the MVP** (see the [roadmap](docs/roadmap.md) for the build order)
 - [ ] Prompt sheet that introduces features and pending tasks, with "Remind me later" and "Not interested"
-- [ ] Budgets with progress and alerts
 - [ ] Search and filters (date, category, amount, vendor)
 - [ ] More charts and insights
-- [ ] Recurring expenses
 - [ ] Multi-currency
 - [ ] Optional receipt attachment
 
@@ -100,6 +103,8 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 | On-device OCR | `google_mlkit_text_recognition` (ML Kit) | Planned |
 | Charts | `fl_chart` (if a chart is added) | Planned |
 | Export | `pdf`, `share_plus` (CSV is written by hand) | In use |
+| Receipt files | `file_selector` (Files app), `pdfx` (draws a PDF page) | In use |
+| Exchange rates | `http` (one daily request to ExchangeRate-API) | In use |
 
 ## Architecture
 

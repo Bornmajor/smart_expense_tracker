@@ -9,7 +9,7 @@ import 'scan_state.dart';
 /// Runs one scan, step by step, and tells the screen where it is.
 ///
 /// A photo from the camera stops at [ScanPreview] so the user can use it or
-/// retake it. A photo from the gallery was chosen on purpose, so it is read
+/// retake it. A file was chosen on purpose, so it is read
 /// straight away.
 class ScanCubit extends Cubit<ScanState> {
   ScanCubit(this._scan) : super(const ScanWorking(ScanStage.picking));
@@ -19,11 +19,11 @@ class ScanCubit extends Cubit<ScanState> {
   /// Where the current photo came from, so Retake opens the same place.
   ReceiptSource _source = ReceiptSource.camera;
 
-  /// True while the camera or gallery is open or a photo is being read. A
+  /// True while the camera or Files app is open or a photo is being read. A
   /// second tap during that time is ignored.
   bool _running = false;
 
-  /// Opens the camera or the gallery.
+  /// Opens the camera or the Files app.
   Future<void> start(ReceiptSource source) => _run(() async {
     _source = source;
     emit(const ScanWorking(ScanStage.picking));
@@ -65,7 +65,7 @@ class ScanCubit extends Cubit<ScanState> {
   }
 
   /// The user does not want the previewed photo: delete it and open the camera
-  /// (or the gallery) again.
+  /// (or the Files app) again.
   Future<void> retake() async {
     final current = state;
     if (current is! ScanPreview || _running) return;

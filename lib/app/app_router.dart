@@ -3,6 +3,11 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/budgets/domain/repositories/budget_repository.dart';
+import '../features/budgets/domain/usecases/remove_budget.dart';
+import '../features/budgets/domain/usecases/set_budget.dart';
+import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/budgets/presentation/pages/budgets_page.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/domain/usecases/create_category.dart';
 import '../features/categories/domain/usecases/delete_category.dart';
@@ -17,6 +22,7 @@ import '../features/expenses/domain/entities/expense.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
 import '../features/expenses/domain/usecases/update_expense.dart';
+import '../features/expenses/domain/usecases/vendor_category_memory.dart';
 import '../features/expenses/presentation/cubit/expense_form_cubit.dart';
 import '../features/expenses/presentation/cubit/expense_list_cubit.dart';
 import '../features/expenses/presentation/pages/expense_form_page.dart';
@@ -24,7 +30,18 @@ import '../features/expenses/presentation/pages/expense_list_page.dart';
 import '../features/export/domain/usecases/export_month.dart';
 import '../features/export/presentation/cubit/export_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/recurring/domain/entities/recurring_rule.dart';
+import '../features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
+import '../features/recurring/domain/repositories/recurring_repository.dart';
+import '../features/recurring/domain/usecases/generate_due_expenses.dart';
+import '../features/recurring/domain/usecases/save_recurring_rule.dart';
+import '../features/recurring/domain/usecases/save_repeating_expense.dart';
+import '../features/recurring/presentation/cubit/recurring_cubit.dart';
+import '../features/recurring/presentation/cubit/recurring_form_cubit.dart';
+import '../features/recurring/presentation/pages/recurring_form_page.dart';
+import '../features/recurring/presentation/pages/recurring_page.dart';
 import '../features/scan/debug/ocr_debug_page.dart';
+import '../features/scan/domain/entities/recovered_photo.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
 import '../features/scan/domain/entities/scan_result.dart';
 import '../features/scan/domain/repositories/receipt_photo_source.dart';
@@ -120,8 +137,10 @@ GoRouter createRouter({
               builder: (context, state) => MultiBlocProvider(
                 providers: [
                   BlocProvider(
-                    create: (_) =>
-                        SummaryCubit(context.read<ExpenseRepository>()),
+                    create: (_) => SummaryCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<BudgetRepository>(),
+                    ),
                   ),
                   BlocProvider(
                     create: (_) => ExportCubit(context.read<ExportMonth>()),
@@ -167,19 +186,87 @@ GoRouter createRouter({
       },
     ),
     GoRoute(
+      path: AppRoutes.recurring,
+      builder: (context, state) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => RecurringCubit(context.read<RecurringRepository>()),
+          ),
+          BlocProvider(
+            create: (_) => CategoriesCubit(context.read<CategoryRepository>()),
+          ),
+        ],
+        child: const RecurringPage(),
+      ),
+    ),
+    GoRoute(
+      path: AppRoutes.recurringForm,
+      builder: (context, state) {
+        final repository = context.read<RecurringRepository>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => RecurringFormCubit(
+                saveRule: SaveRecurringRule(repository),
+                repository: repository,
+                generateDue: context.read<GenerateDueExpenses>(),
+                original: state.extra as RecurringRule?,
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: RecurringFormPage(original: state.extra as RecurringRule?),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.budgets,
+      builder: (context, state) {
+        final budgets = context.read<BudgetRepository>();
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => BudgetsCubit(
+                budgets,
+                setBudget: SetBudget(budgets),
+                removeBudget: RemoveBudget(budgets),
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: const BudgetsPage(),
+        );
+      },
+    ),
+    GoRoute(
       path: AppRoutes.scan,
       // The photo source arrives as `extra`; without it there is nothing to do.
       redirect: (context, state) =>
-          state.extra is ReceiptSource ? null : AppRoutes.expenses,
+          state.extra is ReceiptSource || state.extra is RecoveredPhoto
+          ? null
+          : AppRoutes.expenses,
       builder: (context, state) => BlocProvider(
         create: (_) => ScanCubit(
           ScanReceipt(
             photos: context.read<ReceiptPhotoSource>(),
             reader: context.read<ReceiptTextReader>(),
             categories: context.read<CategoryRepository>(),
+            memory: context.read<VendorCategoryMemory>(),
           ),
         ),
-        child: ScanPage(source: state.extra! as ReceiptSource),
+        child: switch (state.extra) {
+          final RecoveredPhoto photo => ScanPage(
+            source: ReceiptSource.camera,
+            recoveredPhoto: photo,
+          ),
+          _ => ScanPage(source: state.extra! as ReceiptSource),
+        },
       ),
     ),
     GoRoute(
@@ -225,6 +312,10 @@ Widget _expenseForm(
         create: (_) => ExpenseFormCubit(
           saveExpense: SaveExpense(expenses),
           updateExpense: UpdateExpense(expenses),
+          saveRepeating: SaveRepeatingExpense(
+            context.read<RecurringRepository>(),
+          ),
+          rates: context.read<ExchangeRateRepository>(),
           repository: expenses,
           original: original,
         ),

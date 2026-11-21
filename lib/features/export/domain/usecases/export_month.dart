@@ -1,6 +1,7 @@
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/errors/storage_exception.dart';
+import '../../../../core/utils/currency.dart';
 import '../../../categories/domain/repositories/category_repository.dart';
 import '../../../expenses/domain/repositories/expense_repository.dart';
 import '../entities/export_format.dart';
@@ -17,6 +18,7 @@ class ExportMonth {
     required this._pdf,
     required this._csv,
     required this._sharer,
+    required this._currency,
     this._build = const BuildMonthlyReport(),
   });
 
@@ -25,6 +27,10 @@ class ExportMonth {
   final ReportWriter _pdf;
   final ReportWriter _csv;
   final ReportSharer _sharer;
+
+  /// The currency to write amounts in, read each time because the user can
+  /// change it in Settings.
+  final Currency Function() _currency;
   final BuildMonthlyReport _build;
 
   /// [month] is any day in the month to export.
@@ -33,7 +39,7 @@ class ExportMonth {
       final expenses = await _expenses.watchAll().first;
       final categories = await _categories.getAll();
 
-      final report = _build(expenses, categories, month);
+      final report = _build(expenses, categories, month, currency: _currency());
       if (report.rows.isEmpty) {
         return const Failure(ExportFailure(ExportProblem.nothingToExport));
       }

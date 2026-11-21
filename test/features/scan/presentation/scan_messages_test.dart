@@ -108,6 +108,29 @@ void main() {
       );
     });
 
+    test('a category from earlier expenses is said to come from them', () {
+      final notes = scanReviewNotes(
+        ScanResult(
+          photoPath: '/tmp/receipt.jpg',
+          draft: full,
+          suggestedCategoryId: 'food',
+          categoryFromHistory: true,
+        ),
+      );
+
+      expect(
+        notes,
+        contains(
+          'We chose the category you used for this vendor before. '
+          'Change it if it\'s wrong.',
+        ),
+      );
+      expect(
+        notes,
+        isNot(contains('We suggested a category. Change it if it\'s wrong.')),
+      );
+    });
+
     test('no suggestion, no note about one', () {
       final notes = scanReviewNotes(scan(full));
 

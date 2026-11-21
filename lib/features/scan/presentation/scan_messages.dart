@@ -9,6 +9,12 @@ String scanFailureMessage(ScanProblem problem) => switch (problem) {
   ScanProblem.cameraUnavailable =>
     'The camera or your photos could not be opened. Try again, or enter the '
         'expense by hand.',
+  ScanProblem.unsupportedFile =>
+    'That file is not a photo or a PDF. Choose a photo or a PDF receipt, or '
+        'enter the expense by hand.',
+  ScanProblem.cannotOpenFile =>
+    'That file could not be opened. A PDF may be protected with a password or '
+        'damaged. Try another file, or enter the expense by hand.',
   ScanProblem.unreadable =>
     'We couldn\'t read this receipt. A clearer, well-lit photo usually helps. '
         'You can also enter the expense by hand.',
@@ -36,6 +42,9 @@ List<String> scanReviewNotes(ScanResult scan) {
     if (draft.date == null)
       'We couldn\'t read the date, so today\'s date is filled in.',
     if (scan.suggestedCategoryId != null)
-      'We suggested a category. Change it if it\'s wrong.',
+      scan.categoryFromHistory
+          ? 'We chose the category you used for this vendor before. '
+                'Change it if it\'s wrong.'
+          : 'We suggested a category. Change it if it\'s wrong.',
   ];
 }

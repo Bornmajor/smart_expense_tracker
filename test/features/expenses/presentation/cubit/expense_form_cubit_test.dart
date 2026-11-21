@@ -8,25 +8,67 @@ import 'package:smart_expense_tracker/features/expenses/domain/usecases/update_e
 import 'package:smart_expense_tracker/features/expenses/domain/validation/expense_validation.dart';
 import 'package:smart_expense_tracker/features/expenses/presentation/cubit/expense_form_cubit.dart';
 import 'package:smart_expense_tracker/features/expenses/presentation/cubit/expense_form_state.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/entities/recurrence_frequency.dart';
+import 'package:smart_expense_tracker/features/recurring/domain/usecases/save_repeating_expense.dart';
 
 import '../../../../support/builders.dart';
 import '../../../../support/fakes.dart';
 
 void main() {
   late FakeExpenseRepository repository;
+  late FakeRecurringRepository recurring;
+  late FakeExchangeRateRepository rates;
   final today = DateTime(2026, 11, 17);
   final clock = DateTime(2026, 11, 17, 9);
 
   ExpenseFormCubit buildCubit({Expense? original}) => ExpenseFormCubit(
     saveExpense: SaveExpense(repository, now: () => clock),
     updateExpense: UpdateExpense(repository, now: () => clock),
+    saveRepeating: SaveRepeatingExpense(recurring, now: () => clock),
+    rates: rates,
     repository: repository,
     original: original,
   );
 
-  setUp(() => repository = FakeExpenseRepository());
+  setUp(() {
+    repository = FakeExpenseRepository();
+    recurring = FakeRecurringRepository();
+    rates = FakeExchangeRateRepository();
+  });
 
   group('ExpenseFormCubit adding', () {
+    blocTest<ExpenseFormCubit, ExpenseFormState>(
+      'with repeat on, saves the expense and a rule for the next date',
+      build: buildCubit,
+      act: (cubit) => cubit.submit(
+        vendor: 'Landlord',
+        amountText: '50000',
+        date: today,
+        categoryId: 'housing',
+        repeat: RecurrenceFrequency.monthly,
+      ),
+      verify: (_) {
+        expect(repository.saved, isEmpty);
+        expect(
+          recurring.created.single.recurringRuleId,
+          recurring.rules.single.id,
+        );
+        expect(recurring.rules.single.nextDue, DateTime(2026, 12, 17));
+      },
+    );
+
+    blocTest<ExpenseFormCubit, ExpenseFormState>(
+      'with repeat off, makes no rule',
+      build: buildCubit,
+      act: (cubit) => cubit.submit(
+        vendor: 'Shell',
+        amountText: '45',
+        date: today,
+        categoryId: 'transport',
+      ),
+      verify: (_) => expect(recurring.rules, isEmpty),
+    );
+
     blocTest<ExpenseFormCubit, ExpenseFormState>(
       'saves a valid expense and ends in the saved state',
       build: buildCubit,

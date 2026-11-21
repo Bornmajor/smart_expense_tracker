@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
 import 'package:smart_expense_tracker/core/errors/result.dart';
+import 'package:smart_expense_tracker/features/security/domain/entities/auth_outcome.dart';
 import 'package:smart_expense_tracker/features/security/domain/usecases/enable_biometric_lock.dart';
 
 import '../../../support/fakes.dart';
@@ -31,6 +32,18 @@ void main() {
         const BiometricUnavailableFailure(),
       );
       expect(authenticator.authenticateCalls, 0);
+      expect(security.enabled, isFalse);
+    });
+
+    test('refuses when the phone turns out to be unable to check', () async {
+      final result = await useCase(
+        FakeBiometricAuthenticator()..outcome = AuthOutcome.unavailable,
+      )();
+
+      expect(
+        (result as Failure<void>).failure,
+        const BiometricUnavailableFailure(),
+      );
       expect(security.enabled, isFalse);
     });
 

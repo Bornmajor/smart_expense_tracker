@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/result.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_x.dart';
+import '../../../../core/utils/currency.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../../categories/domain/entities/category.dart';
@@ -13,13 +15,19 @@ import '../../../categories/presentation/cubit/category_actions_cubit.dart';
 import '../../../categories/presentation/widgets/category_name_sheet.dart';
 import '../../../scan/domain/entities/scan_result.dart';
 import '../../../scan/presentation/widgets/scan_review_panel.dart';
+import '../../../currency_conversion/domain/entities/exchange_rates.dart';
+import '../../../currency_conversion/domain/repositories/exchange_rate_repository.dart';
+import '../../../recurring/domain/entities/recurrence_frequency.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/expense.dart';
+import '../../domain/usecases/vendor_category_memory.dart';
 import '../../domain/validation/expense_rules.dart';
 import '../../domain/validation/expense_validation.dart';
 import '../cubit/expense_form_cubit.dart';
 import '../cubit/expense_form_state.dart';
 import '../validation_messages.dart';
 import '../widgets/category_picker.dart';
+import '../widgets/currency_converter.dart';
 import '../widgets/date_field.dart';
 
 /// The form for adding an expense, or editing one when [original] is given.
@@ -52,6 +60,23 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   late DateTime _date;
   late String? _categoryId;
 
+  /// True when the user wants this expense to repeat. Only offered when adding.
+  /// The other currency the amount is written in, or null for the app's own.
+  Currency? _from;
+  ExchangeRates? _rates;
+
+  bool _repeat = false;
+  RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
+  final _vendorFocus = FocusNode();
+
+  /// True while the category was filled in from the user's earlier expenses
+  /// at this vendor, and not chosen by them. Only then may a new vendor
+  /// replace it; a category the user picked is never changed behind their back.
+  bool _categoryIsAuto = false;
+
+  /// Says why the category was filled in. Gone once the user picks one.
+  String? _categoryHint;
+
   bool get _isEditing => widget.original != null;
 
   @override
@@ -79,16 +104,66 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     );
     _date = original?.date ?? draft?.date ?? DateTime.now();
     _categoryId = original?.categoryId ?? scan?.suggestedCategoryId;
+    // A suggestion from the scan can be replaced if the user fixes the vendor.
+    _categoryIsAuto = scan?.suggestedCategoryId != null;
+    if (!_isEditing) _vendorFocus.addListener(_onVendorFocusChanged);
   }
 
   @override
   void dispose() {
     final scan = widget.scan;
     if (scan != null) widget.discardPhoto?.call(scan.photoPath);
+    _vendorFocus.dispose();
     _title.dispose();
     _vendor.dispose();
     _amount.dispose();
     super.dispose();
+  }
+
+  /// When the user leaves the vendor field, picks the category they gave this
+  /// vendor before. It never replaces a category the user chose themselves.
+  void _onVendorFocusChanged() {
+    if (!_vendorFocus.hasFocus) _suggestCategory();
+  }
+
+  Future<void> _suggestCategory() async {
+    if (_categoryId != null && !_categoryIsAuto) return;
+
+    final vendor = _vendor.text.trim();
+    final id = await context.read<VendorCategoryMemory>().categoryFor(vendor);
+
+    // The user may have picked a category, or left, while this was running.
+    if (!mounted || id == null || id == _categoryId) return;
+    if (_categoryId != null && !_categoryIsAuto) return;
+
+    setState(() {
+      _categoryId = id;
+      _categoryIsAuto = true;
+      _categoryHint = 'Chosen from your earlier expenses at $vendor.';
+    });
+  }
+
+  void _selectCategory(String id) {
+    setState(() {
+      _categoryId = id;
+      _categoryIsAuto = false;
+      _categoryHint = null;
+    });
+  }
+
+  Future<void> _chooseCurrency(Currency appCurrency) async {
+    final repository = context.read<ExchangeRateRepository>();
+    final picked = await showOtherCurrencySheet(
+      context,
+      appCurrency: appCurrency,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _from = picked);
+    // Shows the saved rates at once, then newer ones if they arrive.
+    final saved = await repository.saved();
+    if (mounted) setState(() => _rates = saved);
+    final fresh = await repository.refresh();
+    if (mounted) setState(() => _rates = fresh);
   }
 
   void _submit() {
@@ -98,6 +173,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       amountText: _amount.text,
       date: _date,
       categoryId: _categoryId,
+      repeat: _repeat ? _frequency : null,
+      fromCurrency: _from?.code,
+      toCurrency: context.read<SettingsCubit>().state.currency.code,
     );
   }
 
@@ -127,9 +205,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     );
 
     final category = chosen;
-    if (category != null && mounted) {
-      setState(() => _categoryId = category.id);
-    }
+    if (category != null && mounted) _selectCategory(category.id);
   }
 
   Future<void> _confirmDelete() async {
@@ -175,6 +251,18 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     }
   }
 
+  /// For an expense that was converted: what was actually paid.
+  String? _originalNote() {
+    final original = widget.original;
+    final minor = original?.originalAmountMinor;
+    final code = original?.originalCurrency;
+    if (minor == null || code == null) return null;
+    final text =
+        Currency.byCode(code)?.formatWithCode(minor) ??
+        '$code ${Money.format(minor)}';
+    return 'Originally $text';
+  }
+
   String? _error(ExpenseFormState state, String field) {
     final code = state.fieldErrors[field];
     return code == null ? null : expenseErrorMessage(code);
@@ -186,6 +274,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       listener: _onStateChanged,
       builder: (context, state) {
         final saving = state.status == ExpenseFormStatus.saving;
+        final currency = context.select<SettingsCubit, Currency>(
+          (cubit) => cubit.state.currency,
+        );
         return Scaffold(
           appBar: AppBar(
             title: Text(_isEditing ? 'Edit expense' : 'Add expense'),
@@ -234,6 +325,8 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       const Gap(AppSpacing.md),
                       TextField(
                         controller: _vendor,
+                        focusNode: _vendorFocus,
+                        textInputAction: TextInputAction.next,
                         textCapitalization: TextCapitalization.words,
                         decoration: const InputDecoration(
                           labelText: 'Vendor (optional)',
@@ -242,6 +335,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       const Gap(AppSpacing.md),
                       TextField(
                         controller: _amount,
+                        onChanged: _from == null
+                            ? null
+                            : (_) => setState(() {}),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -249,10 +345,26 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                         ],
                         decoration: InputDecoration(
-                          labelText: 'Amount',
+                          labelText: _from != null
+                              ? 'Amount (${_from!.code})'
+                              : currency.code.isEmpty
+                              ? 'Amount'
+                              : 'Amount (${currency.code})',
                           errorText: _error(state, ExpenseField.amount),
+                          helperText: _originalNote(),
                         ),
                       ),
+                      // Needs a currency of its own to convert into, and is for new
+                      // expenses only: an edit keeps the figure it already has.
+                      if (!_isEditing && currency.code.isNotEmpty)
+                        CurrencyConverter(
+                          appCurrency: currency,
+                          from: _from,
+                          rates: _rates,
+                          amountText: _amount.text,
+                          onChoose: () => _chooseCurrency(currency),
+                          onClear: () => setState(() => _from = null),
+                        ),
                       const Gap(AppSpacing.md),
                       DateField(
                         date: _date,
@@ -263,9 +375,25 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       CategoryPicker(
                         selectedId: _categoryId,
                         errorText: _error(state, ExpenseField.category),
-                        onSelected: (id) => setState(() => _categoryId = id),
+                        onSelected: _selectCategory,
                         onAdd: _addCategory,
                       ),
+                      if (_categoryHint != null) ...[
+                        const Gap(AppSpacing.sm),
+                        Text(_categoryHint!, style: context.text.bodySmall),
+                      ],
+                      if (!_isEditing) ...[
+                        const Gap(AppSpacing.md),
+                        _RepeatOption(
+                          repeat: _repeat,
+                          frequency: _frequency,
+                          enabled: !saving,
+                          onRepeatChanged: (value) =>
+                              setState(() => _repeat = value),
+                          onFrequencyChanged: (value) =>
+                              setState(() => _frequency = value),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -287,6 +415,67 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
           ),
         );
       },
+    );
+  }
+}
+
+/// "Repeat this expense", for a bill that comes back, with how often.
+class _RepeatOption extends StatelessWidget {
+  const _RepeatOption({
+    required this.repeat,
+    required this.frequency,
+    required this.enabled,
+    required this.onRepeatChanged,
+    required this.onFrequencyChanged,
+  });
+
+  final bool repeat;
+  final RecurrenceFrequency frequency;
+  final bool enabled;
+  final ValueChanged<bool> onRepeatChanged;
+  final ValueChanged<RecurrenceFrequency> onFrequencyChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          controlAffinity: ListTileControlAffinity.leading,
+          value: repeat,
+          onChanged: enabled
+              ? (value) => onRepeatChanged(value ?? false)
+              : null,
+          title: const Text('Repeat this expense'),
+          subtitle: const Text('Add it again automatically, like a bill'),
+        ),
+        if (repeat)
+          SegmentedButton<RecurrenceFrequency>(
+            // The tick would take room from the word, so the filled segment
+            // alone shows the choice.
+            showSelectedIcon: false,
+            style: SegmentedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
+            ),
+            segments: [
+              for (final option in RecurrenceFrequency.values)
+                ButtonSegment(
+                  value: option,
+                  // One line that shrinks to fit instead of wrapping, so a larger
+                  // text size never pushes a word onto a second line.
+                  label: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(option.label, maxLines: 1, softWrap: false),
+                  ),
+                ),
+            ],
+            selected: {frequency},
+            onSelectionChanged: enabled
+                ? (value) => onFrequencyChanged(value.first)
+                : null,
+          ),
+      ],
     );
   }
 }

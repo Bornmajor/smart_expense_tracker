@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
 import 'package:smart_expense_tracker/core/theme/app_theme.dart';
 import 'package:smart_expense_tracker/features/expenses/presentation/widgets/expense_tile.dart';
 
@@ -22,6 +23,7 @@ void main() {
             vendor: vendor,
             amountMinor: 123456,
           ),
+          currency: Currency.none,
           categoryName: categoryName,
           onTap: onTap,
         ),

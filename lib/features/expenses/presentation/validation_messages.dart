@@ -6,6 +6,9 @@ String expenseErrorMessage(String code) => switch (code) {
   ExpenseError.amountRequired => 'Enter an amount',
   ExpenseError.amountMustBePositive => 'Amount must be greater than zero',
   ExpenseError.amountInvalid => 'Enter a valid amount, like 12.50',
+  ExpenseError.ratesUnavailable =>
+    'No exchange rates yet. Connect to the internet once, or remove the '
+        'other currency and enter the amount in yours.',
   ExpenseError.dateInFuture => 'Date can\'t be in the future',
   ExpenseError.categoryRequired => 'Choose a category',
   ExpenseError.titleTooLong =>

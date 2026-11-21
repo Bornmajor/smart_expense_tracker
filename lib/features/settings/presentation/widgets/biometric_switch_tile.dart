@@ -17,7 +17,7 @@ class BiometricSwitchTile extends StatelessWidget {
         context.showInfo('Biometric lock turned off');
       case SecurityFeedback.unavailable:
         context.showWarning(
-          'Set up a fingerprint or face unlock on this device first',
+          'Set up a screen lock, fingerprint or face on this phone first',
         );
       case SecurityFeedback.failed:
         context.showError('Couldn\'t verify it\'s you. Try again.');

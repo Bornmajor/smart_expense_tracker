@@ -4,6 +4,10 @@ import '../../../../core/errors/app_failure.dart';
 import '../../../../core/errors/result.dart';
 import '../../../../core/errors/storage_exception.dart';
 import '../../../../core/utils/money.dart';
+import '../../../currency_conversion/domain/repositories/exchange_rate_repository.dart';
+import '../../../currency_conversion/domain/usecases/convert_amount.dart';
+import '../../../recurring/domain/entities/recurrence_frequency.dart';
+import '../../../recurring/domain/usecases/save_repeating_expense.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_draft.dart';
 import '../../domain/repositories/expense_repository.dart';
@@ -18,12 +22,16 @@ class ExpenseFormCubit extends Cubit<ExpenseFormState> {
   ExpenseFormCubit({
     required this._saveExpense,
     required this._updateExpense,
+    required this._saveRepeating,
+    required this._rates,
     required this._repository,
     this.original,
   }) : super(const ExpenseFormState());
 
   final SaveExpense _saveExpense;
   final UpdateExpense _updateExpense;
+  final SaveRepeatingExpense _saveRepeating;
+  final ExchangeRateRepository _rates;
   final ExpenseRepository _repository;
   final Expense? original;
 
@@ -35,13 +43,49 @@ class ExpenseFormCubit extends Cubit<ExpenseFormState> {
     required String amountText,
     required DateTime date,
     required String? categoryId,
+
+    /// How often to repeat the expense, or null for a one-off. Only used when
+    /// adding; an expense that is being edited is never made to repeat here.
+    RecurrenceFrequency? repeat,
+
+    /// ISO code of another currency [amountText] is written in, or null when it
+    /// is in the app's own currency [toCurrency].
+    String? fromCurrency,
+    String? toCurrency,
   }) async {
     if (state.busy) return;
     emit(const ExpenseFormState(status: ExpenseFormStatus.saving));
 
     // Turning text into a number is a form concern; the rules are in the use case.
-    final amountMinor = Money.tryParse(amountText);
+    var amountMinor = Money.tryParse(amountText);
+    int? originalMinor;
+    final from = fromCurrency;
+    final to = toCurrency;
+    if (from != null && to != null && amountMinor != null) {
+      final rates = await _rates.saved();
+      final converted = rates == null
+          ? null
+          : ConvertAmount.call(
+              minor: amountMinor,
+              from: from,
+              to: to,
+              rates: rates,
+            );
+      if (converted == null) {
+        emit(
+          const ExpenseFormState(
+            status: ExpenseFormStatus.editing,
+            fieldErrors: {ExpenseField.amount: ExpenseError.ratesUnavailable},
+          ),
+        );
+        return;
+      }
+      originalMinor = amountMinor;
+      amountMinor = converted;
+    }
     final draft = ExpenseDraft(
+      originalAmountMinor: originalMinor,
+      originalCurrency: originalMinor == null ? null : from,
       title: title,
       vendor: vendor,
       amountMinor: amountMinor,
@@ -49,9 +93,11 @@ class ExpenseFormCubit extends Cubit<ExpenseFormState> {
       categoryId: categoryId,
     );
     final existing = original;
-    final result = existing == null
-        ? await _saveExpense(draft)
-        : await _updateExpense(existing, draft);
+    final result = existing != null
+        ? await _updateExpense(existing, draft)
+        : repeat != null
+        ? await _saveRepeating(draft, repeat)
+        : await _saveExpense(draft);
 
     switch (result) {
       case Success():

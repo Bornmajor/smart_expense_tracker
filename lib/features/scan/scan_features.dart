@@ -1,11 +1,12 @@
-/// Switches for parts of receipt scanning that are built but not offered yet.
+/// Switches for parts of receipt scanning that can be turned off.
 abstract final class ScanFeatures {
-  /// Taking a photo with the camera is switched off for now.
+  /// Taking a photo with the camera.
   ///
-  /// On the Infinix test phone Android kills the app within seconds of the
-  /// system camera opening, which looks like a crash. Choosing a photo from
-  /// the gallery works very well, so that is the way to scan for now. The
-  /// camera path, its preview and the recovery of the lost photo are all built
-  /// and tested; see the camera item in docs/roadmap.md before turning this on.
-  static const cameraEnabled = false;
+  /// Turned on to test it in a release build. On the Infinix test phone
+  /// Android killed the app within seconds of the system camera opening in a
+  /// debug build, which looked like a crash; the camera path, its preview and
+  /// the recovery of the lost photo are built for that case. If it still fails
+  /// in release, set this back to false and see the camera item in
+  /// docs/roadmap.md.
+  static const cameraEnabled = true;
 }

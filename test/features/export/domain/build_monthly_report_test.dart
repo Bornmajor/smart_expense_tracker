@@ -1,4 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/features/expenses/domain/entities/expense.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
 import 'package:smart_expense_tracker/features/categories/domain/entities/category.dart';
 import 'package:smart_expense_tracker/features/export/domain/entities/monthly_report.dart';
 import 'package:smart_expense_tracker/features/export/domain/usecases/build_monthly_report.dart';
@@ -6,7 +8,12 @@ import 'package:smart_expense_tracker/features/export/domain/usecases/build_mont
 import '../../../support/builders.dart';
 
 void main() {
-  const build = BuildMonthlyReport();
+  const buildReport = BuildMonthlyReport();
+  MonthlyReport build(
+    List<Expense> expenses,
+    List<Category> categories,
+    DateTime month,
+  ) => buildReport(expenses, categories, month, currency: Currency.none);
   const categories = [
     Category(id: 'food', name: 'Food'),
     Category(id: 'transport', name: 'Transport'),

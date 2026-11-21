@@ -37,6 +37,25 @@ void main() {
     expect(expenses.saved.single.categoryId, 'food');
   });
 
+  testWidgets('Repeat this expense makes a monthly rule', (tester) async {
+    final recurring = FakeRecurringRepository();
+    await pumpRouterApp(tester, expenses: expenses, recurring: recurring);
+
+    await openAddExpense(tester);
+    await tester.enterText(find.widgetWithText(TextField, 'Amount'), '12.50');
+    await tester.tap(find.text('Food'));
+    await tester.pump();
+    await tester.ensureVisible(find.text('Repeat this expense'));
+    await tester.tap(find.text('Repeat this expense'));
+    await tester.pumpAndSettle();
+    expect(find.text('Monthly'), findsOneWidget);
+    await tapSave(tester);
+
+    expect(find.text('Expense saved'), findsOneWidget);
+    expect(recurring.created.single.amountMinor, 1250);
+    expect(recurring.rules.single.frequency.label, 'Monthly');
+  });
+
   testWidgets('shows validation messages and stays on the form', (
     tester,
   ) async {

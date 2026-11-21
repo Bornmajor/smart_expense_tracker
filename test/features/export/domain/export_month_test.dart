@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:smart_expense_tracker/core/utils/currency.dart';
 import 'package:smart_expense_tracker/core/errors/app_failure.dart';
 import 'package:smart_expense_tracker/core/errors/result.dart';
 import 'package:smart_expense_tracker/core/errors/storage_exception.dart';
@@ -36,6 +37,7 @@ void main() {
       pdf: pdf,
       csv: csv,
       sharer: sharer,
+      currency: () => Currency.none,
     );
   });
 
@@ -98,6 +100,7 @@ void main() {
       pdf: pdf,
       csv: csv,
       sharer: sharer,
+      currency: () => Currency.none,
     );
 
     final result = await broken(november, ExportFormat.pdf);

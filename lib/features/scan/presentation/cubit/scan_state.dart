@@ -5,7 +5,7 @@ import '../../domain/entities/scan_result.dart';
 
 /// What the scan is waiting on while it is working.
 enum ScanStage {
-  /// The camera or the gallery is open.
+  /// The camera or the Files app is open.
   picking,
 
   /// The photo is being read.

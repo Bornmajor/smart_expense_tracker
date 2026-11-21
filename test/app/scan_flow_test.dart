@@ -54,7 +54,7 @@ void main() {
   Future<void> chooseReceiptPhoto(WidgetTester tester) async {
     await tester.tap(find.byType(FloatingActionButton));
     await tester.pumpAndSettle();
-    await tapText(tester, 'Choose a receipt photo');
+    await tapText(tester, 'Choose a receipt file');
   }
 
   /// The receipt photo in the review panel (the part that can be tapped).
@@ -285,7 +285,7 @@ void main() {
       photos.pickError = null;
       await tapText(tester, 'Try again');
 
-      expect(photos.picked, [ReceiptSource.gallery, ReceiptSource.gallery]);
+      expect(photos.picked, [ReceiptSource.file, ReceiptSource.file]);
       expect(find.text('Add expense'), findsOneWidget);
     });
 
@@ -345,6 +345,39 @@ void main() {
       expect(find.text('Read from your receipt'), findsNothing);
       expect(photos.picked, isEmpty);
       expect(reader.readPaths, isEmpty);
+    });
+  });
+
+  group('a photo kept from before Android closed the app', () {
+    testWidgets('opens on its preview when the app starts', (tester) async {
+      photos.recoverPath = '/cache/lost.jpg';
+
+      await openApp(tester);
+
+      expect(
+        find.textContaining('restarted the app while the camera was open'),
+        findsOneWidget,
+      );
+      expect(find.text('Use this photo'), findsOneWidget);
+      expect(photos.picked, isEmpty);
+    });
+
+    testWidgets('says so when a file pick was cut short', (tester) async {
+      photos.interrupted = true;
+
+      await openApp(tester);
+
+      expect(
+        find.textContaining('closed the app while you were choosing'),
+        findsOneWidget,
+      );
+      expect(find.text('Use this photo'), findsNothing);
+    });
+
+    testWidgets('leaves the list alone when there is none', (tester) async {
+      await openApp(tester);
+
+      expect(find.text('Use this photo'), findsNothing);
     });
   });
 }

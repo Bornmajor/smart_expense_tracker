@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/errors/app_failure.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/utils/currency.dart';
 import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/section_header.dart';
@@ -13,8 +14,10 @@ import '../../../export/presentation/cubit/export_cubit.dart';
 import '../../../export/presentation/cubit/export_state.dart';
 import '../../../export/presentation/export_messages.dart';
 import '../../../export/presentation/widgets/export_sheet.dart';
+import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../cubit/summary_cubit.dart';
 import '../cubit/summary_state.dart';
+import '../widgets/budget_section.dart';
 import '../widgets/category_breakdown_tile.dart';
 import '../widgets/month_switcher.dart';
 import '../widgets/total_card.dart';
@@ -111,6 +114,9 @@ class _SummaryContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<SummaryCubit>();
     final summary = state.summary;
+    final currency = context.select<SettingsCubit, Currency>(
+      (cubit) => cubit.state.currency,
+    );
     final names = context.select<CategoriesCubit, Map<String, String>>(
       (cubit) => switch (cubit.state) {
         CategoriesLoaded(:final categories) => {
@@ -129,7 +135,17 @@ class _SummaryContent extends StatelessWidget {
           onNext: state.canGoNext ? cubit.nextMonth : null,
         ),
         const Gap(AppSpacing.md),
-        TotalCard(totalMinor: summary.totalMinor, count: summary.count),
+        TotalCard(
+          totalMinor: summary.totalMinor,
+          count: summary.count,
+          currency: currency,
+        ),
+        const Gap(AppSpacing.xl),
+        BudgetSection(
+          progress: state.budgets,
+          categoryNames: names,
+          currency: currency,
+        ),
         const Gap(AppSpacing.xl),
         if (summary.count == 0)
           SizedBox(
@@ -147,6 +163,7 @@ class _SummaryContent extends StatelessWidget {
               name: names[category.categoryId] ?? 'Uncategorized',
               totalMinor: category.totalMinor,
               share: category.share,
+              currency: currency,
             ),
             const Gap(AppSpacing.sm),
           ],

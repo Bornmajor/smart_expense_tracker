@@ -4,13 +4,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/app_routes.dart';
+import '../../../../core/debug/test_clock.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_logo.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../cubit/settings_cubit.dart';
 import '../cubit/settings_state.dart';
 import '../widgets/biometric_switch_tile.dart';
+import '../widgets/currency_tile.dart';
+import '../widgets/exchange_rates_credit_tile.dart';
 import '../widgets/privacy_policy_tile.dart';
+import '../widgets/test_date_tile.dart';
 import '../widgets/theme_mode_selector.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -41,12 +45,36 @@ class SettingsPage extends StatelessWidget {
           const Gap(AppSpacing.xl),
           const SectionHeader('Spending'),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.category_outlined),
-              title: const Text('Categories'),
-              subtitle: const Text('Add, rename or delete categories'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(AppRoutes.categories),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.category_outlined),
+                  title: const Text('Categories'),
+                  subtitle: const Text('Add, rename or delete categories'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.categories),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.savings_outlined),
+                  title: const Text('Budgets'),
+                  subtitle: const Text('Set monthly spending limits'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.budgets),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: const Icon(Icons.repeat),
+                  title: const Text('Recurring expenses'),
+                  subtitle: const Text(
+                    'Rent, subscriptions and bills that repeat',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.recurring),
+                ),
+                const Divider(),
+                const CurrencyTile(),
+              ],
             ),
           ),
           const Gap(AppSpacing.xl),
@@ -74,10 +102,15 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const PrivacyPolicyTile(),
-          // TEMPORARY developer tool, shown only in debug builds.
-          if (kDebugMode) ...[
+          const ExchangeRatesCreditTile(),
+          // TEMPORARY developer tools, only in debug builds and the dev flavor.
+          if (developerToolsEnabled) ...[
             const Gap(AppSpacing.xl),
             const SectionHeader('Developer'),
+            const TestDateTile(),
+          ],
+          if (kDebugMode) ...[
+            const Gap(AppSpacing.md),
             Card(
               child: ListTile(
                 leading: const Icon(Icons.bug_report_outlined),
