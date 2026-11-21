@@ -144,10 +144,8 @@ class _Welcome extends StatelessWidget {
             ),
             const Gap(AppSpacing.sm),
             Text(
-              'Tap Add expense below to scan a receipt, type it in one line, '
-              'paste an M-Pesa message, or enter it by hand. Your month, your '
-              'budget and a chart of the year appear here once you have '
-              'expenses. Everything stays on your phone.',
+              'Adding an expense is effortless: scan a receipt, type it in one '
+              'line, or paste an M-Pesa message.',
               style: context.text.bodyMedium,
             ),
           ],

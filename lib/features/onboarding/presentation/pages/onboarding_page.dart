@@ -199,7 +199,7 @@ class _NameField extends StatelessWidget {
       decoration: InputDecoration(
         hintText: 'Your first name (optional)',
         hintStyle: TextStyle(color: onboardingInk.withValues(alpha: 0.6)),
-        helperText: 'Used for a greeting. It stays on your phone.',
+        helperText: 'To make the app feel like yours. It stays on your phone.',
         helperStyle: TextStyle(color: onboardingInk.withValues(alpha: 0.75)),
         counterText: '',
         filled: true,

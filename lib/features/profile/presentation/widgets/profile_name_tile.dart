@@ -64,7 +64,8 @@ class _NameDialogState extends State<_NameDialog> {
         maxLength: ProfileRepositoryImpl.maxLength,
         decoration: const InputDecoration(
           labelText: 'First name',
-          helperText: 'Used for a greeting. It stays on your phone.',
+          helperText:
+              'To make the app feel like yours. It stays on your phone.',
         ),
         onSubmitted: (value) => Navigator.pop(context, value),
       ),
