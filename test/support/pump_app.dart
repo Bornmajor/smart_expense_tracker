@@ -55,6 +55,7 @@ Future<LockSession> pumpRouterApp(
   FakeExchangeRateRepository? rates,
   FakeCategoryRepository? categories,
   FakeReceiptPhotoSource? photos,
+  FakeBackupFilePicker? backupPicker,
   FakeReceiptTextReader? reader,
   FakeReportSharer? sharer,
   FakeReportWriter? pdfWriter,
@@ -132,7 +133,7 @@ Future<LockSession> pumpRouterApp(
           value: RestoreBackup(backupRepo, testCodec()),
         ),
         RepositoryProvider<BackupFilePicker>.value(
-          value: FakeBackupFilePicker(),
+          value: backupPicker ?? FakeBackupFilePicker(),
         ),
         RepositoryProvider<ImportMpesa>.value(
           value: ImportMpesa(

@@ -60,6 +60,16 @@ class FakeBackupFilePicker implements BackupFilePicker {
 
   int picks = 0;
 
+  /// Whether the last start found a choice that Android cut short.
+  bool interrupted = false;
+
+  @override
+  Future<bool> pickWasInterrupted() async {
+    final was = interrupted;
+    interrupted = false;
+    return was;
+  }
+
   @override
   Future<Uint8List?> pick() async {
     picks++;
