@@ -9,7 +9,11 @@ class QuickAddResult extends Equatable {
     required this.draft,
     this.suggestedCategoryId,
     this.categoryFromHistory = false,
+    this.heading = defaultHeading,
+    this.transactionCode,
   });
+
+  static const defaultHeading = 'Filled in from what you typed';
 
   /// What the user typed, shown above the form so they can compare.
   final String text;
@@ -22,11 +26,20 @@ class QuickAddResult extends Equatable {
   /// vendor, not guessed from words.
   final bool categoryFromHistory;
 
+  /// The title of the note above the form.
+  final String heading;
+
+  /// The M-Pesa transaction code, when the form is filled in from a pasted
+  /// message. Saved with the expense so the same message is spotted next time.
+  final String? transactionCode;
+
   @override
   List<Object?> get props => [
     text,
     draft,
     suggestedCategoryId,
     categoryFromHistory,
+    heading,
+    transactionCode,
   ];
 }

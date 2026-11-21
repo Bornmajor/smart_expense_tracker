@@ -39,6 +39,7 @@ class SaveExpense {
       updatedAt: now,
       originalAmountMinor: draft.originalAmountMinor,
       originalCurrency: draft.originalCurrency,
+      transactionCode: draft.transactionCode,
     );
 
     try {

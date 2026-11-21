@@ -6,8 +6,9 @@ import '../../../../core/theme/theme_x.dart';
 /// Shown above the expense form after a typed line: what was typed, and a
 /// reminder to check what was understood.
 class QuickAddNote extends StatelessWidget {
-  const QuickAddNote({super.key, required this.text});
+  const QuickAddNote({super.key, required this.heading, required this.text});
 
+  final String heading;
   final String text;
 
   @override
@@ -24,10 +25,7 @@ class QuickAddNote extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Filled in from what you typed',
-                    style: context.text.titleSmall,
-                  ),
+                  Text(heading, style: context.text.titleSmall),
                   const Gap(AppSpacing.xs),
                   Text('"$text"', style: context.text.bodyMedium),
                   const Gap(AppSpacing.xs),

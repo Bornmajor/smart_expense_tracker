@@ -14,7 +14,7 @@ class AppDatabase extends _$AppDatabase {
       AppDatabase(driftDatabase(name: 'spendwise_iq'));
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -38,6 +38,11 @@ class AppDatabase extends _$AppDatabase {
       if (from < 5) {
         await migrator.addColumn(expenses, expenses.originalAmountMinor);
         await migrator.addColumn(expenses, expenses.originalCurrency);
+      }
+      // Version 6 added the M-Pesa transaction code. Existing expenses have
+      // none.
+      if (from < 6) {
+        await migrator.addColumn(expenses, expenses.transactionCode);
       }
     },
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),

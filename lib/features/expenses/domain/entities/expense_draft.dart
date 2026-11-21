@@ -10,6 +10,7 @@ class ExpenseDraft extends Equatable {
     this.title = '',
     this.originalAmountMinor,
     this.originalCurrency,
+    this.transactionCode,
   });
 
   /// Optional. Blank means no title.
@@ -26,6 +27,9 @@ class ExpenseDraft extends Equatable {
   final int? originalAmountMinor;
   final String? originalCurrency;
 
+  /// The M-Pesa transaction code, when the draft came from a pasted message.
+  final String? transactionCode;
+
   @override
   List<Object?> get props => [
     title,
@@ -35,5 +39,6 @@ class ExpenseDraft extends Equatable {
     categoryId,
     originalAmountMinor,
     originalCurrency,
+    transactionCode,
   ];
 }

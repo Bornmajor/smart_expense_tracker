@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../scan/scan_features.dart';
 
-enum AddExpenseChoice { manual, quickAdd, scanCamera, scanFile }
+enum AddExpenseChoice { manual, quickAdd, mpesa, scanCamera, scanFile }
 
 /// Bottom sheet asking how the user wants to add an expense.
 /// Manual entry is listed first because scanning is optional.
@@ -15,6 +15,10 @@ Future<AddExpenseChoice?> showAddExpenseSheet(
 }) {
   return showModalBottomSheet<AddExpenseChoice>(
     context: context,
+    // With five choices the default height limit (just over half the screen)
+    // would hide the last one behind a scroll. The sheet still scrolls on a
+    // very small phone or at large text.
+    isScrollControlled: true,
     builder: (context) => _AddExpenseSheet(cameraEnabled: cameraEnabled),
   );
 }
@@ -45,6 +49,12 @@ class _AddExpenseSheet extends StatelessWidget {
               title: const Text('Type it in one line'),
               subtitle: const Text('For example: lunch 350 at Java yesterday'),
               onTap: () => Navigator.pop(context, AddExpenseChoice.quickAdd),
+            ),
+            ListTile(
+              leading: const Icon(Icons.sms_outlined),
+              title: const Text('Paste an M-Pesa message'),
+              subtitle: const Text('Fill it in from the confirmation'),
+              onTap: () => Navigator.pop(context, AddExpenseChoice.mpesa),
             ),
             ListTile(
               leading: const Icon(Icons.upload_file_outlined),

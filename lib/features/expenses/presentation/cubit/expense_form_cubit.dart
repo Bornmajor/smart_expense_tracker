@@ -52,6 +52,10 @@ class ExpenseFormCubit extends Cubit<ExpenseFormState> {
     /// is in the app's own currency [toCurrency].
     String? fromCurrency,
     String? toCurrency,
+
+    /// The M-Pesa transaction code, when the form was filled in from a pasted
+    /// message. Only used when adding.
+    String? transactionCode,
   }) async {
     if (state.busy) return;
     emit(const ExpenseFormState(status: ExpenseFormStatus.saving));
@@ -86,6 +90,7 @@ class ExpenseFormCubit extends Cubit<ExpenseFormState> {
     final draft = ExpenseDraft(
       originalAmountMinor: originalMinor,
       originalCurrency: originalMinor == null ? null : from,
+      transactionCode: transactionCode,
       title: title,
       vendor: vendor,
       amountMinor: amountMinor,

@@ -13,6 +13,7 @@ class Expense extends Equatable {
     this.recurringRuleId,
     this.originalAmountMinor,
     this.originalCurrency,
+    this.transactionCode,
   });
 
   final String id;
@@ -37,6 +38,10 @@ class Expense extends Equatable {
   final int? originalAmountMinor;
   final String? originalCurrency;
 
+  /// The M-Pesa transaction code when the expense came from a pasted
+  /// message, or null. Used to spot the same message pasted twice.
+  final String? transactionCode;
+
   @override
   List<Object?> get props => [
     id,
@@ -50,5 +55,6 @@ class Expense extends Equatable {
     recurringRuleId,
     originalAmountMinor,
     originalCurrency,
+    transactionCode,
   ];
 }

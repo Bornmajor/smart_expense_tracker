@@ -1107,6 +1107,17 @@ class $ExpensesTable extends Expenses
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _transactionCodeMeta = const VerificationMeta(
+    'transactionCode',
+  );
+  @override
+  late final GeneratedColumn<String> transactionCode = GeneratedColumn<String>(
+    'transaction_code',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1120,6 +1131,7 @@ class $ExpensesTable extends Expenses
     recurringRuleId,
     originalAmountMinor,
     originalCurrency,
+    transactionCode,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1222,6 +1234,15 @@ class $ExpensesTable extends Expenses
         ),
       );
     }
+    if (data.containsKey('transaction_code')) {
+      context.handle(
+        _transactionCodeMeta,
+        transactionCode.isAcceptableOrUnknown(
+          data['transaction_code']!,
+          _transactionCodeMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1275,6 +1296,10 @@ class $ExpensesTable extends Expenses
         DriftSqlType.string,
         data['${effectivePrefix}original_currency'],
       ),
+      transactionCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}transaction_code'],
+      ),
     );
   }
 
@@ -1308,6 +1333,11 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
   /// Added in schema version 5.
   final int? originalAmountMinor;
   final String? originalCurrency;
+
+  /// The M-Pesa transaction code (such as "SGH4A1B2C3") when the expense came
+  /// from a pasted confirmation message, so the same message is not added
+  /// twice. Null otherwise. Added in schema version 6.
+  final String? transactionCode;
   const ExpenseRow({
     required this.id,
     required this.title,
@@ -1320,6 +1350,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     this.recurringRuleId,
     this.originalAmountMinor,
     this.originalCurrency,
+    this.transactionCode,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1340,6 +1371,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     }
     if (!nullToAbsent || originalCurrency != null) {
       map['original_currency'] = Variable<String>(originalCurrency);
+    }
+    if (!nullToAbsent || transactionCode != null) {
+      map['transaction_code'] = Variable<String>(transactionCode);
     }
     return map;
   }
@@ -1363,6 +1397,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       originalCurrency: originalCurrency == null && nullToAbsent
           ? const Value.absent()
           : Value(originalCurrency),
+      transactionCode: transactionCode == null && nullToAbsent
+          ? const Value.absent()
+          : Value(transactionCode),
     );
   }
 
@@ -1385,6 +1422,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
         json['originalAmountMinor'],
       ),
       originalCurrency: serializer.fromJson<String?>(json['originalCurrency']),
+      transactionCode: serializer.fromJson<String?>(json['transactionCode']),
     );
   }
   @override
@@ -1402,6 +1440,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       'recurringRuleId': serializer.toJson<String?>(recurringRuleId),
       'originalAmountMinor': serializer.toJson<int?>(originalAmountMinor),
       'originalCurrency': serializer.toJson<String?>(originalCurrency),
+      'transactionCode': serializer.toJson<String?>(transactionCode),
     };
   }
 
@@ -1417,6 +1456,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     Value<String?> recurringRuleId = const Value.absent(),
     Value<int?> originalAmountMinor = const Value.absent(),
     Value<String?> originalCurrency = const Value.absent(),
+    Value<String?> transactionCode = const Value.absent(),
   }) => ExpenseRow(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -1435,6 +1475,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     originalCurrency: originalCurrency.present
         ? originalCurrency.value
         : this.originalCurrency,
+    transactionCode: transactionCode.present
+        ? transactionCode.value
+        : this.transactionCode,
   );
   ExpenseRow copyWithCompanion(ExpensesCompanion data) {
     return ExpenseRow(
@@ -1459,6 +1502,9 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
       originalCurrency: data.originalCurrency.present
           ? data.originalCurrency.value
           : this.originalCurrency,
+      transactionCode: data.transactionCode.present
+          ? data.transactionCode.value
+          : this.transactionCode,
     );
   }
 
@@ -1475,7 +1521,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           ..write('updatedAt: $updatedAt, ')
           ..write('recurringRuleId: $recurringRuleId, ')
           ..write('originalAmountMinor: $originalAmountMinor, ')
-          ..write('originalCurrency: $originalCurrency')
+          ..write('originalCurrency: $originalCurrency, ')
+          ..write('transactionCode: $transactionCode')
           ..write(')'))
         .toString();
   }
@@ -1493,6 +1540,7 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
     recurringRuleId,
     originalAmountMinor,
     originalCurrency,
+    transactionCode,
   );
   @override
   bool operator ==(Object other) =>
@@ -1508,7 +1556,8 @@ class ExpenseRow extends DataClass implements Insertable<ExpenseRow> {
           other.updatedAt == this.updatedAt &&
           other.recurringRuleId == this.recurringRuleId &&
           other.originalAmountMinor == this.originalAmountMinor &&
-          other.originalCurrency == this.originalCurrency);
+          other.originalCurrency == this.originalCurrency &&
+          other.transactionCode == this.transactionCode);
 }
 
 class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
@@ -1523,6 +1572,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
   final Value<String?> recurringRuleId;
   final Value<int?> originalAmountMinor;
   final Value<String?> originalCurrency;
+  final Value<String?> transactionCode;
   final Value<int> rowid;
   const ExpensesCompanion({
     this.id = const Value.absent(),
@@ -1536,6 +1586,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.recurringRuleId = const Value.absent(),
     this.originalAmountMinor = const Value.absent(),
     this.originalCurrency = const Value.absent(),
+    this.transactionCode = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExpensesCompanion.insert({
@@ -1550,6 +1601,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     this.recurringRuleId = const Value.absent(),
     this.originalAmountMinor = const Value.absent(),
     this.originalCurrency = const Value.absent(),
+    this.transactionCode = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        vendor = Value(vendor),
@@ -1570,6 +1622,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Expression<String>? recurringRuleId,
     Expression<int>? originalAmountMinor,
     Expression<String>? originalCurrency,
+    Expression<String>? transactionCode,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1585,6 +1638,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       if (originalAmountMinor != null)
         'original_amount_minor': originalAmountMinor,
       if (originalCurrency != null) 'original_currency': originalCurrency,
+      if (transactionCode != null) 'transaction_code': transactionCode,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1601,6 +1655,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     Value<String?>? recurringRuleId,
     Value<int?>? originalAmountMinor,
     Value<String?>? originalCurrency,
+    Value<String?>? transactionCode,
     Value<int>? rowid,
   }) {
     return ExpensesCompanion(
@@ -1615,6 +1670,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
       recurringRuleId: recurringRuleId ?? this.recurringRuleId,
       originalAmountMinor: originalAmountMinor ?? this.originalAmountMinor,
       originalCurrency: originalCurrency ?? this.originalCurrency,
+      transactionCode: transactionCode ?? this.transactionCode,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1655,6 +1711,9 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
     if (originalCurrency.present) {
       map['original_currency'] = Variable<String>(originalCurrency.value);
     }
+    if (transactionCode.present) {
+      map['transaction_code'] = Variable<String>(transactionCode.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1675,6 +1734,7 @@ class ExpensesCompanion extends UpdateCompanion<ExpenseRow> {
           ..write('recurringRuleId: $recurringRuleId, ')
           ..write('originalAmountMinor: $originalAmountMinor, ')
           ..write('originalCurrency: $originalCurrency, ')
+          ..write('transactionCode: $transactionCode, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -2893,6 +2953,7 @@ typedef $$ExpensesTableCreateCompanionBuilder = ExpensesCompanion Function({
   Value<String?> recurringRuleId,
   Value<int?> originalAmountMinor,
   Value<String?> originalCurrency,
+  Value<String?> transactionCode,
   Value<int> rowid,
 });
 typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
@@ -2907,6 +2968,7 @@ typedef $$ExpensesTableUpdateCompanionBuilder = ExpensesCompanion Function({
   Value<String?> recurringRuleId,
   Value<int?> originalAmountMinor,
   Value<String?> originalCurrency,
+  Value<String?> transactionCode,
   Value<int> rowid,
 });
 
@@ -3001,6 +3063,11 @@ class $$ExpensesTableFilterComposer
 
   ColumnFilters<String> get originalCurrency => $composableBuilder(
     column: $table.originalCurrency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get transactionCode => $composableBuilder(
+    column: $table.transactionCode,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3105,6 +3172,11 @@ class $$ExpensesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get transactionCode => $composableBuilder(
+    column: $table.transactionCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CategoriesTableOrderingComposer get categoryId {
     final $$CategoriesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -3194,6 +3266,11 @@ class $$ExpensesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get transactionCode => $composableBuilder(
+    column: $table.transactionCode,
+    builder: (column) => column,
+  );
+
   $$CategoriesTableAnnotationComposer get categoryId {
     final $$CategoriesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -3280,6 +3357,7 @@ class $$ExpensesTableTableManager
                 Value<String?> recurringRuleId = const Value.absent(),
                 Value<int?> originalAmountMinor = const Value.absent(),
                 Value<String?> originalCurrency = const Value.absent(),
+                Value<String?> transactionCode = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion(
                 id: id,
@@ -3293,6 +3371,7 @@ class $$ExpensesTableTableManager
                 recurringRuleId: recurringRuleId,
                 originalAmountMinor: originalAmountMinor,
                 originalCurrency: originalCurrency,
+                transactionCode: transactionCode,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3308,6 +3387,7 @@ class $$ExpensesTableTableManager
                 Value<String?> recurringRuleId = const Value.absent(),
                 Value<int?> originalAmountMinor = const Value.absent(),
                 Value<String?> originalCurrency = const Value.absent(),
+                Value<String?> transactionCode = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExpensesCompanion.insert(
                 id: id,
@@ -3321,6 +3401,7 @@ class $$ExpensesTableTableManager
                 recurringRuleId: recurringRuleId,
                 originalAmountMinor: originalAmountMinor,
                 originalCurrency: originalCurrency,
+                transactionCode: transactionCode,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

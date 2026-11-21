@@ -193,6 +193,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       repeat: _repeat ? _frequency : null,
       fromCurrency: _from?.code,
       toCurrency: context.read<SettingsCubit>().state.currency.code,
+      transactionCode: widget.quick?.transactionCode,
     );
   }
 
@@ -336,7 +337,10 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       ],
                       // After a typed line: what was typed, and to check it.
                       if (widget.quick != null) ...[
-                        QuickAddNote(text: widget.quick!.text),
+                        QuickAddNote(
+                          heading: widget.quick!.heading,
+                          text: widget.quick!.text,
+                        ),
                         const Gap(AppSpacing.lg),
                       ],
                       TextField(
