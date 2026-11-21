@@ -1,3 +1,5 @@
+import 'package:smart_expense_tracker/features/profile/domain/repositories/profile_repository.dart';
+import 'package:smart_expense_tracker/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:smart_expense_tracker/features/backup/domain/repositories/backup_file_picker.dart';
 import 'package:smart_expense_tracker/features/backup/domain/repositories/backup_history.dart';
 import 'package:smart_expense_tracker/features/backup/domain/usecases/create_backup.dart';
@@ -45,6 +47,8 @@ Future<LockSession> pumpRouterApp(
   FakeExpenseRepository? expenses,
   FakeBudgetRepository? budgets,
   FakeRecurringRepository? recurring,
+  FakeProfileRepository? profile,
+  bool startOnHome = false,
   FakeBackupRepository? backupRepository,
   FakeBackupHistory? backupHistory,
   FakeLocalStateReset? localStateReset,
@@ -82,6 +86,7 @@ Future<LockSession> pumpRouterApp(
   final expenseRepo = expenses ?? FakeExpenseRepository();
   final categoryRepo = categories ?? FakeCategoryRepository();
   final recurringRepo = recurring ?? FakeRecurringRepository();
+  final profileRepo = profile ?? FakeProfileRepository();
   final backupRepo = backupRepository ?? FakeBackupRepository();
   final history = backupHistory ?? FakeBackupHistory();
   final stateReset = localStateReset ?? FakeLocalStateReset();
@@ -109,6 +114,7 @@ Future<LockSession> pumpRouterApp(
           value: rates ?? FakeExchangeRateRepository(),
         ),
         RepositoryProvider<AlertDismissals>.value(value: dismissals),
+        RepositoryProvider<ProfileRepository>.value(value: profileRepo),
         RepositoryProvider<BackupHistory>.value(value: history),
         RepositoryProvider<EraseAllData>.value(
           value: EraseAllData(backupRepo, stateReset),
@@ -171,6 +177,7 @@ Future<LockSession> pumpRouterApp(
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => SettingsCubit(settingsRepo)),
+          BlocProvider(create: (_) => ProfileCubit(profileRepo)),
           BlocProvider(
             create: (_) => SecurityCubit(
               securityRepo,
@@ -190,6 +197,17 @@ Future<LockSession> pumpRouterApp(
     ),
   );
   await tester.pumpAndSettle();
+  // The app opens on Home. Most tests are about the expense list, so they start
+  // there unless they ask for Home.
+  if (!startOnHome && onboarding?.isCompleted != false) {
+    final bar = find.byType(NavigationBar);
+    if (bar.evaluate().isNotEmpty) {
+      await tester.tap(
+        find.descendant(of: bar, matching: find.text('Expenses')),
+      );
+      await tester.pumpAndSettle();
+    }
+  }
   return session;
 }
 

@@ -2,6 +2,7 @@ abstract final class AppRoutes {
   static const welcome = '/welcome';
   static const onboarding = '/onboarding';
   static const lock = '/lock';
+  static const home = '/home';
   static const expenses = '/';
   static const summary = '/summary';
   static const settings = '/settings';
@@ -26,4 +27,12 @@ abstract final class AppRoutes {
 
   /// TEMPORARY, debug builds only: see what the scanner reads.
   static const ocrDebug = '/debug/ocr';
+}
+
+/// The tabs, in the order of the navigation bar.
+abstract final class AppTabs {
+  static const home = 0;
+  static const expenses = 1;
+  static const summary = 2;
+  static const settings = 3;
 }

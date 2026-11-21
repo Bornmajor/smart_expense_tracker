@@ -22,7 +22,8 @@ SpendWise IQ keeps the following in its own private storage on your phone:
 
 - your expenses: amount, date, vendor, an optional title, and the category
 - the categories you create or rename
-- your settings: the theme, whether the biometric lock is on, and whether you have finished the introduction
+- your settings: the theme, the currency, whether the biometric lock is on, and whether you have finished the introduction
+- your first name, if you chose to give one, which is only used to greet you in the app
 
 Other apps cannot read this storage. The developer cannot see it.
 

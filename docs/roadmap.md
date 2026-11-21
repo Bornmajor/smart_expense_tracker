@@ -20,14 +20,7 @@ Push, merge to `dev`, promote to `uat`, and try the build on a few phones. Then 
 
 All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model could be added later behind a switch, on phones that support it.
 
-1. **A better first screen, and better insights.** The app opens on a plain list of expenses that keeps scrolling, which is fine for finding things but a weak first impression. People expect the first screen to answer "how am I doing?" at a glance. Research first, without bias (what the best expense trackers show on their first screen, and what users of this kind of app say they want), then pick **3 to 5** things to put there. The starting ideas, to be checked against that research:
-   - **A greeting by name.** Onboarding asks for a first name (kept only on the phone, like everything else; it is optional) so the top of the app can say "Good morning, Maja". Needs a name step in onboarding and a way to change it in Settings.
-   - **How I am doing against my target:** this month's spending against the overall budget (and Safe to spend), in one glance, with a clear prompt to set a budget when there is none.
-   - **A small bar chart of spending per month for the current year**, so the trend is clear at a glance (the chart can be tapped to open that month on the Summary).
-   - **A clear Add expense action** (it exists today) kept visible, with the recent expenses shown as a short list under the insights and a "see all" link, instead of the whole scrolling list.
-   - **Heads-up cards** (already built) and this month against last month with the biggest change.
-   - Also on the list of insights: an alert for a subscription that changed price.
-   The Expenses list stays one tap away (search and filters already work there). Decide the final 3 to 5 after the research, and keep the screen calm: a few strong things, not a dashboard of everything.
+1. **Better insights.** The Home screen is built (see [first-screen-research.md](first-screen-research.md)). Next for the insights: this month against last month with the biggest change, an alert for a subscription that changed price, and, if the chart earns it, the budget drawn as a line on the year chart.
 
 ## Portfolio showcase (cheap, high value)
 
@@ -40,7 +33,7 @@ Most reviewers will not install the app, so the repository has to show it.
 
 ## Done
 
-**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt from a photo or a PDF in the Files app, the camera option with recovery of a photo lost to an app restart, exporting a month as a PDF or CSV, choosing a currency (the Kenyan shilling by default), converting an amount from another currency with the daily rate, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, recurring expenses added when they come due, backup and restore to a file (optionally password-protected), a Repeat box on the add form, a tap-through from Summary categories and budgets to their expenses, search and filters on the expense list, typing an expense in one line, pasting an M-Pesa message, the Inter font and helpful empty states, Safe to spend, heads-up cards for duplicates, large expenses and a category above normal, the app version in Settings, and a dev-only Pretend today is tool.
+**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt from a photo or a PDF in the Files app, the camera option with recovery of a photo lost to an app restart, exporting a month as a PDF or CSV, choosing a currency (the Kenyan shilling by default), converting an amount from another currency with the daily rate, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, recurring expenses added when they come due, backup and restore to a file (optionally password-protected), a Repeat box on the add form, a tap-through from Summary categories and budgets to their expenses, search and filters on the expense list, typing an expense in one line, pasting an M-Pesa message, the Inter font and helpful empty states, a Home screen with a greeting, the month against the budget, a bar chart of the year and the latest expenses, delete all my data, Safe to spend, heads-up cards for duplicates, large expenses and a category above normal, the app version in Settings, and a dev-only Pretend today is tool.
 
 ## TODO: app PIN (brainstormed, not built; parked for now)
 

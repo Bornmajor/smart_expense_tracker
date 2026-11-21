@@ -87,34 +87,11 @@ class _BackupPageState extends State<BackupPage> {
   }
 
   Future<String?> _askPassword(BuildContext context, bool wrong) {
-    final controller = TextEditingController();
     return showDialog<String>(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Backup password'),
-        content: TextField(
-          controller: controller,
-          obscureText: true,
-          autofocus: true,
-          decoration: InputDecoration(
-            labelText: 'Password',
-            errorText: wrong ? 'That password is not right' : null,
-          ),
-          onSubmitted: (value) => Navigator.pop(context, value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, controller.text),
-            child: const Text('Open'),
-          ),
-        ],
-      ),
-    ).whenComplete(controller.dispose);
+      builder: (context) => _PasswordDialog(wrong: wrong),
+    );
   }
 
   Future<bool?> _confirmRestore(BuildContext context, RestoreReady backup) {
@@ -233,6 +210,55 @@ class _BackupPageState extends State<BackupPage> {
           ),
         );
       },
+    );
+  }
+}
+
+/// Asks for the password of a locked backup. It owns its text controller, so
+/// the controller is only disposed once the dialog has finished closing.
+class _PasswordDialog extends StatefulWidget {
+  const _PasswordDialog({required this.wrong});
+
+  /// True after a wrong try, to say so under the field.
+  final bool wrong;
+
+  @override
+  State<_PasswordDialog> createState() => _PasswordDialogState();
+}
+
+class _PasswordDialogState extends State<_PasswordDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Backup password'),
+      content: TextField(
+        controller: _controller,
+        obscureText: true,
+        autofocus: true,
+        decoration: InputDecoration(
+          labelText: 'Password',
+          errorText: widget.wrong ? 'That password is not right' : null,
+        ),
+        onSubmitted: (value) => Navigator.pop(context, value),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: const Text('Open'),
+        ),
+      ],
     );
   }
 }

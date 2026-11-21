@@ -27,6 +27,13 @@ void main() {
       safePadding: safePadding,
     );
     await goToTab(tester, 'Settings');
+    // Settings is a long list, and on a short screen the row may be below the
+    // fold.
+    await tester.scrollUntilVisible(
+      find.text('Categories'),
+      100,
+      scrollable: find.byType(Scrollable).first,
+    );
     await tapText(tester, 'Categories');
   }
 

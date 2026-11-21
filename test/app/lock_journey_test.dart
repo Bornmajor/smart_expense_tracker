@@ -8,11 +8,12 @@ import '../support/pump_app.dart';
 
 void main() {
   const lockedTitle = 'SpendWise IQ is locked';
-  const homeMarker = 'Add your first expense';
+  // The first thing on Home when the app has no expenses yet.
+  const homeMarker = 'Let\'s add your first expense';
 
   group('launch journey', () {
     testWidgets('goes straight home when the lock is off', (tester) async {
-      await pumpRouterApp(tester);
+      await pumpRouterApp(tester, startOnHome: true);
 
       expect(find.text(lockedTitle), findsNothing);
       expect(find.text(homeMarker), findsOneWidget);
@@ -24,6 +25,7 @@ void main() {
       final authenticator = FakeBiometricAuthenticator(succeeds: false);
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         security: FakeSecurityRepository(enabled: true),
         authenticator: authenticator,
       );
@@ -36,6 +38,7 @@ void main() {
     testWidgets('lands on home once verification succeeds', (tester) async {
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         security: FakeSecurityRepository(enabled: true),
       );
 
@@ -49,6 +52,7 @@ void main() {
       final authenticator = FakeBiometricAuthenticator(succeeds: false);
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         security: FakeSecurityRepository(enabled: true),
         authenticator: authenticator,
       );
@@ -72,6 +76,7 @@ void main() {
       final security = FakeSecurityRepository(enabled: true);
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         security: security,
         authenticator: FakeBiometricAuthenticator()
           ..outcome = AuthOutcome.unavailable,
@@ -94,6 +99,7 @@ void main() {
     ) async {
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         onboarding: FakeOnboardingRepository(),
         security: FakeSecurityRepository(enabled: true),
       );
@@ -112,6 +118,7 @@ void main() {
       final session = LockSession(enabled: true, now: () => clock);
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         security: FakeSecurityRepository(enabled: true),
         authenticator: authenticator,
         lockSession: session,
@@ -161,6 +168,7 @@ void main() {
       final security = FakeSecurityRepository();
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         security: security,
         authenticator: FakeBiometricAuthenticator(available: false),
       );
@@ -183,6 +191,7 @@ void main() {
       final security = FakeSecurityRepository();
       await pumpRouterApp(
         tester,
+        startOnHome: true,
         security: security,
         authenticator: FakeBiometricAuthenticator(succeeds: false),
       );

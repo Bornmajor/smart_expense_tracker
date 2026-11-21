@@ -9,6 +9,7 @@ import '../../../../core/info/app_version.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../shared/widgets/app_logo.dart';
+import '../../../profile/presentation/widgets/profile_name_tile.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../cubit/settings_cubit.dart';
 import '../cubit/settings_state.dart';
@@ -50,6 +51,9 @@ class SettingsPage extends StatelessWidget {
       body: ListView(
         padding: AppSpacing.screen.copyWith(bottom: AppSpacing.xxl),
         children: [
+          const SectionHeader('You'),
+          const Card(child: ProfileNameTile()),
+          const Gap(AppSpacing.xl),
           const SectionHeader('Appearance'),
           Card(
             child: Padding(

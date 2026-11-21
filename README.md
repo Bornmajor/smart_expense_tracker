@@ -82,6 +82,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Search expenses by vendor or title and filter them by category, dates and amount
 - [x] Type an expense in one line ("lunch 350 at Java yesterday"); a plain on-device parser fills in the form for you to check
 - [x] Paste an M-Pesa confirmation message to fill in an expense (no SMS permission; the same message is not added twice)
+- [x] A Home screen: greeting by name, this month against the budget with what is safe to spend, a bar chart of the year, the latest expenses and heads-up cards
 
 ### Planned
 

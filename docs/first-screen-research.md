@@ -94,3 +94,9 @@ so Home stays calm.
 - Is the name step on its own onboarding screen, or a small field on the last
   one? Its own screen is clearer but adds a step; a field on the last screen
   adds none.
+
+## Decided
+
+- A new **Home** tab, first in the bar, which the app opens on. The Expenses list and the Summary stay as their own tabs.
+- The year chart shows **spending only**. Tapping a month opens that month's expenses (the Summary has no month to jump to from outside).
+- The first name is a **field on the last onboarding screen**, optional, and can be changed in Settings.

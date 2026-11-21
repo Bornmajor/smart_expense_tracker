@@ -62,7 +62,10 @@ import '../features/scan/domain/repositories/receipt_text_reader.dart';
 import '../features/scan/domain/usecases/scan_receipt.dart';
 import '../features/scan/presentation/cubit/scan_cubit.dart';
 import '../features/scan/presentation/pages/scan_page.dart';
+import '../features/home/presentation/cubit/home_cubit.dart';
+import '../features/home/presentation/pages/home_page.dart';
 import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
+import '../features/profile/domain/repositories/profile_repository.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/onboarding/presentation/pages/welcome_page.dart';
 import '../features/security/domain/repositories/biometric_authenticator.dart';
@@ -83,7 +86,7 @@ GoRouter createRouter({
   required OnboardingRepository onboarding,
   required LockSession lockSession,
 }) => GoRouter(
-  initialLocation: AppRoutes.expenses,
+  initialLocation: AppRoutes.home,
   refreshListenable: lockSession,
   redirect: (context, state) {
     final location = state.matchedLocation;
@@ -95,7 +98,7 @@ GoRouter createRouter({
     if (lockSession.isLocked) {
       return location == AppRoutes.lock ? null : AppRoutes.lock;
     }
-    if (inIntro || location == AppRoutes.lock) return AppRoutes.expenses;
+    if (inIntro || location == AppRoutes.lock) return AppRoutes.home;
     return null;
   },
   routes: [
@@ -106,7 +109,10 @@ GoRouter createRouter({
     GoRoute(
       path: AppRoutes.onboarding,
       builder: (context, state) => BlocProvider(
-        create: (_) => OnboardingCubit(context.read<OnboardingRepository>()),
+        create: (_) => OnboardingCubit(
+          context.read<OnboardingRepository>(),
+          context.read<ProfileRepository>(),
+        ),
         child: const OnboardingPage(),
       ),
     ),
@@ -122,6 +128,35 @@ GoRouter createRouter({
       builder: (context, state, navigationShell) =>
           AppShell(navigationShell: navigationShell),
       branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (context, state) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) => HomeCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<BudgetRepository>(),
+                      context.read<RecurringRepository>(),
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (_) => AlertsCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<AlertDismissals>(),
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (_) =>
+                        CategoriesCubit(context.read<CategoryRepository>()),
+                  ),
+                ],
+                child: const HomePage(),
+              ),
+            ),
+          ],
+        ),
         StatefulShellBranch(
           routes: [
             GoRoute(

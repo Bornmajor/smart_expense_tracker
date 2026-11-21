@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../profile/data/repositories/profile_repository_impl.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
 import '../onboarding_slides.dart';
@@ -22,10 +23,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
   static const _slideDuration = Duration(milliseconds: 300);
 
   final _controller = PageController();
+  final _name = TextEditingController();
 
   @override
   void dispose() {
     _controller.dispose();
+    _name.dispose();
     super.dispose();
   }
 
@@ -41,7 +44,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return BlocConsumer<OnboardingCubit, OnboardingState>(
       listenWhen: (previous, current) =>
           !previous.completed && current.completed,
-      listener: (context, _) => context.go(AppRoutes.expenses),
+      listener: (context, _) => context.go(AppRoutes.home),
       builder: (context, state) {
         final isFirst = state.page == 0;
         final isLast = state.page == onboardingSlides.length - 1;
@@ -59,8 +62,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   controller: _controller,
                   itemCount: onboardingSlides.length,
                   onPageChanged: cubit.pageChanged,
-                  itemBuilder: (_, index) =>
-                      OnboardingSlideView(slide: onboardingSlides[index]),
+                  itemBuilder: (_, index) => OnboardingSlideView(
+                    slide: onboardingSlides[index],
+                    // The last screen asks for an optional first name, for the
+                    // greeting on the home screen.
+                    footer: index == onboardingSlides.length - 1
+                        ? _NameField(controller: _name)
+                        : null,
+                  ),
                 ),
                 Positioned(
                   top: 0,
@@ -120,7 +129,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           FilledButton(
-                            onPressed: isLast ? cubit.complete : _next,
+                            onPressed: isLast
+                                ? () => cubit.complete(name: _name.text)
+                                : _next,
                             style: FilledButton.styleFrom(
                               backgroundColor: onboardingInk,
                               foregroundColor: Colors.white,
@@ -159,6 +170,46 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
         );
       },
+    );
+  }
+}
+
+/// The optional first name on the last screen. The slides have bright
+/// backgrounds in light and dark mode alike, so the field is drawn in black on
+/// a soft white, whatever the theme.
+class _NameField extends StatelessWidget {
+  const _NameField({required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final border = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(14),
+      borderSide: BorderSide(color: onboardingInk.withValues(alpha: 0.35)),
+    );
+    return TextField(
+      controller: controller,
+      textCapitalization: TextCapitalization.words,
+      textInputAction: TextInputAction.done,
+      maxLength: ProfileRepositoryImpl.maxLength,
+      autocorrect: false,
+      style: const TextStyle(color: onboardingInk),
+      cursorColor: onboardingInk,
+      decoration: InputDecoration(
+        hintText: 'Your first name (optional)',
+        hintStyle: TextStyle(color: onboardingInk.withValues(alpha: 0.6)),
+        helperText: 'Used for a greeting. It stays on your phone.',
+        helperStyle: TextStyle(color: onboardingInk.withValues(alpha: 0.75)),
+        counterText: '',
+        filled: true,
+        fillColor: Colors.white.withValues(alpha: 0.6),
+        enabledBorder: border,
+        border: border,
+        focusedBorder: border.copyWith(
+          borderSide: const BorderSide(color: onboardingInk, width: 2),
+        ),
+      ),
     );
   }
 }

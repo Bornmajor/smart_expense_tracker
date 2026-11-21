@@ -43,5 +43,7 @@ First release. Nothing has been published to Google Play yet.
 - Type an expense in one line, such as "lunch 350 at Java yesterday" or "ksh 1,200 airtime". The amount, date, vendor and title are read on your phone (also in Swahili: leo, jana, juzi), a category is suggested, and the expense form opens filled in for you to check
 - Paste an M-Pesa confirmation message and the expense form is filled in: the amount (with the transaction cost), who or what was paid, the date and the transaction code. The same message is noticed if you paste it twice. The app never reads your text messages
 - The app now uses the Inter font. Empty screens (no expenses, a month with no spending, no recurring expenses) explain what they are for and offer the next step as a button, and the introduction mentions the ways to add an expense
+- A new Home screen, now the first tab: a greeting with your name and the date, how this month is going against your budget (what is left and what is safe to spend each day), a bar chart of spending for each month of the year (tap a month to see its expenses), your latest five expenses, and the most pressing heads-up cards. A new app shows a short welcome in their place
+- Onboarding asks for an optional first name for the greeting, and Settings has a "Your name" row to change it. The name stays on the phone
 - Your currency now starts as the Kenyan shilling
 - A budget that is passed shows how much it is over (for example "KSh 1,510 over") instead of a percentage above 100

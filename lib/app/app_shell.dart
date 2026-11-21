@@ -20,8 +20,6 @@ class AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<AppShell> {
-  static const _settingsIndex = 2;
-
   StatefulNavigationShell get navigationShell => widget.navigationShell;
 
   @override
@@ -57,7 +55,7 @@ class _AppShellState extends State<AppShell> {
       // bar and Scaffold handle the bottom. This keeps content out of a
       // landscape notch.
       body: SafeArea(top: false, bottom: false, child: navigationShell),
-      floatingActionButton: index == _settingsIndex
+      floatingActionButton: index == AppTabs.settings
           ? null
           : FloatingActionButton.extended(
               onPressed: () => startAddExpense(context),
@@ -69,6 +67,11 @@ class _AppShellState extends State<AppShell> {
         onDestinationSelected: (value) =>
             navigationShell.goBranch(value, initialLocation: value == index),
         destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Home',
+          ),
           NavigationDestination(
             icon: Icon(Icons.receipt_long_outlined),
             selectedIcon: Icon(Icons.receipt_long),

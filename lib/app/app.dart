@@ -48,6 +48,9 @@ import '../features/export/data/writers/csv_report_writer.dart';
 import '../features/export/data/writers/pdf_report_writer.dart';
 import '../features/export/domain/usecases/export_month.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
+import '../features/profile/data/repositories/profile_repository_impl.dart';
+import '../features/profile/domain/repositories/profile_repository.dart';
+import '../features/profile/presentation/cubit/profile_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/mpesa/domain/usecases/import_mpesa.dart';
 import '../features/quick_add/domain/usecases/quick_add.dart';
@@ -173,6 +176,9 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
     _backupRepository,
     _backupCodec,
   );
+  late final ProfileRepository _profile = ProfileRepositoryImpl(
+    widget.preferences,
+  );
   late final AppLifecycleListener _lifecycle;
 
   @override
@@ -218,6 +224,7 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
         RepositoryProvider<AppVersion>.value(value: widget.appVersion),
+        RepositoryProvider<ProfileRepository>.value(value: _profile),
         RepositoryProvider<CreateBackup>.value(value: _createBackup),
         RepositoryProvider<BackupHistory>.value(value: _backupHistory),
         RepositoryProvider<EraseAllData>.value(value: _eraseAllData),
@@ -286,6 +293,7 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => SettingsCubit(_settings)),
+          BlocProvider(create: (_) => ProfileCubit(_profile)),
           BlocProvider(
             create: (_) => SecurityCubit(
               _security,
