@@ -140,6 +140,7 @@ GoRouter createRouter({
                     create: (_) => SummaryCubit(
                       context.read<ExpenseRepository>(),
                       context.read<BudgetRepository>(),
+                      context.read<RecurringRepository>(),
                     ),
                   ),
                   BlocProvider(

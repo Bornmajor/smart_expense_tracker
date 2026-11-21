@@ -18,6 +18,7 @@ import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../cubit/summary_cubit.dart';
 import '../cubit/summary_state.dart';
 import '../widgets/budget_section.dart';
+import '../../../safe_to_spend/presentation/widgets/safe_to_spend_card.dart';
 import '../widgets/category_breakdown_tile.dart';
 import '../widgets/month_switcher.dart';
 import '../widgets/total_card.dart';
@@ -140,6 +141,10 @@ class _SummaryContent extends StatelessWidget {
           count: summary.count,
           currency: currency,
         ),
+        if (state.safeToSpend != null) ...[
+          const Gap(AppSpacing.md),
+          SafeToSpendCard(safeToSpend: state.safeToSpend!, currency: currency),
+        ],
         const Gap(AppSpacing.xl),
         BudgetSection(
           progress: state.budgets,

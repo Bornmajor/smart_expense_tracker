@@ -8,6 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/database/app_database.dart';
+import '../core/info/app_version.dart';
 import '../core/debug/test_clock.dart';
 import '../core/links/app_links.dart';
 import '../core/links/link_opener.dart';
@@ -67,6 +68,7 @@ class SpendWiseApp extends StatefulWidget {
     this.biometricAuthenticator,
     this.fallbackCurrency,
     this.exchangeRates,
+    this.appVersion = AppVersion.unknown,
   });
 
   final AppDatabase database;
@@ -80,6 +82,9 @@ class SpendWiseApp extends StatefulWidget {
 
   /// Replaced in tests; defaults to the real service.
   final ExchangeRateRepository? exchangeRates;
+
+  /// The installed version, shown in Settings. Replaced in tests.
+  final AppVersion appVersion;
 
   @override
   State<SpendWiseApp> createState() => _SpendWiseAppState();
@@ -168,6 +173,7 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<RecurringRepository>.value(value: _recurring),
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
+        RepositoryProvider<AppVersion>.value(value: widget.appVersion),
         RepositoryProvider<BudgetRepository>(
           create: (_) => BudgetRepositoryImpl(widget.database),
         ),
