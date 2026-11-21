@@ -13,6 +13,11 @@ enum AlertKind {
   /// Something paid every month for the same amount that now costs a different
   /// amount, such as a subscription.
   priceChanged,
+
+  /// A category that is a big share of this month's spending and has no budget.
+  /// [InsightAlert.amountMinor] is its total so far and [InsightAlert.usualMinor]
+  /// is the whole month's spending, so the share can be shown.
+  noBudget,
 }
 
 /// Something worth a second look, found in the user's own expenses. The
