@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../app/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
@@ -14,13 +15,18 @@ import '../../../categories/presentation/cubit/categories_state.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_day_group.dart';
+import '../../domain/entities/expense_filter.dart';
 import '../cubit/expense_list_cubit.dart';
 import '../cubit/expense_list_state.dart';
 import '../widgets/day_header.dart';
 import '../widgets/expense_tile.dart';
 
+/// The list of expenses. With a [filter] it is the page behind a Summary
+/// total: the expenses in one category and month, with a way back.
 class ExpenseListPage extends StatelessWidget {
-  const ExpenseListPage({super.key});
+  const ExpenseListPage({super.key, this.filter});
+
+  final ExpenseFilter? filter;
 
   /// Returns whether the expense was deleted, so a swiped row knows whether
   /// to leave or spring back.
@@ -45,10 +51,30 @@ class ExpenseListPage extends StatelessWidget {
     return deleted;
   }
 
+  /// "Food" or "All spending", for the page behind a Summary row.
+  String _title(BuildContext context, ExpenseFilter filter) {
+    final id = filter.categoryId;
+    if (id == null) return 'All spending';
+    return context.select<CategoriesCubit, String>(
+      (cubit) => switch (cubit.state) {
+        CategoriesLoaded(:final categories) =>
+          categories.where((c) => c.id == id).firstOrNull?.name ??
+              'Uncategorized',
+        _ => '',
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final filter = this.filter;
+    final month = filter?.month == null
+        ? null
+        : DateFormat.yMMMM().format(filter!.month!);
+    final title = filter == null ? 'Expenses' : _title(context, filter);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Expenses')),
+      appBar: AppBar(title: Text(title)),
       body: BlocBuilder<ExpenseListCubit, ExpenseListState>(
         builder: (context, state) => switch (state) {
           ExpenseListLoading() => const Center(
@@ -59,15 +85,34 @@ class ExpenseListPage extends StatelessWidget {
             title: 'Couldn\'t load expenses',
             message: 'Close the app and open it again.',
           ),
+          ExpenseListLoaded(:final expenses)
+              when expenses.isEmpty && filter != null =>
+            EmptyState(
+              icon: Icons.receipt_long_outlined,
+              title: 'Nothing here',
+              message: month == null
+                  ? 'There are no expenses to show.'
+                  : 'There are no expenses in $month.',
+            ),
           ExpenseListLoaded(:final expenses) when expenses.isEmpty =>
             const EmptyState(
               icon: Icons.receipt_long_outlined,
               title: 'Add your first expense',
               message: 'Tap the button below to record what you spent.',
             ),
-          ExpenseListLoaded(:final groups) => _ExpenseList(
+          ExpenseListLoaded(:final groups, :final expenses) => _ExpenseList(
             groups: groups,
             onDelete: (expense) => _delete(context, expense),
+            summary: filter == null
+                ? null
+                : _FilterSummary(
+                    month: month,
+                    count: expenses.length,
+                    totalMinor: expenses.fold(
+                      0,
+                      (sum, e) => sum + e.amountMinor,
+                    ),
+                  ),
           ),
         },
       ),
@@ -75,11 +120,47 @@ class ExpenseListPage extends StatelessWidget {
   }
 }
 
+/// "November 2026 · 5 expenses · KSh 12,300" above a filtered list.
+class _FilterSummary extends StatelessWidget {
+  const _FilterSummary({
+    required this.month,
+    required this.count,
+    required this.totalMinor,
+  });
+
+  final String? month;
+  final int count;
+  final int totalMinor;
+
+  @override
+  Widget build(BuildContext context) {
+    final currency = context.select<SettingsCubit, Currency>(
+      (cubit) => cubit.state.currency,
+    );
+    final parts = [
+      ?month,
+      '$count ${count == 1 ? 'expense' : 'expenses'}',
+      currency.format(totalMinor),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.md),
+      child: Text(parts.join(' · '), style: context.text.titleSmall),
+    );
+  }
+}
+
 class _ExpenseList extends StatelessWidget {
-  const _ExpenseList({required this.groups, required this.onDelete});
+  const _ExpenseList({
+    required this.groups,
+    required this.onDelete,
+    this.summary,
+  });
 
   final List<ExpenseDayGroup> groups;
   final Future<bool> Function(Expense) onDelete;
+
+  /// Shown above the first day, for a filtered list.
+  final Widget? summary;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +179,7 @@ class _ExpenseList extends StatelessWidget {
 
     // Day headers and expenses in one flat list, so the list builds lazily.
     final items = <Object>[
+      ?summary,
       for (final group in groups) ...[group, ...group.expenses],
     ];
 
@@ -106,6 +188,7 @@ class _ExpenseList extends StatelessWidget {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final item = items[index];
+        if (item is Widget) return item;
         if (item is ExpenseDayGroup) {
           return Padding(
             padding: const EdgeInsets.only(bottom: AppSpacing.sm),

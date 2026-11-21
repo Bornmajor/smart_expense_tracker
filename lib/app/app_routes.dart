@@ -13,6 +13,10 @@ abstract final class AppRoutes {
 
   /// Needs the expense to edit passed as `extra`.
   static const editExpense = '/expenses/edit';
+
+  /// Needs an `ExpenseFilter` passed as `extra`: the expenses behind a Summary
+  /// category or total.
+  static const filteredExpenses = '/expenses/filtered';
   static const categories = '/categories';
   static const budgets = '/budgets';
   static const recurring = '/recurring';

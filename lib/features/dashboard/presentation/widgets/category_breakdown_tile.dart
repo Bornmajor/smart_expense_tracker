@@ -13,10 +13,14 @@ class CategoryBreakdownTile extends StatelessWidget {
     required this.totalMinor,
     required this.share,
     required this.currency,
+    this.onTap,
   });
 
   final String name;
   final int totalMinor;
+
+  /// Opens the expenses behind this total.
+  final VoidCallback? onTap;
 
   /// Fraction of the month's total, from 0 to 1.
   final double share;
@@ -25,38 +29,43 @@ class CategoryBreakdownTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: Padding(
-        padding: AppSpacing.card,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AmountRow(
-              leading: Text(name, style: context.text.titleMedium),
-              amount: currency.format(totalMinor),
-              amountStyle: context.text.titleMedium,
-            ),
-            const Gap(AppSpacing.md),
-            Row(
-              children: [
-                Expanded(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(4),
-                    child: LinearProgressIndicator(
-                      value: share,
-                      minHeight: 8,
-                      color: context.scheme.primary,
-                      backgroundColor: context.scheme.outline,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: AppSpacing.card,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AmountRow(
+                leading: Text(name, style: context.text.titleMedium),
+                amount: currency.format(totalMinor),
+                amountStyle: context.text.titleMedium,
+              ),
+              const Gap(AppSpacing.md),
+              Row(
+                children: [
+                  Expanded(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(4),
+                      child: LinearProgressIndicator(
+                        value: share,
+                        minHeight: 8,
+                        color: context.scheme.primary,
+                        backgroundColor: context.scheme.outline,
+                      ),
                     ),
                   ),
-                ),
-                const Gap(AppSpacing.md),
-                Text(
-                  '${(share * 100).round()}%',
-                  style: context.text.bodySmall,
-                ),
-              ],
-            ),
-          ],
+                  const Gap(AppSpacing.md),
+                  Text(
+                    '${(share * 100).round()}%',
+                    style: context.text.bodySmall,
+                  ),
+                  if (onTap != null) const Icon(Icons.chevron_right, size: 20),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

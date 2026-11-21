@@ -77,6 +77,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] "Safe to spend" on the Summary: an amount a day for the rest of the month, after spending so far and upcoming recurring bills (needs an overall budget)
 - [x] Heads-up cards on the Summary: possible duplicate charge, unusually large expense, a category above a usual month (rules on the phone, nothing sent anywhere)
 - [x] Back up everything to a file (optionally password-protected with AES-256) and restore it, with a confirmation that shows what is in the backup
+- [x] Tap a Summary category or budget to open the expenses behind it for that month
 
 ### Planned
 

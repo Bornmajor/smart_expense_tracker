@@ -24,6 +24,7 @@ import '../features/categories/presentation/pages/categories_page.dart';
 import '../features/dashboard/presentation/cubit/summary_cubit.dart';
 import '../features/dashboard/presentation/pages/summary_page.dart';
 import '../features/expenses/domain/entities/expense.dart';
+import '../features/expenses/domain/entities/expense_filter.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
 import '../features/expenses/domain/usecases/update_expense.dart';
@@ -196,6 +197,30 @@ GoRouter createRouter({
             BlocProvider(create: (_) => _categoryActions(categories)),
           ],
           child: const CategoriesPage(),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.filteredExpenses,
+      // The filter arrives as `extra`; without it there is nothing to show.
+      redirect: (context, state) =>
+          state.extra is ExpenseFilter ? null : AppRoutes.expenses,
+      builder: (context, state) {
+        final filter = state.extra! as ExpenseFilter;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => ExpenseListCubit(
+                context.read<ExpenseRepository>(),
+                filter: filter,
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: ExpenseListPage(filter: filter),
         );
       },
     ),
