@@ -22,15 +22,23 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Centered when it fits, and scrolls when it does not, such as on a short
+    // screen, in landscape or at large text, so nothing is ever cut off.
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: AppSpacing.screen,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(icon, size: 48, color: context.scheme.onSurfaceVariant),
             const Gap(AppSpacing.lg),
-            Text(title, style: context.text.titleMedium),
+            // Centered too: a long title such as "No expenses in November 2026"
+            // wraps on a narrow phone, and its lines must stay centered.
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: context.text.titleMedium,
+            ),
             const Gap(AppSpacing.sm),
             Text(
               message,

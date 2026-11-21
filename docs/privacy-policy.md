@@ -22,7 +22,8 @@ SpendWise IQ keeps the following in its own private storage on your phone:
 
 - your expenses: amount, date, vendor, an optional title, and the category
 - the categories you create or rename
-- your settings: the theme, whether the biometric lock is on, and whether you have finished the introduction
+- your settings: the theme, the currency, whether the biometric lock is on, and whether you have finished the introduction
+- your first name, if you chose to give one, which is only used to greet you in the app
 
 Other apps cannot read this storage. The developer cannot see it.
 
@@ -68,7 +69,7 @@ If device backup is turned on, Android may include the app's data in your phone'
 
 ## Keeping and deleting your data
 
-Your data stays on your phone until you remove it. You can delete expenses and categories inside the app. Uninstalling the app removes all the data it stored on your phone. Copies in a device backup are separate and are managed in your Google account settings.
+Your data stays on your phone until you remove it. You can delete expenses and categories inside the app, or everything at once with "Delete all my data" in Settings, which also puts the settings back to the start. It is deleted from your phone at once and cannot be undone; the developer has no copy to delete because nothing is uploaded. Backup files you made earlier, and anything you shared, stay where you saved them until you delete them yourself. Uninstalling the app removes all the data it stored on your phone. Copies in a device backup are separate and are managed in your Google account settings.
 
 ## Sharing and selling
 

@@ -48,6 +48,18 @@ class AppDatabase extends _$AppDatabase {
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),
   );
 
+  /// Deletes every expense, recurring rule, budget and category, then puts
+  /// back the starting categories, in one step: either all of it happens or
+  /// nothing does.
+  Future<void> eraseAllData() => transaction(() async {
+    // Children first: expenses point at categories and rules.
+    await delete(expenses).go();
+    await delete(recurringRules).go();
+    await delete(budgets).go();
+    await delete(categories).go();
+    await batch((b) => b.insertAll(categories, _defaultCategories()));
+  });
+
   List<CategoriesCompanion> _defaultCategories() {
     final now = DateTime.now();
     const names = {

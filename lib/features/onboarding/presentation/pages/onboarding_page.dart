@@ -8,6 +8,7 @@ import '../../../../core/theme/app_spacing.dart';
 import '../cubit/onboarding_cubit.dart';
 import '../cubit/onboarding_state.dart';
 import '../onboarding_slides.dart';
+import '../widgets/onboarding_name_view.dart';
 import '../widgets/onboarding_slide_view.dart';
 import '../widgets/step_progress_bar.dart';
 
@@ -22,10 +23,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
   static const _slideDuration = Duration(milliseconds: 300);
 
   final _controller = PageController();
+  final _name = TextEditingController();
 
   @override
   void dispose() {
     _controller.dispose();
+    _name.dispose();
     super.dispose();
   }
 
@@ -41,10 +44,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
     return BlocConsumer<OnboardingCubit, OnboardingState>(
       listenWhen: (previous, current) =>
           !previous.completed && current.completed,
-      listener: (context, _) => context.go(AppRoutes.expenses),
+      listener: (context, _) => context.go(AppRoutes.home),
       builder: (context, state) {
         final isFirst = state.page == 0;
-        final isLast = state.page == onboardingSlides.length - 1;
+        final isLast = state.page == onboardingPageCount - 1;
         return AnnotatedRegion<SystemUiOverlayStyle>(
           // Dark status bar icons, because the backgrounds are bright.
           value: SystemUiOverlayStyle.dark.copyWith(
@@ -52,15 +55,19 @@ class _OnboardingPageState extends State<OnboardingPage> {
             systemNavigationBarColor: Colors.transparent,
           ),
           child: Scaffold(
-            backgroundColor: onboardingSlides[state.page].color,
+            backgroundColor: state.page < onboardingSlides.length
+                ? onboardingSlides[state.page].color
+                : nameScreenColor,
             body: Stack(
               children: [
                 PageView.builder(
                   controller: _controller,
-                  itemCount: onboardingSlides.length,
+                  itemCount: onboardingPageCount,
                   onPageChanged: cubit.pageChanged,
-                  itemBuilder: (_, index) =>
-                      OnboardingSlideView(slide: onboardingSlides[index]),
+                  // The slides, then a screen asking for an optional first name.
+                  itemBuilder: (_, index) => index < onboardingSlides.length
+                      ? OnboardingSlideView(slide: onboardingSlides[index])
+                      : OnboardingNameView(controller: _name),
                 ),
                 Positioned(
                   top: 0,
@@ -91,7 +98,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           const Gap(AppSpacing.sm),
                           Expanded(
                             child: StepProgressBar(
-                              count: onboardingSlides.length,
+                              count: onboardingPageCount,
                               current: state.page,
                               activeColor: onboardingInk,
                               inactiveColor: onboardingInk.withValues(
@@ -120,7 +127,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           FilledButton(
-                            onPressed: isLast ? cubit.complete : _next,
+                            onPressed: isLast
+                                ? () => cubit.complete(name: _name.text)
+                                : _next,
                             style: FilledButton.styleFrom(
                               backgroundColor: onboardingInk,
                               foregroundColor: Colors.white,

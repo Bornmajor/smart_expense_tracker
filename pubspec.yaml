@@ -90,6 +90,15 @@ flutter:
     # Inter, embedded into exported PDFs (see assets/fonts/Inter-LICENSE.txt).
     - assets/fonts/
 
+  # The app's own font. Only regular and bold are bundled, so the in-between
+  # weights the text styles ask for use the nearest of the two.
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Bold.ttf
+          weight: 700
+
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

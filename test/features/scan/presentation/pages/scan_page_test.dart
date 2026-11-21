@@ -178,7 +178,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(
-        find.textContaining('restarted the app while the camera was open'),
+        find.textContaining('low on memory and restarted the app'),
         findsOneWidget,
       );
       expect(find.text('Use this photo'), findsOneWidget);

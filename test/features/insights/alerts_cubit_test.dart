@@ -21,7 +21,12 @@ void main() {
   );
 
   Future<AlertsCubit> start() async {
-    final cubit = AlertsCubit(repository, dismissals, now: () => today);
+    final cubit = AlertsCubit(
+      repository,
+      dismissals,
+      FakeBudgetRepository(),
+      now: () => today,
+    );
     addTearDown(cubit.close);
     await pumpEventQueue();
     return cubit;

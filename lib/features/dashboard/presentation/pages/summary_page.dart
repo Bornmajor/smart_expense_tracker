@@ -24,6 +24,7 @@ import '../cubit/summary_state.dart';
 import '../widgets/budget_section.dart';
 import '../../../insights/presentation/cubit/alerts_cubit.dart';
 import '../../../insights/presentation/widgets/alerts_section.dart';
+import '../../../insights/presentation/widgets/month_comparison_card.dart';
 import '../../../safe_to_spend/presentation/widgets/safe_to_spend_card.dart';
 import '../widgets/category_breakdown_tile.dart';
 import '../widgets/month_switcher.dart';
@@ -124,6 +125,11 @@ class _SummaryContent extends StatelessWidget {
 
     // The expenses behind a row: one category in the month shown, or the whole
     // month when [categoryId] is null.
+    // Each category's budget, so its card can show how much is left.
+    final budgetFor = {
+      for (final progress in state.budgets)
+        if (!progress.budget.isOverall) progress.budget.scopeId: progress,
+    };
     void openExpenses(String? categoryId) => context.push(
       AppRoutes.filteredExpenses,
       extra: ExpenseFilter(categoryId: categoryId, month: state.month),
@@ -153,6 +159,7 @@ class _SummaryContent extends StatelessWidget {
           categoryNames: names,
           currency: currency,
           onDismiss: context.read<AlertsCubit>().dismiss,
+          onAction: (alert) => openExpenses(alert.categoryId),
         ),
         const Gap(AppSpacing.md),
         TotalCard(
@@ -164,21 +171,31 @@ class _SummaryContent extends StatelessWidget {
           const Gap(AppSpacing.md),
           SafeToSpendCard(safeToSpend: state.safeToSpend!, currency: currency),
         ],
+        if (state.comparison != null) ...[
+          const Gap(AppSpacing.md),
+          MonthComparisonCard(
+            comparison: state.comparison!,
+            currency: currency,
+            biggestChangeName: names[state.comparison!.biggestChangeCategoryId],
+          ),
+        ],
         const Gap(AppSpacing.xl),
         BudgetSection(
           progress: state.budgets,
-          categoryNames: names,
           currency: currency,
           onOpen: openExpenses,
         ),
         const Gap(AppSpacing.xl),
         if (summary.count == 0)
           SizedBox(
-            height: 240,
+            height: 300,
             child: EmptyState(
               icon: Icons.pie_chart_outline,
               title: 'No expenses in ${DateFormat.yMMMM().format(state.month)}',
-              message: 'Expenses you add will show up here.',
+              message: state.canGoNext
+                  ? 'Nothing was recorded this month.'
+                  : 'Add an expense and your spending by category, budgets '
+                        'and what is safe to spend show up here.',
             ),
           )
         else ...[
@@ -190,6 +207,7 @@ class _SummaryContent extends StatelessWidget {
               share: category.share,
               currency: currency,
               onTap: () => openExpenses(category.categoryId),
+              budget: budgetFor[category.categoryId],
             ),
             const Gap(AppSpacing.sm),
           ],

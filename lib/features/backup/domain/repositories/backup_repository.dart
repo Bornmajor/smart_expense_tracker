@@ -10,4 +10,9 @@ abstract interface class BackupRepository {
   /// Throws `BackupException` (damaged) if the data does not fit, and
   /// `StorageException` if storage fails.
   Future<void> replaceAll(BackupData data);
+
+  /// Deletes everything the user entered and starts again with the standard
+  /// categories, in one step. Throws `StorageException` if storage fails, and
+  /// then nothing is changed.
+  Future<void> eraseAll();
 }

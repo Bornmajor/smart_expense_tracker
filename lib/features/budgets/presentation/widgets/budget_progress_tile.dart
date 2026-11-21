@@ -8,8 +8,8 @@ import '../../../../core/utils/currency.dart';
 import '../../../../shared/widgets/amount_row.dart';
 import '../../domain/entities/budget_progress.dart';
 
-/// One budget on the Summary: what was spent of the limit, a bar, and what is
-/// left. The bar turns amber near the limit and red once it is passed.
+/// One budget: what was spent, a bar, and, in bold, what is left of the limit.
+/// The bar and the amount turn amber near the limit and red once it is passed.
 class BudgetProgressTile extends StatelessWidget {
   const BudgetProgressTile({
     super.key,
@@ -32,21 +32,25 @@ class BudgetProgressTile extends StatelessWidget {
     BudgetLevel.over => context.semantic.danger,
   };
 
-  String _caption() {
+  /// "KSh 28,946 left" or "KSh 1,510 over".
+  String _answer() {
     final remaining = progress.remainingMinor;
     return remaining >= 0
-        ? '${currency.format(remaining)} left'
-        : '${currency.format(-remaining)} over';
+        ? '${currency.formatGlance(remaining)} left'
+        : '${currency.formatGlance(-remaining)} over';
   }
 
   @override
   Widget build(BuildContext context) {
     final color = _color(context);
+    final over = progress.level == BudgetLevel.over;
     final percent = (progress.fraction * 100).round();
+    final limit = currency.formatGlance(progress.limitMinor);
+
     return Semantics(
-      label: progress.level == BudgetLevel.over
-          ? '$name budget, over by ${currency.format(-progress.remainingMinor)}'
-          : '$name budget, $percent percent used, ${_caption()}',
+      label: over
+          ? '$name budget, ${_answer()}'
+          : '$name budget, $percent percent used, ${_answer()}',
       excludeSemantics: true,
       child: Card(
         clipBehavior: Clip.antiAlias,
@@ -59,9 +63,7 @@ class BudgetProgressTile extends StatelessWidget {
               children: [
                 AmountRow(
                   leading: Text(name, style: context.text.titleMedium),
-                  amount:
-                      '${currency.format(progress.spentMinor)} of '
-                      '${currency.format(progress.limitMinor)}',
+                  amount: '${currency.formatGlance(progress.spentMinor)} spent',
                   amountStyle: context.text.bodyMedium,
                 ),
                 const Gap(AppSpacing.md),
@@ -77,23 +79,31 @@ class BudgetProgressTile extends StatelessWidget {
                 const Gap(AppSpacing.sm),
                 Row(
                   children: [
+                    // The answer is the bold part; the limit is context.
                     Expanded(
-                      child: Text(
-                        _caption(),
-                        style: context.text.bodySmall?.copyWith(
-                          color: progress.level == BudgetLevel.onTrack
-                              ? null
-                              : color,
-                          fontWeight: progress.level == BudgetLevel.onTrack
-                              ? null
-                              : FontWeight.w600,
+                      child: Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: _answer(),
+                              style: context.text.titleSmall?.copyWith(
+                                color: progress.level == BudgetLevel.onTrack
+                                    ? null
+                                    : color,
+                              ),
+                            ),
+                            TextSpan(
+                              text: over ? ' · budget $limit' : ' of $limit',
+                              style: context.text.bodySmall,
+                            ),
+                          ],
                         ),
                       ),
                     ),
-                    // Past the limit the amount over says it all; a figure such as
-                    // 251% is harder to read than "KSh 1,510 over".
-                    if (progress.level != BudgetLevel.over)
-                      Text('$percent%', style: context.text.bodySmall),
+                    // Past the limit the amount over says it all; a figure such
+                    // as 251% is harder to read than "KSh 1,510 over".
+                    if (!over)
+                      Text('$percent% used', style: context.text.bodySmall),
                   ],
                 ),
               ],

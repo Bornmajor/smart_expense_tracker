@@ -150,8 +150,8 @@ class _Preview extends StatelessWidget {
           Padding(
             padding: AppSpacing.screen.copyWith(top: AppSpacing.md),
             child: Text(
-              'Your phone restarted the app while the camera was open. '
-              'This is the photo you took.',
+              'Your phone ran low on memory and restarted the app. This is the '
+              'photo you took.',
               style: context.text.bodySmall,
               textAlign: TextAlign.center,
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:smart_expense_tracker/features/onboarding/presentation/onboarding_slides.dart';
+import 'package:smart_expense_tracker/features/onboarding/presentation/widgets/onboarding_name_view.dart';
 import 'package:smart_expense_tracker/features/onboarding/presentation/widgets/onboarding_slide_view.dart';
 
 import '../support/fakes.dart';
@@ -34,6 +35,7 @@ void main() {
       final colors = onboardingSlides.map((s) => s.color).toSet();
 
       expect(colors, hasLength(onboardingSlides.length));
+      expect(colors, isNot(contains(nameScreenColor)));
     });
   });
 
@@ -104,11 +106,21 @@ void main() {
       );
     });
 
-    testWidgets('the last slide has no Skip', (tester) async {
+    testWidgets('the name screen has its own color and no Skip', (
+      tester,
+    ) async {
       await openOnboarding(tester);
 
       await tapText(tester, 'Next');
       await tapText(tester, 'Next');
+      await tapText(tester, 'Next');
+
+      expect(find.byType(OnboardingNameView), findsOneWidget);
+      final box = find.descendant(
+        of: find.byType(OnboardingNameView),
+        matching: find.byType(ColoredBox),
+      );
+      expect(tester.widget<ColoredBox>(box.first).color, nameScreenColor);
 
       expect(find.text('Skip'), findsNothing);
       expect(find.widgetWithText(FilledButton, 'Get started'), findsOneWidget);

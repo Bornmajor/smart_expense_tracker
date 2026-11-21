@@ -20,15 +20,7 @@ Push, merge to `dev`, promote to `uat`, and try the build on a few phones. Then 
 
 All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model could be added later behind a switch, on phones that support it.
 
-1. **Polish.** Use the bundled Inter font in the app itself (the files are already in `assets/fonts` for the PDF; set `AppTypography.fontFamily` and declare them under `fonts:` in `pubspec.yaml`), the app PIN below as a fallback to biometrics, and a pass over empty states and onboarding.
-2. **A better first screen, and better insights.** The app opens on a plain list of expenses that keeps scrolling, which is fine for finding things but a weak first impression. People expect the first screen to answer "how am I doing?" at a glance. Research first, without bias (what the best expense trackers show on their first screen, and what users of this kind of app say they want), then pick **3 to 5** things to put there. The starting ideas, to be checked against that research:
-   - **A greeting by name.** Onboarding asks for a first name (kept only on the phone, like everything else; it is optional) so the top of the app can say "Good morning, Maja". Needs a name step in onboarding and a way to change it in Settings.
-   - **How I am doing against my target:** this month's spending against the overall budget (and Safe to spend), in one glance, with a clear prompt to set a budget when there is none.
-   - **A small bar chart of spending per month for the current year**, so the trend is clear at a glance (the chart can be tapped to open that month on the Summary).
-   - **A clear Add expense action** (it exists today) kept visible, with the recent expenses shown as a short list under the insights and a "see all" link, instead of the whole scrolling list.
-   - **Heads-up cards** (already built) and this month against last month with the biggest change.
-   - Also on the list of insights: an alert for a subscription that changed price.
-   The Expenses list stays one tap away (search and filters already work there). Decide the final 3 to 5 after the research, and keep the screen calm: a few strong things, not a dashboard of everything.
+1. **Check the personas with five real people** (see [personas.md](personas.md)): which one are you, and what is missing? Their answers decide the order of the last section below.
 
 ## Portfolio showcase (cheap, high value)
 
@@ -39,11 +31,20 @@ Most reviewers will not install the app, so the repository has to show it.
 - **Case study page:** the problem, the decisions and trade-offs (on-device ML Kit OCR instead of a cloud service, plain Dart insights, no account), the testing and release pipeline, and what would come next. This roadmap already holds most of the material.
 - Be plain about what "smart" means here: on-device receipt reading, a vendor-to-category memory, and rule-based insights. No cloud AI, by choice, for privacy.
 
+## At the end: the persona gaps
+
+These came out of the [personas research](personas.md): features that several kinds of user expect and the app does not have yet. They are deliberately **last**, after the pending work above. Their order can change once the personas have been checked with real people.
+
+1. **Income.** The biggest gap (five of seven personas). Record pay, a client's payment or sales, so the app can show what is left after spending, a savings rate, and profit for a shop. Nothing of it is built. A first version would be: an income table (amount, date, an optional source such as Salary or a client, an optional note), an Add income choice, an income card on the Summary and a line on Home, backup, restore and delete-all, and turning an M-Pesa "you have received" message into income. Recurring income (a monthly salary) and income in the PDF and CSV reports would come after.
+2. **Savings goals.** A goal with a target and a date ("laptop, KSh 80,000 by June"), progress toward it, and a friendly counterweight to budgets. Wanted by the first-time budgeter and the saver.
+3. **Bill reminders.** A gentle, optional reminder before a recurring bill is due, built on the recurring expenses already there. It needs no internet, but some phones stop background apps, so it has to be modest about what it promises.
+4. **Tags.** A business or personal flag, and a client or trip tag, with totals per tag. Serves the freelancer, the shop owner and the traveller without needing real accounts.
+
 ## Done
 
-**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt from a photo or a PDF in the Files app, the camera option with recovery of a photo lost to an app restart, exporting a month as a PDF or CSV, choosing a currency (the Kenyan shilling by default), converting an amount from another currency with the daily rate, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, recurring expenses added when they come due, backup and restore to a file (optionally password-protected), a Repeat box on the add form, a tap-through from Summary categories and budgets to their expenses, search and filters on the expense list, typing an expense in one line, pasting an M-Pesa message, Safe to spend, heads-up cards for duplicates, large expenses and a category above normal, the app version in Settings, and a dev-only Pretend today is tool.
+**Done:** onboarding redesign, safe-area fixes, color-coded snackbars, the expense loop (edit, delete with undo, list grouped by day), an optional title, category management, adding a category from the expense form, scanning a receipt from a photo or a PDF in the Files app, the camera option with recovery of a photo lost to an app restart, exporting a month as a PDF or CSV, choosing a currency (the Kenyan shilling by default), converting an amount from another currency with the daily rate, remembering the category for each vendor, an app lock that never locks the user out, monthly budgets with progress on the Summary, recurring expenses added when they come due, backup and restore to a file (optionally password-protected), a Repeat box on the add form, a tap-through from Summary categories and budgets to their expenses, search and filters on the expense list, typing an expense in one line, pasting an M-Pesa message, the Inter font and helpful empty states, a Home screen with a greeting, the month against the budget, a bar chart of the year (with the budget as a line) and the latest expenses, this month against last month with the biggest change, a heads-up when a subscription changes price, a nudge to set a budget for a big category, delete all my data, Safe to spend, heads-up cards for duplicates, large expenses and a category above normal, the app version in Settings, and a dev-only Pretend today is tool.
 
-## TODO: app PIN (brainstormed, not built; part of Polish above)
+## TODO: app PIN (brainstormed, not built; parked for now)
 
 An optional PIN of the app's own, besides the biometric and phone-screen-lock check that exists now. The main reason: on a shared phone, family may know the phone's PIN, and a separate app PIN keeps spending private from them. It also helps phones with no screen lock.
 

@@ -405,7 +405,7 @@ void main() {
       await openApp(tester);
 
       expect(
-        find.textContaining('restarted the app while the camera was open'),
+        find.textContaining('low on memory and restarted the app'),
         findsOneWidget,
       );
       expect(find.text('Use this photo'), findsOneWidget);
@@ -418,7 +418,7 @@ void main() {
       await openApp(tester);
 
       expect(
-        find.textContaining('closed the app while you were choosing'),
+        find.textContaining('low on memory and closed the app'),
         findsOneWidget,
       );
       expect(find.text('Use this photo'), findsNothing);
