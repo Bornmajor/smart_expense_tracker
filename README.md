@@ -83,6 +83,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Type an expense in one line ("lunch 350 at Java yesterday"); a plain on-device parser fills in the form for you to check
 - [x] Paste an M-Pesa confirmation message to fill in an expense (no SMS permission; the same message is not added twice)
 - [x] A Home screen: greeting by name, this month against the budget with what is safe to spend, a bar chart of the year, the latest expenses and heads-up cards
+- [x] Insights on the phone: this month against the same stretch of last month with the biggest change, a heads-up when a subscription changes price, and the budget as a line on the year chart
 
 ### Planned
 

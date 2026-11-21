@@ -12,6 +12,7 @@ import '../../../categories/presentation/cubit/categories_state.dart';
 import '../../../expenses/domain/entities/expense_filter.dart';
 import '../../../insights/presentation/cubit/alerts_cubit.dart';
 import '../../../insights/presentation/widgets/alerts_section.dart';
+import '../../../insights/presentation/widgets/month_comparison_card.dart';
 import '../../../profile/presentation/cubit/profile_cubit.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../cubit/home_cubit.dart';
@@ -90,6 +91,15 @@ class _Loaded extends StatelessWidget {
             onOpen: () => shell.goBranch(AppTabs.summary),
             onSetBudget: () => context.push(AppRoutes.budgets),
           ),
+          if (state.comparison != null) ...[
+            const Gap(AppSpacing.lg),
+            MonthComparisonCard(
+              comparison: state.comparison!,
+              currency: currency,
+              biggestChangeName:
+                  names[state.comparison!.biggestChangeCategoryId],
+            ),
+          ],
           const Gap(AppSpacing.lg),
           // Only the most pressing, so the screen stays calm. All of them are
           // on the Summary.
@@ -103,6 +113,7 @@ class _Loaded extends StatelessWidget {
             year: state.year,
             totals: state.monthlyTotals,
             currentMonth: state.month,
+            budgetMinor: state.overallBudget?.limitMinor,
             currency: currency,
             onMonthTap: (month) => context.push(
               AppRoutes.filteredExpenses,

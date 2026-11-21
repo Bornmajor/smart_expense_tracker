@@ -23,6 +23,19 @@ class FindAlerts {
   /// Too small to be worth a message, in minor units (100.00).
   static const floorMinor = 10000;
 
+  /// How many months in a row, at the same amount, make something look like a
+  /// subscription before a change in its price is news.
+  static const steadyMonths = 3;
+
+  /// A price change has to be at least this much to be told (10.00)...
+  static const priceFloorMinor = 1000;
+
+  /// ...and at least this share of the old price.
+  static const pricePercent = 5;
+
+  /// How long after the new price first shows up it is still news.
+  static const priceFreshDays = 35;
+
   static const maxAlerts = 3;
 
   /// The alerts for [today], most pressing first, at most [maxAlerts].
@@ -31,6 +44,7 @@ class FindAlerts {
     return [
       ..._duplicates(expenses, day),
       ..._large(expenses, day),
+      ..._priceChanges(expenses, day),
       ..._aboveNormal(expenses, day),
     ].take(maxAlerts).toList();
   }
@@ -103,6 +117,68 @@ class FindAlerts {
       }
     }
     found.sort((a, b) => b.amountMinor.compareTo(a.amountMinor));
+    return found;
+  }
+
+  /// A vendor paid once a month, in [steadyMonths] months in a row at the same
+  /// amount, and then once more in the next month at a different amount.
+  List<InsightAlert> _priceChanges(List<Expense> expenses, DateTime day) {
+    final byVendor = <String, List<Expense>>{};
+    for (final e in expenses) {
+      if (e.date.isAfter(day)) continue;
+      final key = e.vendor.trim().toLowerCase();
+      if (key.isEmpty || e.vendor == ExpenseRules.unknownVendor) continue;
+      byVendor.putIfAbsent(key, () => []).add(e);
+    }
+
+    int monthIndex(Expense e) => e.date.year * 12 + e.date.month;
+
+    final found = <InsightAlert>[];
+    byVendor.forEach((key, list) {
+      if (list.length < steadyMonths + 1) return;
+      list.sort((a, b) => a.date.compareTo(b.date));
+      final recent = list.sublist(list.length - (steadyMonths + 1));
+
+      // One a month, in months that follow each other. Several in a month is a
+      // shop visited often, not a subscription, in any of those months.
+      for (var i = 1; i < recent.length; i++) {
+        if (monthIndex(recent[i]) != monthIndex(recent[i - 1]) + 1) return;
+      }
+      final months = {for (final e in recent) monthIndex(e)};
+      if (list.where((e) => months.contains(monthIndex(e))).length !=
+          recent.length) {
+        return;
+      }
+
+      final steady = recent.first.amountMinor;
+      for (final e in recent.take(steadyMonths)) {
+        if (e.amountMinor != steady) return;
+      }
+
+      final latest = recent.last;
+      final change = (latest.amountMinor - steady).abs();
+      if (change < priceFloorMinor || change * 100 < steady * pricePercent) {
+        return;
+      }
+      if (day.difference(latest.date).inDays > priceFreshDays) return;
+
+      found.add(
+        InsightAlert(
+          id: 'price:$key:${latest.date.year}-${latest.date.month}',
+          kind: AlertKind.priceChanged,
+          categoryId: latest.categoryId,
+          amountMinor: latest.amountMinor,
+          vendor: latest.vendor,
+          usualMinor: steady,
+        ),
+      );
+    });
+    found.sort((a, b) {
+      final byChange = (b.amountMinor - b.usualMinor!).abs().compareTo(
+        (a.amountMinor - a.usualMinor!).abs(),
+      );
+      return byChange != 0 ? byChange : a.id.compareTo(b.id);
+    });
     return found;
   }
 

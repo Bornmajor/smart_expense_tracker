@@ -18,6 +18,7 @@ class YearChart extends StatelessWidget {
     required this.currentMonth,
     required this.currency,
     required this.onMonthTap,
+    this.budgetMinor,
   });
 
   /// The tallest a bar can be.
@@ -63,9 +64,19 @@ class YearChart extends StatelessWidget {
   /// Called with the month, 1 to 12.
   final ValueChanged<int> onMonthTap;
 
+  /// The overall monthly budget, drawn as a dashed line so months over it stand
+  /// out. Null for no line.
+  final int? budgetMinor;
+
+  /// Room under each bar for its month letter.
+  static const _labelArea = 20.0;
+  static const _labelGap = 4.0;
+
   @override
   Widget build(BuildContext context) {
-    final tallest = totals.fold<int>(0, math.max);
+    final budget = budgetMinor;
+    // The budget line has to fit on the chart, so it counts for the height.
+    final tallest = math.max(totals.fold<int>(0, math.max), budget ?? 0);
     final yearTotal = totals.fold<int>(0, (a, b) => a + b);
 
     return Card(
@@ -88,21 +99,61 @@ class YearChart extends StatelessWidget {
               amountStyle: context.text.bodySmall,
             ),
             const Gap(AppSpacing.md),
-            SizedBox(
-              height: barArea + 32,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
+            if (budget != null) ...[
+              Row(
                 children: [
-                  for (var i = 0; i < 12; i++)
-                    Expanded(
-                      child: _Bar(
-                        label: _letters[i],
-                        semantics:
-                            '${_names[i]}: ${currency.format(totals[i])}',
-                        fraction: tallest == 0 ? 0 : totals[i] / tallest,
-                        current: i + 1 == currentMonth,
-                        future: i + 1 > currentMonth,
-                        onTap: () => onMonthTap(i + 1),
+                  SizedBox(
+                    width: 24,
+                    height: 2,
+                    child: CustomPaint(
+                      painter: _DashPainter(context.semantic.warning),
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(
+                    child: Text(
+                      'Monthly budget ${currency.format(budget)}',
+                      style: context.text.bodySmall,
+                    ),
+                  ),
+                ],
+              ),
+              const Gap(AppSpacing.sm),
+            ],
+            SizedBox(
+              height: barArea + _labelArea + _labelGap + 8,
+              child: Stack(
+                children: [
+                  Positioned.fill(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        for (var i = 0; i < 12; i++)
+                          Expanded(
+                            child: _Bar(
+                              label: _letters[i],
+                              semantics:
+                                  '${_names[i]}: ${currency.format(totals[i])}',
+                              fraction: tallest == 0 ? 0 : totals[i] / tallest,
+                              current: i + 1 == currentMonth,
+                              future: i + 1 > currentMonth,
+                              onTap: () => onMonthTap(i + 1),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  if (budget != null && tallest > 0)
+                    Positioned(
+                      left: 0,
+                      right: 0,
+                      bottom:
+                          _labelArea + _labelGap + budget / tallest * barArea,
+                      height: 2,
+                      child: IgnorePointer(
+                        child: CustomPaint(
+                          painter: _DashPainter(context.semantic.warning),
+                        ),
                       ),
                     ),
                 ],
@@ -158,16 +209,24 @@ class _Bar extends StatelessWidget {
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
-            const Gap(AppSpacing.xs),
-            // The month letters are tiny labels, so they grow with the phone's
-            // font size only a little. Otherwise twelve of them would not fit
-            // side by side, and the chart would need more room than it has.
-            MediaQuery.withClampedTextScaling(
-              maxScaleFactor: 1.2,
-              child: Text(
-                label,
-                style: context.text.bodySmall?.copyWith(
-                  fontWeight: current ? FontWeight.w700 : null,
+            const SizedBox(height: YearChart._labelGap),
+            // A fixed room for the month letter, so the budget line can be
+            // placed exactly. The letters are tiny labels, so they grow with the
+            // phone's font size only a little, and shrink to fit if they must.
+            SizedBox(
+              height: YearChart._labelArea,
+              child: Center(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: MediaQuery.withClampedTextScaling(
+                    maxScaleFactor: 1.2,
+                    child: Text(
+                      label,
+                      style: context.text.bodySmall?.copyWith(
+                        fontWeight: current ? FontWeight.w700 : null,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -176,4 +235,30 @@ class _Bar extends StatelessWidget {
       ),
     );
   }
+}
+
+/// A thin dashed line across the width it is given.
+class _DashPainter extends CustomPainter {
+  const _DashPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2;
+    const dash = 6.0;
+    const gap = 4.0;
+    for (var x = 0.0; x < size.width; x += dash + gap) {
+      canvas.drawLine(
+        Offset(x, size.height / 2),
+        Offset(math.min(x + dash, size.width), size.height / 2),
+        paint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(_DashPainter old) => old.color != color;
 }

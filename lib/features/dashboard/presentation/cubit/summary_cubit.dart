@@ -7,6 +7,7 @@ import '../../../budgets/domain/repositories/budget_repository.dart';
 import '../../../budgets/domain/usecases/evaluate_budgets.dart';
 import '../../../recurring/domain/entities/recurring_rule.dart';
 import '../../../recurring/domain/repositories/recurring_repository.dart';
+import '../../../insights/domain/usecases/compare_months.dart';
 import '../../../safe_to_spend/domain/entities/safe_to_spend.dart';
 import '../../../safe_to_spend/domain/usecases/calculate_safe_to_spend.dart';
 import '../../../expenses/domain/entities/expense.dart';
@@ -23,6 +24,7 @@ class SummaryCubit extends Cubit<SummaryState> {
     this._summarize = const SummarizeMonth(),
     this._evaluate = const EvaluateBudgets(),
     this._safeToSpend = const CalculateSafeToSpend(),
+    this._compare = const CompareMonths(),
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now,
        super(const SummaryLoading()) {
@@ -51,6 +53,7 @@ class SummaryCubit extends Cubit<SummaryState> {
   final SummarizeMonth _summarize;
   final EvaluateBudgets _evaluate;
   final CalculateSafeToSpend _safeToSpend;
+  final CompareMonths _compare;
   final DateTime Function() _now;
   late final StreamSubscription<Object?> _expenseSubscription;
   late final StreamSubscription<Object?> _budgetSubscription;
@@ -95,6 +98,8 @@ class SummaryCubit extends Cubit<SummaryState> {
         canGoNext: _canGoNext,
         budgets: _evaluate(summary, _budgets),
         safeToSpend: _isCurrentMonth ? _safeToSpendNow(summary) : null,
+        // Only this month is still going, so only it is compared.
+        comparison: _isCurrentMonth ? _compare(_expenses, _now()) : null,
       ),
     );
   }

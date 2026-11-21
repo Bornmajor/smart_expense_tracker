@@ -2,6 +2,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../../budgets/domain/entities/budget.dart';
 import '../../../expenses/domain/entities/expense.dart';
+import '../../../insights/domain/entities/month_comparison.dart';
 import '../../../safe_to_spend/domain/entities/safe_to_spend.dart';
 
 sealed class HomeState extends Equatable {
@@ -24,6 +25,7 @@ final class HomeLoaded extends HomeState {
     required this.hasExpenses,
     this.overallBudget,
     this.safeToSpend,
+    this.comparison,
   });
 
   final int year;
@@ -47,6 +49,10 @@ final class HomeLoaded extends HomeState {
   /// budget.
   final SafeToSpend? safeToSpend;
 
+  /// This month against the same stretch of last month, or null when there is
+  /// no spending last month to compare with.
+  final MonthComparison? comparison;
+
   /// Spent so far this month.
   int get spentThisMonth => monthlyTotals[month - 1];
 
@@ -59,6 +65,7 @@ final class HomeLoaded extends HomeState {
     hasExpenses,
     overallBudget,
     safeToSpend,
+    comparison,
   ];
 }
 

@@ -9,6 +9,7 @@ import '../../../expenses/domain/repositories/expense_repository.dart';
 import '../../../recurring/domain/entities/recurring_rule.dart';
 import '../../../recurring/domain/repositories/recurring_repository.dart';
 import '../../../safe_to_spend/domain/usecases/calculate_safe_to_spend.dart';
+import '../../../insights/domain/usecases/compare_months.dart';
 import '../../domain/usecases/summarize_year.dart';
 import 'home_state.dart';
 
@@ -22,6 +23,7 @@ class HomeCubit extends Cubit<HomeState> {
     RecurringRepository recurring, {
     this._summarizeYear = const SummarizeYear(),
     this._safeToSpend = const CalculateSafeToSpend(),
+    this._compare = const CompareMonths(),
     DateTime Function()? now,
   }) : _now = now ?? DateTime.now,
        super(const HomeLoading()) {
@@ -45,6 +47,7 @@ class HomeCubit extends Cubit<HomeState> {
 
   final SummarizeYear _summarizeYear;
   final CalculateSafeToSpend _safeToSpend;
+  final CompareMonths _compare;
   final DateTime Function() _now;
   late final StreamSubscription<Object?> _expenseSubscription;
   late final StreamSubscription<Object?> _budgetSubscription;
@@ -73,6 +76,7 @@ class HomeCubit extends Cubit<HomeState> {
           rules: _rules,
           today: now,
         ),
+        comparison: _compare(_expenses, now),
       ),
     );
   }

@@ -24,6 +24,7 @@ import '../cubit/summary_state.dart';
 import '../widgets/budget_section.dart';
 import '../../../insights/presentation/cubit/alerts_cubit.dart';
 import '../../../insights/presentation/widgets/alerts_section.dart';
+import '../../../insights/presentation/widgets/month_comparison_card.dart';
 import '../../../safe_to_spend/presentation/widgets/safe_to_spend_card.dart';
 import '../widgets/category_breakdown_tile.dart';
 import '../widgets/month_switcher.dart';
@@ -168,6 +169,14 @@ class _SummaryContent extends StatelessWidget {
         if (state.safeToSpend != null) ...[
           const Gap(AppSpacing.md),
           SafeToSpendCard(safeToSpend: state.safeToSpend!, currency: currency),
+        ],
+        if (state.comparison != null) ...[
+          const Gap(AppSpacing.md),
+          MonthComparisonCard(
+            comparison: state.comparison!,
+            currency: currency,
+            biggestChangeName: names[state.comparison!.biggestChangeCategoryId],
+          ),
         ],
         const Gap(AppSpacing.xl),
         BudgetSection(

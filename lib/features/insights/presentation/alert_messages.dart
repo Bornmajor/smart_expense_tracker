@@ -24,6 +24,12 @@ import '../domain/entities/insight_alert.dart';
           '$amount at ${alert.vendor} is much more than the usual $usual '
           'for $categoryName.',
     ),
+    AlertKind.priceChanged => (
+      title: 'Price change at ${alert.vendor}',
+      message:
+          '${alert.vendor} went ${alert.amountMinor > (alert.usualMinor ?? 0) ? 'up' : 'down'} '
+          'from $usual to $amount a month.',
+    ),
     AlertKind.categoryAboveNormal => (
       title: '$categoryName is running high',
       message:

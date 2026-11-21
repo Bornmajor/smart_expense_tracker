@@ -174,6 +174,51 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('marks the budget with a line and a note when there is one', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          YearChart(
+            year: 2026,
+            totals: totals(),
+            currentMonth: 11,
+            currency: Currency.kes,
+            onMonthTap: (_) {},
+            budgetMinor: 400000,
+          ),
+        ),
+      );
+
+      expect(find.textContaining('Monthly budget'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a budget above every bar still fits on the chart', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        host(
+          YearChart(
+            year: 2026,
+            totals: totals(),
+            currentMonth: 11,
+            currency: Currency.kes,
+            onMonthTap: (_) {},
+            budgetMinor: 99999999,
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('has no budget note without a budget', (tester) async {
+      await tester.pumpWidget(chart());
+
+      expect(find.textContaining('Monthly budget'), findsNothing);
+    });
+
     testWidgets('fits a narrow phone at large text', (tester) async {
       tester.view.physicalSize = const Size(320, 700);
       tester.view.devicePixelRatio = 1;
