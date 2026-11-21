@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../app/add_expense_flow.dart';
 import '../../../../app/app_routes.dart';
 
 import '../../../../core/errors/app_failure.dart';
@@ -174,11 +175,22 @@ class _SummaryContent extends StatelessWidget {
         const Gap(AppSpacing.xl),
         if (summary.count == 0)
           SizedBox(
-            height: 240,
+            height: 300,
             child: EmptyState(
               icon: Icons.pie_chart_outline,
               title: 'No expenses in ${DateFormat.yMMMM().format(state.month)}',
-              message: 'Expenses you add will show up here.',
+              message: state.canGoNext
+                  ? 'Nothing was recorded this month.'
+                  : 'Add an expense and your spending by category, budgets '
+                        'and what is safe to spend show up here.',
+              // Only this month can still be added to from here.
+              action: state.canGoNext
+                  ? null
+                  : FilledButton.icon(
+                      onPressed: () => startAddExpense(context),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Add an expense'),
+                    ),
             ),
           )
         else ...[

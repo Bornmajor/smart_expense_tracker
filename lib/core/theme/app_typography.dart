@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppTypography {
-  /// Set to 'Inter' once the font files are added to assets/fonts and
-  /// declared in pubspec.yaml. Null uses the platform default font.
-  static const String? fontFamily = null;
+  /// The bundled Inter font (see assets/fonts and pubspec.yaml).
+  static const fontFamily = 'Inter';
 
   static TextTheme textTheme(Color primary, Color secondary) => TextTheme(
     headlineMedium: TextStyle(

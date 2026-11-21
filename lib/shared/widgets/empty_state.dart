@@ -22,8 +22,10 @@ class EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Centered when it fits, and scrolls when it does not, such as on a short
+    // screen, in landscape or at large text, so nothing is ever cut off.
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: AppSpacing.screen,
         child: Column(
           mainAxisSize: MainAxisSize.min,
