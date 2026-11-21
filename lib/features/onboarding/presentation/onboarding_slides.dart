@@ -47,3 +47,10 @@ const onboardingSlides = [
     color: Color(0xFF8FEBBE), // Mint (13.7:1 contrast with black)
   ),
 ];
+
+/// The fourth screen, where the user can give a first name. It is a form, so it
+/// has a color of its own (black text on it is 12:1) and no big illustration.
+const nameScreenColor = Color(0xFFFFC9A8); // Peach
+
+/// How many screens the introduction has: the slides and the name screen.
+final onboardingPageCount = onboardingSlides.length + 1;

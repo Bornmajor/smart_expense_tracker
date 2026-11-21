@@ -28,6 +28,10 @@ void main() {
 
     await tapText(tester, 'Next');
     expect(find.text('Private by design'), findsOneWidget);
+    expect(find.text('Skip'), findsOneWidget);
+
+    await tapText(tester, 'Next');
+    expect(find.text('What should we call you?'), findsOneWidget);
     expect(find.text('Skip'), findsNothing);
 
     await tapText(tester, 'Get started');
@@ -75,16 +79,20 @@ void main() {
     await tapText(tester, 'Get started');
     await tapText(tester, 'Next');
     await tapText(tester, 'Next');
+    await tapText(tester, 'Next');
   }
 
-  testWidgets('the last screen asks for an optional first name', (
-    tester,
-  ) async {
+  testWidgets('the fourth screen asks for a name and says why', (tester) async {
     await pumpRouterApp(tester, onboarding: onboarding);
     await toLastSlide(tester);
 
-    expect(find.text('Your first name (optional)'), findsOneWidget);
-    expect(find.textContaining('It stays on your phone'), findsOneWidget);
+    expect(find.text('Your first name'), findsOneWidget);
+    expect(
+      find.textContaining('shows at the top of your Home'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('optional'), findsOneWidget);
+    expect(find.textContaining('never sent anywhere'), findsOneWidget);
   });
 
   testWidgets('a name typed there greets the user on Home', (tester) async {
