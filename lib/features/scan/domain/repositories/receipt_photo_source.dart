@@ -13,6 +13,12 @@ abstract interface class ReceiptPhotoSource {
   /// only once. Never throws: recovery is a bonus, so any problem is null.
   Future<String?> recoverLost();
 
+  /// True once if choosing a file was cut short because Android closed the app
+  /// while the Files app was open. Nothing can be recovered then, so the app
+  /// tells the user to try again. It reports a given interruption only once.
+  /// Never throws.
+  Future<bool> pickWasInterrupted();
+
   /// Deletes a photo this source gave out. Never throws.
   Future<void> discard(String path);
 }

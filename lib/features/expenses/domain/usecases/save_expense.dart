@@ -37,6 +37,8 @@ class SaveExpense {
       categoryId: draft.categoryId!,
       createdAt: now,
       updatedAt: now,
+      originalAmountMinor: draft.originalAmountMinor,
+      originalCurrency: draft.originalCurrency,
     );
 
     try {

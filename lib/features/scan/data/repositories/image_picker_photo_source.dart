@@ -61,6 +61,9 @@ class ImagePickerPhotoSource implements ReceiptPhotoSource {
   }
 
   @override
+  Future<bool> pickWasInterrupted() async => false;
+
+  @override
   Future<void> discard(String path) async {
     try {
       final file = File(path);

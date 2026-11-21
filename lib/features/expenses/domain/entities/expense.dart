@@ -11,6 +11,8 @@ class Expense extends Equatable {
     required this.updatedAt,
     this.title = '',
     this.recurringRuleId,
+    this.originalAmountMinor,
+    this.originalCurrency,
   });
 
   final String id;
@@ -30,6 +32,11 @@ class Expense extends Equatable {
   /// it. It is kept when the expense is edited.
   final String? recurringRuleId;
 
+  /// When the amount was converted from another currency: what was paid, in
+  /// minor units, and its ISO code. Both are null for an ordinary expense.
+  final int? originalAmountMinor;
+  final String? originalCurrency;
+
   @override
   List<Object?> get props => [
     id,
@@ -41,5 +48,7 @@ class Expense extends Equatable {
     createdAt,
     updatedAt,
     recurringRuleId,
+    originalAmountMinor,
+    originalCurrency,
   ];
 }

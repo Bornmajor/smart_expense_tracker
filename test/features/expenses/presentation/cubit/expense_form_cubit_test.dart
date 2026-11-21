@@ -17,6 +17,7 @@ import '../../../../support/fakes.dart';
 void main() {
   late FakeExpenseRepository repository;
   late FakeRecurringRepository recurring;
+  late FakeExchangeRateRepository rates;
   final today = DateTime(2026, 11, 17);
   final clock = DateTime(2026, 11, 17, 9);
 
@@ -24,6 +25,7 @@ void main() {
     saveExpense: SaveExpense(repository, now: () => clock),
     updateExpense: UpdateExpense(repository, now: () => clock),
     saveRepeating: SaveRepeatingExpense(recurring, now: () => clock),
+    rates: rates,
     repository: repository,
     original: original,
   );
@@ -31,6 +33,7 @@ void main() {
   setUp(() {
     repository = FakeExpenseRepository();
     recurring = FakeRecurringRepository();
+    rates = FakeExchangeRateRepository();
   });
 
   group('ExpenseFormCubit adding', () {

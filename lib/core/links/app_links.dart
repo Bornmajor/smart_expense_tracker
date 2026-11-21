@@ -16,6 +16,10 @@ class AppLinks extends Equatable {
 
   final String privacyPolicyUrl;
 
+  /// The exchange-rate service. Its terms ask for a link to it wherever its
+  /// rates are used.
+  static final exchangeRatesUri = Uri.parse('https://www.exchangerate-api.com');
+
   /// The privacy policy page, or null when it is not set or is not a secure
   /// web address. Only https is accepted.
   Uri? get privacyPolicyUri {

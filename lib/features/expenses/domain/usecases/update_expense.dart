@@ -20,6 +20,13 @@ class UpdateExpense {
     final errors = ExpenseRules.validate(draft, now);
     if (errors.isNotEmpty) return Failure(ValidationFailure(errors));
 
+    // What was paid in another currency stays with the expense while its amount
+    // is untouched. A new amount is a new figure, so the note about the old one
+    // goes, unless the draft brings its own.
+    final keepsOriginal =
+        draft.originalAmountMinor == null &&
+        draft.amountMinor == original.amountMinor;
+
     final updated = Expense(
       id: original.id,
       title: ExpenseRules.cleanTitle(draft.title),
@@ -30,6 +37,12 @@ class UpdateExpense {
       createdAt: original.createdAt,
       updatedAt: now,
       recurringRuleId: original.recurringRuleId,
+      originalAmountMinor: keepsOriginal
+          ? original.originalAmountMinor
+          : draft.originalAmountMinor,
+      originalCurrency: keepsOriginal
+          ? original.originalCurrency
+          : draft.originalCurrency,
     );
 
     try {

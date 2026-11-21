@@ -35,6 +35,12 @@ class Expenses extends Table {
     onDelete: KeyAction.setNull,
   )();
 
+  /// When the amount was converted from another currency: what was paid, in
+  /// minor units, and its ISO code such as "USD". Both are null otherwise.
+  /// Added in schema version 5.
+  IntColumn get originalAmountMinor => integer().nullable()();
+  TextColumn get originalCurrency => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

@@ -31,6 +31,7 @@ import '../features/export/domain/usecases/export_month.dart';
 import '../features/export/presentation/cubit/export_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/recurring/domain/entities/recurring_rule.dart';
+import '../features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
 import '../features/recurring/domain/repositories/recurring_repository.dart';
 import '../features/recurring/domain/usecases/generate_due_expenses.dart';
 import '../features/recurring/domain/usecases/save_recurring_rule.dart';
@@ -314,6 +315,7 @@ Widget _expenseForm(
           saveRepeating: SaveRepeatingExpense(
             context.read<RecurringRepository>(),
           ),
+          rates: context.read<ExchangeRateRepository>(),
           repository: expenses,
           original: original,
         ),

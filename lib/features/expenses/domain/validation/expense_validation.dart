@@ -16,4 +16,8 @@ abstract final class ExpenseError {
 
   /// Raised by the form when the amount text is not a number.
   static const amountInvalid = 'amount_invalid';
+
+  /// Raised by the form when an amount in another currency cannot be
+  /// converted because no exchange rates have been downloaded yet.
+  static const ratesUnavailable = 'rates_unavailable';
 }

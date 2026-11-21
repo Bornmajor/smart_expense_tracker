@@ -1,3 +1,6 @@
+import 'package:smart_expense_tracker/features/currency_conversion/domain/entities/exchange_rates.dart';
+import 'package:smart_expense_tracker/features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
+
 import 'dart:async';
 import 'dart:typed_data';
 
@@ -190,6 +193,16 @@ class FakeReceiptPhotoSource implements ReceiptPhotoSource {
     // A lost photo can be taken only once, like the real thing.
     final found = recoverPath;
     recoverPath = null;
+    return found;
+  }
+
+  /// Set to make `pickWasInterrupted` report an interruption once.
+  bool interrupted = false;
+
+  @override
+  Future<bool> pickWasInterrupted() async {
+    final found = interrupted;
+    interrupted = false;
     return found;
   }
 
@@ -485,5 +498,24 @@ class FakeRecurringRepository implements RecurringRepository {
       ..removeWhere((r) => r.id == rule.id)
       ..add(rule);
     _changes.add(List.of(rules));
+  }
+}
+
+/// Exchange rates held in memory instead of downloaded.
+class FakeExchangeRateRepository implements ExchangeRateRepository {
+  FakeExchangeRateRepository([this.rates]);
+
+  ExchangeRates? rates;
+
+  /// How many times `refresh` was asked for.
+  int refreshCalls = 0;
+
+  @override
+  Future<ExchangeRates?> saved() async => rates;
+
+  @override
+  Future<ExchangeRates?> refresh({bool force = false}) async {
+    refreshCalls++;
+    return rates;
   }
 }

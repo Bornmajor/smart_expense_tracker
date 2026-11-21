@@ -362,6 +362,18 @@ void main() {
       expect(photos.picked, isEmpty);
     });
 
+    testWidgets('says so when a file pick was cut short', (tester) async {
+      photos.interrupted = true;
+
+      await openApp(tester);
+
+      expect(
+        find.textContaining('closed the app while you were choosing'),
+        findsOneWidget,
+      );
+      expect(find.text('Use this photo'), findsNothing);
+    });
+
     testWidgets('leaves the list alone when there is none', (tester) async {
       await openApp(tester);
 

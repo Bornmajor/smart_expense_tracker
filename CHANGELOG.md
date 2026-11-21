@@ -31,3 +31,6 @@ First release. Nothing has been published to Google Play yet.
 - Monthly budgets: set a limit for each category and one for everything, and see on the Summary how much of each you have used. The bar turns amber near the limit and red once it is passed
 - Recurring expenses: add rent, a subscription or a bill once, weekly, monthly or yearly, and an expense is added on its own each time it comes due. Expenses missed while the app was closed are added too, on their own dates, and you can edit or delete any of them
 - A "Repeat this expense" box when adding an expense, so a bill you just scanned or typed can repeat from then on (weekly, monthly or yearly). The expense you save is the first one
+- Enter an amount in another currency ("Different currency?" under the amount) and it is converted to your currency with the latest daily rate. The rate and its date are shown, and what you paid is kept with the expense. Rates are downloaded once a day and saved, so it also works offline
+- Your currency now starts as the Kenyan shilling
+- A budget that is passed shows how much it is over (for example "KSh 1,510 over") instead of a percentage above 100
