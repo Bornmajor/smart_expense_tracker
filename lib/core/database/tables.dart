@@ -41,6 +41,11 @@ class Expenses extends Table {
   IntColumn get originalAmountMinor => integer().nullable()();
   TextColumn get originalCurrency => text().nullable()();
 
+  /// The M-Pesa transaction code (such as "SGH4A1B2C3") when the expense came
+  /// from a pasted confirmation message, so the same message is not added
+  /// twice. Null otherwise. Added in schema version 6.
+  TextColumn get transactionCode => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }

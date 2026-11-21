@@ -16,6 +16,7 @@ extension ExpenseRowMapper on ExpenseRow {
     recurringRuleId: recurringRuleId,
     originalAmountMinor: originalAmountMinor,
     originalCurrency: originalCurrency,
+    transactionCode: transactionCode,
   );
 }
 
@@ -32,5 +33,6 @@ extension ExpenseEntityMapper on Expense {
     recurringRuleId: Value(recurringRuleId),
     originalAmountMinor: Value(originalAmountMinor),
     originalCurrency: Value(originalCurrency),
+    transactionCode: Value(transactionCode),
   );
 }

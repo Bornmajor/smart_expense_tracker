@@ -48,6 +48,7 @@ import '../features/recurring/presentation/cubit/recurring_cubit.dart';
 import '../features/recurring/presentation/cubit/recurring_form_cubit.dart';
 import '../features/recurring/presentation/pages/recurring_form_page.dart';
 import '../features/recurring/presentation/pages/recurring_page.dart';
+import '../features/quick_add/domain/entities/quick_add_result.dart';
 import '../features/scan/debug/ocr_debug_page.dart';
 import '../features/scan/domain/entities/recovered_photo.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
@@ -325,6 +326,9 @@ GoRouter createRouter({
       builder: (context, state) => _expenseForm(
         context,
         scan: state.extra is ScanResult ? state.extra! as ScanResult : null,
+        quick: state.extra is QuickAddResult
+            ? state.extra! as QuickAddResult
+            : null,
       ),
     ),
     GoRoute(
@@ -353,6 +357,7 @@ Widget _expenseForm(
   BuildContext context, {
   Expense? original,
   ScanResult? scan,
+  QuickAddResult? quick,
 }) {
   final expenses = context.read<ExpenseRepository>();
   final categories = context.read<CategoryRepository>();
@@ -377,6 +382,7 @@ Widget _expenseForm(
     child: ExpenseFormPage(
       original: original,
       scan: scan,
+      quick: quick,
       // The receipt photo is only for comparing, so it goes when the form does.
       discardPhoto: scan == null
           ? null

@@ -79,6 +79,8 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Back up everything to a file (optionally password-protected with AES-256) and restore it, with a confirmation that shows what is in the backup
 - [x] Tap a Summary category or budget to open the expenses behind it for that month
 - [x] Search expenses by vendor or title and filter them by category, dates and amount
+- [x] Type an expense in one line ("lunch 350 at Java yesterday"); a plain on-device parser fills in the form for you to check
+- [x] Paste an M-Pesa confirmation message to fill in an expense (no SMS permission; the same message is not added twice)
 
 ### Planned
 

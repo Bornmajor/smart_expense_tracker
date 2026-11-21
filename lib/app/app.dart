@@ -45,6 +45,8 @@ import '../features/export/data/writers/pdf_report_writer.dart';
 import '../features/export/domain/usecases/export_month.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/mpesa/domain/usecases/import_mpesa.dart';
+import '../features/quick_add/domain/usecases/quick_add.dart';
 import '../features/scan/data/datasources/file_selector_chooser.dart';
 import '../features/scan/data/datasources/pdfx_page_renderer.dart';
 import '../features/scan/data/repositories/file_receipt_photo_source.dart';
@@ -225,6 +227,21 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<VendorCategoryMemory>(
           create: (context) =>
               VendorCategoryMemory(context.read<ExpenseRepository>()),
+        ),
+        // Turns a pasted M-Pesa message into a filled-in form.
+        RepositoryProvider<ImportMpesa>(
+          create: (context) => ImportMpesa(
+            expenses: context.read<ExpenseRepository>(),
+            categories: context.read<CategoryRepository>(),
+            memory: context.read<VendorCategoryMemory>(),
+          ),
+        ),
+        // Turns a typed line into a filled-in form.
+        RepositoryProvider<QuickAdd>(
+          create: (context) => QuickAdd(
+            categories: context.read<CategoryRepository>(),
+            memory: context.read<VendorCategoryMemory>(),
+          ),
         ),
         // Monthly report export. The fonts are read when a PDF is made.
         RepositoryProvider<ExportMonth>(

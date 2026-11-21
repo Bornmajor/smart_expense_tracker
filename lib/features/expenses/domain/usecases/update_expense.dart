@@ -43,6 +43,8 @@ class UpdateExpense {
       originalCurrency: keepsOriginal
           ? original.originalCurrency
           : draft.originalCurrency,
+      // Editing never changes which message an expense came from.
+      transactionCode: original.transactionCode,
     );
 
     try {

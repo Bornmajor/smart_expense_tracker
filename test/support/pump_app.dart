@@ -1,3 +1,6 @@
+import 'package:smart_expense_tracker/features/mpesa/domain/usecases/import_mpesa.dart';
+import 'package:smart_expense_tracker/features/quick_add/domain/usecases/parse_quick_add.dart';
+import 'package:smart_expense_tracker/features/quick_add/domain/usecases/quick_add.dart';
 import 'package:smart_expense_tracker/features/insights/domain/repositories/alert_dismissals.dart';
 import 'package:smart_expense_tracker/core/info/app_version.dart';
 import 'package:smart_expense_tracker/features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
@@ -91,6 +94,20 @@ Future<LockSession> pumpRouterApp(
           value: rates ?? FakeExchangeRateRepository(),
         ),
         RepositoryProvider<AlertDismissals>.value(value: FakeAlertDismissals()),
+        RepositoryProvider<ImportMpesa>.value(
+          value: ImportMpesa(
+            expenses: expenseRepo,
+            categories: categoryRepo,
+            memory: VendorCategoryMemory(expenseRepo),
+          ),
+        ),
+        RepositoryProvider<QuickAdd>.value(
+          value: QuickAdd(
+            categories: categoryRepo,
+            memory: VendorCategoryMemory(expenseRepo),
+            parse: ParseQuickAdd(now: () => DateTime.now()),
+          ),
+        ),
         RepositoryProvider<AppVersion>.value(
           value: const AppVersion(name: '1.2.3', build: '45'),
         ),
