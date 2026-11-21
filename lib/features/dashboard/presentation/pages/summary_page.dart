@@ -159,6 +159,7 @@ class _SummaryContent extends StatelessWidget {
           categoryNames: names,
           currency: currency,
           onDismiss: context.read<AlertsCubit>().dismiss,
+          onAction: (alert) => openExpenses(alert.categoryId),
         ),
         const Gap(AppSpacing.md),
         TotalCard(

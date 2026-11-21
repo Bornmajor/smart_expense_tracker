@@ -6,7 +6,7 @@ import '../../../../core/utils/currency.dart';
 import '../../domain/entities/insight_alert.dart';
 import '../alert_messages.dart';
 
-/// "Heads up" cards at the top of the Summary. Each can be closed.
+/// "Heads up" cards at the top of the Summary and Home. Each can be closed.
 class AlertsSection extends StatelessWidget {
   const AlertsSection({
     super.key,
@@ -14,6 +14,7 @@ class AlertsSection extends StatelessWidget {
     required this.categoryNames,
     required this.currency,
     required this.onDismiss,
+    this.onAction,
   });
 
   final List<InsightAlert> alerts;
@@ -23,9 +24,14 @@ class AlertsSection extends StatelessWidget {
   final Currency currency;
   final ValueChanged<String> onDismiss;
 
+  /// Called when the user taps the action on a card that has one, such as "Set
+  /// a budget". Without it such a card has no button.
+  final ValueChanged<InsightAlert>? onAction;
+
   @override
   Widget build(BuildContext context) {
     if (alerts.isEmpty) return const SizedBox.shrink();
+    final action = onAction;
     return Column(
       children: [
         for (final alert in alerts) ...[
@@ -37,6 +43,10 @@ class AlertsSection extends StatelessWidget {
               currency,
             ),
             onDismiss: () => onDismiss(alert.id),
+            actionLabel: alert.kind == AlertKind.noBudget && action != null
+                ? 'Set a budget'
+                : null,
+            onAction: action == null ? null : () => action(alert),
           ),
           const Gap(AppSpacing.sm),
         ],
@@ -51,14 +61,21 @@ class _AlertCard extends StatelessWidget {
     required this.alert,
     required this.text,
     required this.onDismiss,
+    this.actionLabel,
+    this.onAction,
   });
 
   final InsightAlert alert;
   final ({String title, String message}) text;
   final VoidCallback onDismiss;
 
+  /// The label of a button under the message, or null for none.
+  final String? actionLabel;
+  final VoidCallback? onAction;
+
   @override
   Widget build(BuildContext context) {
+    final label = actionLabel;
     return Semantics(
       container: true,
       label: '${text.title}. ${text.message}',
@@ -77,6 +94,16 @@ class _AlertCard extends StatelessWidget {
                     Text(text.title, style: context.text.titleMedium),
                     const Gap(AppSpacing.xs),
                     Text(text.message, style: context.text.bodyMedium),
+                    if (label != null && onAction != null)
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 36),
+                          alignment: Alignment.centerLeft,
+                        ),
+                        onPressed: onAction,
+                        child: Text(label),
+                      ),
                   ],
                 ),
               ),

@@ -13,12 +13,9 @@ import '../onboarding_slides.dart';
 /// size) needs more room, it grows and the illustration shrinks, so the text
 /// never runs under the buttons.
 class OnboardingSlideView extends StatelessWidget {
-  const OnboardingSlideView({super.key, required this.slide, this.footer});
+  const OnboardingSlideView({super.key, required this.slide});
 
   final OnboardingSlide slide;
-
-  /// Something under the description, such as the name field on the last slide.
-  final Widget? footer;
 
   /// Room kept free at the top for the back button and progress bar.
   static const topBarSpace = 72.0;
@@ -99,10 +96,6 @@ class OnboardingSlideView extends StatelessWidget {
                               color: onboardingInk.withValues(alpha: 0.85),
                             ),
                           ),
-                          if (footer != null) ...[
-                            const Gap(AppSpacing.lg),
-                            footer!,
-                          ],
                         ],
                       ),
                     ),

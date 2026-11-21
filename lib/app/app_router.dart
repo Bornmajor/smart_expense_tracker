@@ -145,6 +145,7 @@ GoRouter createRouter({
                     create: (_) => AlertsCubit(
                       context.read<ExpenseRepository>(),
                       context.read<AlertDismissals>(),
+                      context.read<BudgetRepository>(),
                     ),
                   ),
                   BlocProvider(
@@ -198,6 +199,7 @@ GoRouter createRouter({
                     create: (_) => AlertsCubit(
                       context.read<ExpenseRepository>(),
                       context.read<AlertDismissals>(),
+                      context.read<BudgetRepository>(),
                     ),
                   ),
                   BlocProvider(

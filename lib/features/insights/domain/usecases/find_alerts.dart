@@ -36,15 +36,36 @@ class FindAlerts {
   /// How long after the new price first shows up it is still news.
   static const priceFreshDays = 35;
 
+  /// A category with no budget is worth a nudge when it is this share of the
+  /// month's spending...
+  static const noBudgetPercent = 40;
+
+  /// ...it has at least this many expenses (so one big purchase is not a
+  /// pattern)...
+  static const noBudgetMinCount = 3;
+
+  /// ...and the month's spending has reached this much (500.00), so the first
+  /// days of a month, when one category is always most of it, stay quiet.
+  static const noBudgetMinTotalMinor = 50000;
+
   static const maxAlerts = 3;
 
   /// The alerts for [today], most pressing first, at most [maxAlerts].
-  List<InsightAlert> call(List<Expense> expenses, DateTime today) {
+  ///
+  /// [budgetedCategoryIds] are the categories that have a budget. Null means the
+  /// budgets are not known yet, and then no category is said to lack one.
+  List<InsightAlert> call(
+    List<Expense> expenses,
+    DateTime today, {
+    Set<String>? budgetedCategoryIds,
+  }) {
     final day = ExpenseRules.dayOnly(today);
     return [
       ..._duplicates(expenses, day),
       ..._large(expenses, day),
       ..._priceChanges(expenses, day),
+      if (budgetedCategoryIds != null)
+        ..._noBudget(expenses, day, budgetedCategoryIds),
       ..._aboveNormal(expenses, day),
     ].take(maxAlerts).toList();
   }
@@ -180,6 +201,54 @@ class FindAlerts {
       return byChange != 0 ? byChange : a.id.compareTo(b.id);
     });
     return found;
+  }
+
+  /// The category with the biggest share of this month's spending, when that
+  /// share is large, it is not a one-off, and it has no budget. At most one, so
+  /// the screen stays calm.
+  List<InsightAlert> _noBudget(
+    List<Expense> expenses,
+    DateTime day,
+    Set<String> budgeted,
+  ) {
+    final totals = <String, int>{};
+    final counts = <String, int>{};
+    var monthTotal = 0;
+    for (final e in expenses) {
+      if (e.date.year != day.year ||
+          e.date.month != day.month ||
+          e.date.isAfter(day)) {
+        continue;
+      }
+      monthTotal += e.amountMinor;
+      totals.update(
+        e.categoryId,
+        (sum) => sum + e.amountMinor,
+        ifAbsent: () => e.amountMinor,
+      );
+      counts.update(e.categoryId, (n) => n + 1, ifAbsent: () => 1);
+    }
+    if (monthTotal < noBudgetMinTotalMinor) return const [];
+
+    String? best;
+    for (final entry in totals.entries) {
+      final id = entry.key;
+      if (budgeted.contains(id)) continue;
+      if ((counts[id] ?? 0) < noBudgetMinCount) continue;
+      if (entry.value * 100 < monthTotal * noBudgetPercent) continue;
+      if (best == null || entry.value > totals[best]!) best = id;
+    }
+    if (best == null) return const [];
+
+    return [
+      InsightAlert(
+        id: 'nobudget:$best:${day.year}-${day.month}',
+        kind: AlertKind.noBudget,
+        categoryId: best,
+        amountMinor: totals[best]!,
+        usualMinor: monthTotal,
+      ),
+    ];
   }
 
   List<InsightAlert> _aboveNormal(List<Expense> expenses, DateTime day) {

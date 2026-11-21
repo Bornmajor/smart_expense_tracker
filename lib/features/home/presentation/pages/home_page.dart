@@ -108,6 +108,14 @@ class _Loaded extends StatelessWidget {
             categoryNames: names,
             currency: currency,
             onDismiss: context.read<AlertsCubit>().dismiss,
+            // "Set a budget" opens the category's page, where it is set.
+            onAction: (alert) => context.push(
+              AppRoutes.filteredExpenses,
+              extra: ExpenseFilter(
+                categoryId: alert.categoryId,
+                month: DateTime(state.year, state.month),
+              ),
+            ),
           ),
           YearChart(
             year: state.year,
