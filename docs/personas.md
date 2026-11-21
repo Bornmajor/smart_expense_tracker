@@ -147,8 +147,7 @@ The shop owner's full business bookkeeping is a different product.
 ## Next step
 
 Show these seven to five real people (the testers), ask which one they are, and
-what is missing. Then choose between income, savings goals, bill reminders and
-tags for the next build.
+what is missing. The four gaps above are scheduled **last** in the [roadmap](roadmap.md), after the pending work, and the answers decide their order.
 
 ## Sources
 

@@ -21,6 +21,8 @@ Push, merge to `dev`, promote to `uat`, and try the build on a few phones. Then 
 All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model could be added later behind a switch, on phones that support it.
 
 1. **Better insights.** The Home screen is built (see [first-screen-research.md](first-screen-research.md)). Next for the insights: this month against last month with the biggest change, an alert for a subscription that changed price, and, if the chart earns it, the budget drawn as a line on the year chart.
+2. **A nudge for a category with no budget.** A heads-up card such as "Food is 45% of your spending and has no budget. Set one?", shown only when it is true, dismissible, and shown once. A category's page and its Summary card already show the budget; this is the reasoned way to point people to it. Then decide whether the Summary's separate Budgets list should shrink to the overall budget, since each category budget now also shows on its own card.
+3. **Check the personas with five real people** (see [personas.md](personas.md)): which one are you, and what is missing? Their answers decide the order of the last section below.
 
 ## Portfolio showcase (cheap, high value)
 
@@ -30,6 +32,15 @@ Most reviewers will not install the app, so the repository has to show it.
 - **README:** current screenshots (the old ones predate scanning files, converting, Safe to spend and alerts), a 60 to 90 second demo video or GIFs, CI and coverage badges, a one-line link to the release APK, and a short architecture diagram.
 - **Case study page:** the problem, the decisions and trade-offs (on-device ML Kit OCR instead of a cloud service, plain Dart insights, no account), the testing and release pipeline, and what would come next. This roadmap already holds most of the material.
 - Be plain about what "smart" means here: on-device receipt reading, a vendor-to-category memory, and rule-based insights. No cloud AI, by choice, for privacy.
+
+## At the end: the persona gaps
+
+These came out of the [personas research](personas.md): features that several kinds of user expect and the app does not have yet. They are deliberately **last**, after the pending work above. Their order can change once the personas have been checked with real people.
+
+1. **Income.** The biggest gap (five of seven personas). Record pay, a client's payment or sales, so the app can show what is left after spending, a savings rate, and profit for a shop. The first pieces are built and parked on the unmerged branch `feat/income` (an income table, rules, a form and a month list, not yet reachable from the app). Still to do when it is resumed: an Add income choice, an income card on the Summary and a line on Home, backup, restore and delete-all, turning an M-Pesa "you have received" message into income, and tests. Recurring income (a monthly salary) and income in the PDF and CSV reports come after.
+2. **Savings goals.** A goal with a target and a date ("laptop, KSh 80,000 by June"), progress toward it, and a friendly counterweight to budgets. Wanted by the first-time budgeter and the saver.
+3. **Bill reminders.** A gentle, optional reminder before a recurring bill is due, built on the recurring expenses already there. It needs no internet, but some phones stop background apps, so it has to be modest about what it promises.
+4. **Tags.** A business or personal flag, and a client or trip tag, with totals per tag. Serves the freelancer, the shop owner and the traveller without needing real accounts.
 
 ## Done
 
