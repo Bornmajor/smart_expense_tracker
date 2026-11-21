@@ -10,6 +10,7 @@ First release. Nothing has been published to Google Play yet.
 
 ### Added
 
+- A backup is saved straight to your Downloads folder, with no share sheet. If Android closes the app while you choose a backup to restore, the app says so and reopens Back up and restore
 - Welcome screen and a three-step introduction, shown once
 - Add expenses by hand with an amount, date, category, and an optional title and vendor
 - Scan a receipt: choose a photo or a PDF from your Files app and the vendor, date, total and a likely category are read on your phone and filled into the expense form for you to check. Nothing is uploaded, and the temporary copy is deleted afterwards

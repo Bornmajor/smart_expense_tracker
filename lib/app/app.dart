@@ -42,6 +42,7 @@ import 'package:http/http.dart' as http;
 
 import '../features/insights/data/repositories/alert_dismissals_impl.dart';
 import '../features/insights/domain/repositories/alert_dismissals.dart';
+import '../features/backup/data/repositories/downloads_backup_saver.dart';
 import '../features/export/data/repositories/share_plus_report_sharer.dart';
 import '../features/export/data/writers/bundled_fonts.dart';
 import '../features/export/data/writers/csv_report_writer.dart';
@@ -165,7 +166,8 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
   late final CreateBackup _createBackup = CreateBackup(
     repository: _backupRepository,
     codec: _backupCodec,
-    sharer: const SharePlusReportSharer(),
+    // Straight into Downloads, with no share sheet.
+    sharer: const DownloadsBackupSaver(fallback: SharePlusReportSharer()),
     history: _backupHistory,
     currencyCode: () {
       final code = _settings.currency.code;

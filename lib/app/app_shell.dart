@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../shared/widgets/app_snack_bar.dart';
 
+import '../features/backup/domain/repositories/backup_file_picker.dart';
 import '../features/scan/domain/entities/recovered_photo.dart';
 import '../features/scan/domain/repositories/receipt_photo_source.dart';
 import 'add_expense_flow.dart';
@@ -44,6 +45,17 @@ class _AppShellState extends State<AppShell> {
         'Your phone ran low on memory and closed the app. Close other apps, '
         'then try again.',
       );
+      return;
+    }
+    // The same for the backup file picker: the chosen file is lost with the
+    // app, so say so and open the page where it can be chosen again.
+    if (await context.read<BackupFilePicker>().pickWasInterrupted() &&
+        mounted) {
+      context.showWarning(
+        'Your phone ran low on memory and closed the app while you chose a '
+        'backup. Choose it again.',
+      );
+      context.push(AppRoutes.backup);
     }
   }
 

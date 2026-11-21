@@ -1,27 +1,98 @@
 # SpendWise IQ
 
-**Snap a receipt. Know where your money goes.**
+**Know where your money goes, without the work of tracking it.**
 
-SpendWise IQ is a smart, privacy-first expense tracker. Point your camera at a receipt and the app reads the vendor, date and total on your device, suggests a category, and lets you confirm the details before saving. No typing, no account, no cloud.
+[![CI](https://github.com/Bornmajor/smart_expense_tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/Bornmajor/smart_expense_tracker/actions/workflows/ci.yml)
+![Flutter](https://img.shields.io/badge/Flutter-3.47-02569B?logo=flutter&logoColor=white)
+![Built with Flutter](https://img.shields.io/badge/cross--platform-one%20codebase-02569B)
+![Offline first](https://img.shields.io/badge/offline--first-no%20account-0A0A0A)
+
+SpendWise IQ is a smart, AI-assisted expense tracker that works offline and keeps your data private. On-device text recognition and a plain-language parser make adding an expense almost effortless (scan a receipt, type one line, or paste an M-Pesa message), then smart rules do the thinking for you: it shows how this month compares with last, warns about duplicate charges and price changes, and tells you what is safe to spend today. Everything stays on your phone. There is no account, no cloud and no ads.
+
+It is also a portfolio project: a complete, tested app built the way a production app would be, with a clean architecture, an 80% test-coverage gate and a release pipeline. See [Under the hood](#under-the-hood).
+
+<!-- Screen recording goes here. -->
 
 ## Download
 
-Get the latest Android APK from the [Releases page](https://github.com/Bornmajor/smart_expense_tracker/releases/latest), open it on your phone, and allow installs from your browser or file manager if Android asks. Every release lists what changed and has a `.sha256` file to check the download against. The first release appears there once the app goes to production. Test builds from the `uat` branch are listed on the [Releases page](https://github.com/Bornmajor/smart_expense_tracker/releases) as **pre-releases**, for people helping to test.
+Get the latest APK from the [Releases page](https://github.com/Bornmajor/smart_expense_tracker/releases/latest) and open it on your phone. Your phone may ask you to allow installs from your browser or file manager. Every release lists what changed and has a `.sha256` file to check the download against. Builds from the `uat` branch are listed there as **pre-releases**, for people helping to test.
 
-The APK is signed with a different key than the one Google Play uses, so a copy installed from the APK cannot be updated from Google Play, or the other way round. Use one source per phone.
+The APK is signed with a different key than a Google Play copy, so one cannot update the other. Use one source per phone.
 
+The app is built with Flutter, one codebase for several platforms. I test and verify it on an Android device only, so that is the build offered here.
+
+## The problem
+
+Most people want to know where their money goes, and most give up tracking it within weeks. Four things get in the way, and each one shaped the app.
+
+| The real problem | What SpendWise IQ does about it |
+|---|---|
+| **Entering expenses feels like work**, so the habit fades. Research on abandoned budgeting apps keeps finding this ([sources](docs/personas.md#how-much-to-trust-this)) | Three fast ways in: scan a receipt photo or PDF, type "lunch 350 at Java yesterday", or paste an M-Pesa confirmation. The app fills in the form and you only check it |
+| **Receipts pile up** and mobile-money messages are buried in the inbox | Text is read from the receipt on your phone. A pasted M-Pesa message becomes an expense, and the same message is never added twice. The app never reads your SMS |
+| **Totals do not tell you anything.** A list of numbers does not say what changed or what to do | Plain-language insights: this month against last month, the biggest change, an amount safe to spend each day, and a nudge when a big category has no budget |
+| **Finance apps want an account and your data on their server** | No account, no cloud, no tracking. Works with no internet. Optional app lock, an encrypted backup you control, and one button to delete everything |
+
+Who it is for, and what each kind of user expects, is written up in [docs/personas.md](docs/personas.md).
+
+## What it does
+
+### Effortless capture
+- **Scan a receipt with on-device AI.** Take a photo, or choose a photo or PDF from your files. The vendor, date and total are read on the phone and a category is suggested. Nothing is saved until you press Save.
+- **Type it in one line.** "Lunch 350 at Java yesterday" fills in the form.
+- **Paste an M-Pesa message.** The amount, the name and the transaction code are picked out for you.
+- **Repeat it.** Tick "Repeat this expense" and a rent, a subscription or a bill is added automatically when it falls due.
+- **Other currencies.** Convert an amount with the latest daily exchange rate.
+- **Remembers you.** The category you use for each vendor is suggested next time.
+
+### Smart insights that say something
+- **This month against last month**, over the same stretch of days, with the biggest change by category.
+- **Safe to spend:** an amount a day for the rest of the month, after what you have spent and the bills still to come.
+- **Heads-up cards:** a possible duplicate charge, an unusually large expense, a category above its usual month, a subscription that changed price, and a big category with no budget.
+- **Budgets** for each category and overall, drawn on the year chart and on each category card, turning amber near the limit and red once passed.
+- **A Home screen** that puts the month, the year and the latest expenses in one glance, in whole shillings.
+
+### Your data stays yours
+- **Offline and on-device:** storage, text recognition and every insight run on the phone.
+- **App lock** with fingerprint, face or the phone's screen lock, and never a way to lock yourself out.
+- **Backup and restore** to a file in your Downloads folder, optionally locked with a password (AES-256).
+- **Export** any month as a PDF report or a CSV spreadsheet. **Search and filter** by vendor, category, dates and amount.
+- **Delete all my data** puts the app back to a fresh install.
+
+The full list, and what is still to come, is in [docs/features.md](docs/features.md) and the [roadmap](docs/roadmap.md).
 ## Screenshots
+
+### First run
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/welcome.jpg" width="200" alt="Welcome screen"><br><sub>Welcome</sub></td>
-    <td align="center"><img src="docs/screenshots/onboarding-add.jpg" width="200" alt="Onboarding: add expenses your way"><br><sub>Onboarding</sub></td>
-    <td align="center"><img src="docs/screenshots/onboarding-summary.jpg" width="200" alt="Onboarding: see where your money goes"><br><sub>Onboarding</sub></td>
+    <td align="center"><img src="docs/screenshots/welcome.jpg" width="150" alt="Welcome screen"><br><sub>Welcome</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-add.jpg" width="150" alt="Onboarding: add expenses your way"><br><sub>Add expenses your way</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-summary.jpg" width="150" alt="Onboarding: see where your money goes"><br><sub>See where it goes</sub></td>
+    <td align="center"><img src="docs/screenshots/onboarding-name.jpg" width="150" alt="Onboarding: an optional first name, with the reason it is asked"><br><sub>An optional name</sub></td>
   </tr>
+</table>
+
+### Home and Summary
+
+The month against the budget, a comparison with last month, a year chart with the budget line, and where the money went.
+
+<table>
   <tr>
-    <td align="center"><img src="docs/screenshots/expenses.jpg" width="200" alt="Expenses tab"><br><sub>Expenses</sub></td>
-    <td align="center"><img src="docs/screenshots/summary.jpg" width="200" alt="Monthly summary"><br><sub>Monthly summary</sub></td>
-    <td align="center"><img src="docs/screenshots/settings.jpg" width="200" alt="Settings"><br><sub>Settings</sub></td>
+    <td align="center"><img src="docs/screenshots/home.jpg" width="180" alt="Home: this month against the budget, and compared with last month"><br><sub>Home</sub></td>
+    <td align="center"><img src="docs/screenshots/home-year-chart.jpg" width="180" alt="Home: spending in the year, month by month, with the budget line"><br><sub>The year</sub></td>
+    <td align="center"><img src="docs/screenshots/summary-overview.jpg" width="180" alt="Summary: total spent, budget and comparison with last month"><br><sub>Summary</sub></td>
+    <td align="center"><img src="docs/screenshots/summary-categories.jpg" width="180" alt="Summary: a bar for each category"><br><sub>By category</sub></td>
+  </tr>
+</table>
+
+### Adding, finding and keeping your data
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/mpesa-paste.jpg" width="180" alt="Paste an M-Pesa message to fill in an expense"><br><sub>Paste an M-Pesa message</sub></td>
+    <td align="center"><img src="docs/screenshots/filter.jpg" width="180" alt="Filter expenses by category, dates and amount"><br><sub>Search and filter</sub></td>
+    <td align="center"><img src="docs/screenshots/export-sheet.jpg" width="180" alt="Export a month as a PDF report or a CSV spreadsheet"><br><sub>Export a month</sub></td>
+    <td align="center"><img src="docs/screenshots/settings-your-data.jpg" width="180" alt="Settings: back up, restore and delete all data"><br><sub>Back up and restore</sub></td>
   </tr>
 </table>
 
@@ -38,96 +109,48 @@ Choose a receipt photo or PDF and the vendor, date and total are read on the pho
   </tr>
 </table>
 
-Captured on an Android phone with the dark theme. Scanning a receipt photo or PDF chosen from the Files app works; taking the photo with the camera is still planned (see [Features](#features)).
+Captured on a real phone with the dark theme.
 
-## The problem it solves
+## Under the hood
 
-Most people want to know where their money goes, but tracking it is tedious. Receipts pile up, typing each purchase takes too long, and the habit fades after a week. The apps that automate it usually ask for an account and upload financial data to a server.
+- **Feature-first clean architecture.** Each feature has domain, data and presentation layers. Business rules are plain Dart with no Flutter or database imports, so they are fast to test. See [docs/architecture.md](docs/architecture.md).
+- **Tested where it matters.** Business logic, repositories, state and reusable widgets have tests, and CI fails below **80% coverage** (88.9% today). Layout tests check that screens fit a narrow phone at large text sizes.
+- **Offline-first.** A local SQLite database (drift) with versioned migrations. The only network call is one small exchange-rate request a day, for converting amounts.
+- **Built for flaky hardware.** The app recovers a receipt photo, and tells the user what happened, when the phone closes it for memory while the camera or the file picker is open.
+- **Release pipeline.** GitHub Actions runs format, analysis and tests on every pull request, builds dev and prod flavors, and publishes signed APKs with checksums. Work flows `dev`, then `uat` (pre-release), then `main`. See [docs/branching.md](docs/branching.md) and [docs/releasing.md](docs/releasing.md).
+- **Honest privacy policy.** What the app does with your data is written down in [docs/privacy-policy.md](docs/privacy-policy.md).
 
-SpendWise IQ removes the effort and keeps the data private:
+### Tech stack
 
-- **Scan instead of type.** On-device text recognition turns a photo of a receipt into an expense in seconds.
-- **Smart, but you stay in control.** The app fills in the form and suggests a category. You verify and correct it before anything is saved, so records stay accurate.
-- **Private and offline-first.** Everything is stored on your phone and works without internet.
-- **Clear picture of your spending.** Monthly totals, category breakdowns and budgets show what is happening and warn you before you overspend.
+| Area | Technology |
+|---|---|
+| Framework | Flutter 3.47 (Dart 3.13), Material 3, light and dark themes, Inter font |
+| State and navigation | `flutter_bloc` (Cubit), `equatable`, `go_router` |
+| Storage | `drift` (SQLite), `shared_preferences` |
+| Receipts | `image_picker` (camera), `file_selector` (Files app), `pdfx` (draws a PDF page), `google_mlkit_text_recognition` (on-device OCR) |
+| Reports and backup | `pdf`, `share_plus`, `cryptography` (PBKDF2 + AES-256-GCM) |
+| Security | `local_auth` (biometrics and screen lock) |
+| Exchange rates | `http` (one daily request to ExchangeRate-API) |
+| Testing and CI | `flutter_test`, `bloc_test`, GitHub Actions, an 80% coverage gate |
 
-## Features
+## More documentation
 
-Status: `[x]` implemented, `[ ]` planned. Planned items that are never built will be removed from this list before release.
-
-### Implemented
-
-- [x] Light and dark themes with a shared design system (colors, spacing, typography)
-- [x] Welcome screen and three-step onboarding, shown once
-- [x] Manual expense entry with validation (optional title and vendor), stored offline on the device
-- [x] Expense list grouped by day, with daily totals and category names
-- [x] Edit an expense, or delete it by swiping (with Undo) or from the edit screen
-- [x] Categories you manage yourself: create, rename and delete (deleting moves the expenses to Other)
-- [x] Add a category from the expense form with the New chip, without losing what you typed
-- [x] Monthly summary: total and spending by category, with a month switcher
-- [x] Settings: theme (system, light, dark) and About
-- [x] Optional app lock with fingerprint, face or the phone's screen lock, turned on from Settings. If the phone can no longer check you, the lock screen offers to turn the lock off, so you are never locked out of your own data
-- [x] Scan a receipt: choose a photo and the app reads the vendor, date and total on your phone, suggests a category, and fills the expense form for you to check before saving. The photo is temporary and is deleted afterwards
-- [x] Export a month as a PDF report or a CSV spreadsheet from the Summary screen, shared or saved from the system share sheet. Nothing is uploaded by the app; the file goes only where you send it
-- [x] Choose the currency amounts are shown in (it starts with the currency of the phone's country). Saved amounts are relabelled, not converted
-- [x] Remember the category you use for each vendor, so the next expense or scan starts with it
-- [x] Monthly budgets for each category and overall, with progress bars on the Summary that turn amber near the limit and red when passed
-- [x] Recurring expenses and subscriptions, added automatically when they come due (weekly, monthly or yearly), with what they add up to each month. A "Repeat this expense" box on the add form turns a scanned or typed bill into one
-- [x] Convert an amount in another currency with the latest daily rate (downloaded once a day, saved on the phone, rate and date shown)
-- [x] "Safe to spend" on the Summary: an amount a day for the rest of the month, after spending so far and upcoming recurring bills (needs an overall budget)
-- [x] Heads-up cards on the Summary: possible duplicate charge, unusually large expense, a category above a usual month (rules on the phone, nothing sent anywhere)
-- [x] Back up everything to a file (optionally password-protected with AES-256) and restore it, with a confirmation that shows what is in the backup
-- [x] Delete all my data from Settings, with a backup reminder and a typed confirmation; the app then starts again as a fresh install
-- [x] Tap a Summary category or budget to open the expenses behind it for that month
-- [x] Search expenses by vendor or title and filter them by category, dates and amount
-- [x] Type an expense in one line ("lunch 350 at Java yesterday"); a plain on-device parser fills in the form for you to check
-- [x] Paste an M-Pesa confirmation message to fill in an expense (no SMS permission; the same message is not added twice)
-- [x] A Home screen: greeting by name, this month against the budget with what is safe to spend, a bar chart of the year, the latest expenses and heads-up cards
-- [x] Insights on the phone: this month against the same stretch of last month with the biggest change, a heads-up when a subscription changes price, and the budget as a line on the year chart
-
-### Planned
-
-**MVP: scan, track, export**
-- [ ] Scan a receipt with the camera (choosing a photo or PDF from the Files app works today; see the [roadmap](docs/roadmap.md))
-
-**After the MVP** (see the [roadmap](docs/roadmap.md) for the build order)
-- [ ] Prompt sheet that introduces features and pending tasks, with "Remind me later" and "Not interested"
-- [ ] Search and filters (date, category, amount, vendor)
-- [ ] More charts and insights
-- [ ] Multi-currency
-- [ ] Optional receipt attachment
-
-## Tech stack
-
-| Area | Technology | Status |
-|---|---|---|
-| Framework | Flutter 3.47 (Dart 3.13), Material 3 | In use |
-| Theming | `ThemeData` + `ThemeExtension`, light and dark | In use |
-| CI | GitHub Actions (format, analyze, test, coverage) | In use |
-| Local database | `drift` (SQLite) | In use |
-| State management | `flutter_bloc` (Cubit), `equatable`, `bloc_test` for tests | In use |
-| Navigation | `go_router` | In use |
-| Settings storage | `shared_preferences` | In use |
-| Biometrics | `local_auth` | In use |
-| Camera | `camera` / `image_picker` | Planned |
-| On-device OCR | `google_mlkit_text_recognition` (ML Kit) | Planned |
-| Charts | `fl_chart` (if a chart is added) | Planned |
-| Export | `pdf`, `share_plus` (CSV is written by hand) | In use |
-| Receipt files | `file_selector` (Files app), `pdfx` (draws a PDF page) | In use |
-| Exchange rates | `http` (one daily request to ExchangeRate-API) | In use |
-| App version | `package_info_plus` | In use |
-| Backup encryption | `cryptography` (PBKDF2 + AES-256-GCM) | In use |
-
-## Architecture
-
-The app uses a feature-first structure with domain, data and presentation layers in each feature. See [docs/architecture.md](docs/architecture.md) for the folder layout, data flow and conventions.
-
+| Doc | What is in it |
+|---|---|
+| [Features](docs/features.md) | Everything the app does, and what is still to come |
+| [Roadmap](docs/roadmap.md) | The build order and why |
+| [Personas](docs/personas.md) | Who the app is for, with sources |
+| [First-screen research](docs/first-screen-research.md) | Why the Home screen looks the way it does |
+| [Architecture](docs/architecture.md) | Folder layout, data flow and conventions |
+| [Privacy policy](docs/privacy-policy.md) | What happens to your data |
+| [Changelog](CHANGELOG.md) | What changed, release by release |
+| [Sample backup](docs/sample-backup-2026.json) | A year of sample spending to restore and see the charts with data |
 ## Getting started
 
 ### Prerequisites
 
 - [Flutter SDK](https://docs.flutter.dev/get-started/install) **3.47.2** (Dart 3.13.2) or newer on the stable channel
-- Android Studio (Android SDK and emulator) and/or Xcode (macOS, for iOS)
+- An IDE with the Flutter tools (Android Studio or VS Code) and a device or emulator. The app is only tested on an Android device
 - A connected device or emulator. Camera features will need a real device.
 
 Check your setup:
