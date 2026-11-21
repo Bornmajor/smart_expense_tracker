@@ -30,7 +30,7 @@ void main() {
     await show(tester, spent: 50000);
 
     expect(find.textContaining('left'), findsOneWidget);
-    expect(find.text('50%'), findsOneWidget);
+    expect(find.text('50% used'), findsOneWidget);
   });
 
   testWidgets('past the limit shows how much over, and no percent', (

@@ -1,22 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/errors/result.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
 import '../../../../core/utils/currency.dart';
-import '../../../../core/utils/money.dart';
-import '../../../../shared/widgets/app_snack_bar.dart';
 import '../../../../shared/widgets/empty_state.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../../../categories/presentation/cubit/categories_cubit.dart';
 import '../../../categories/presentation/cubit/categories_state.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/budget.dart';
-import '../budget_messages.dart';
 import '../cubit/budgets_cubit.dart';
 import '../cubit/budgets_state.dart';
-import '../widgets/budget_limit_sheet.dart';
+import '../edit_budget.dart';
 
 /// Set the monthly limit for everything together, and for each category.
 class BudgetsPage extends StatelessWidget {
@@ -28,33 +24,14 @@ class BudgetsPage extends StatelessWidget {
     required String title,
     required Budget? existing,
     required Currency currency,
-  }) async {
-    final cubit = context.read<BudgetsCubit>();
-    final result = await showBudgetSheet(
-      context,
-      title: title,
-      currency: currency,
-      initialText: existing == null
-          ? ''
-          : Money.toInputText(existing.limitMinor),
-      onSave: (text) async => switch (await cubit.save(scopeId, text)) {
-        Failure(:final failure) => budgetSaveError(failure),
-        _ => null,
-      },
-      onRemove: existing == null
-          ? null
-          : () async => await cubit.remove(scopeId) is Success<void>,
-    );
-    if (!context.mounted) return;
-    switch (result) {
-      case BudgetSheetResult.saved:
-        context.showSuccess('Budget saved');
-      case BudgetSheetResult.removed:
-        context.showInfo('Budget removed');
-      case null:
-        break;
-    }
-  }
+  }) => editBudget(
+    context,
+    cubit: context.read<BudgetsCubit>(),
+    scopeId: scopeId,
+    title: title,
+    existing: existing,
+    currency: currency,
+  );
 
   @override
   Widget build(BuildContext context) {

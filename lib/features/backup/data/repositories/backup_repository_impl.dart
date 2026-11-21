@@ -36,6 +36,15 @@ class BackupRepositoryImpl implements BackupRepository {
   }
 
   @override
+  Future<void> eraseAll() async {
+    try {
+      await _db.eraseAllData();
+    } on Exception catch (error) {
+      throw StorageException(error);
+    }
+  }
+
+  @override
   Future<void> replaceAll(BackupData data) async {
     // Read every row first, so a damaged file is refused before anything on
     // the phone is touched.

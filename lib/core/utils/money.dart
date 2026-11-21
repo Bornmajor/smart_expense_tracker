@@ -21,6 +21,17 @@ abstract final class Money {
     return '${minorUnits < 0 ? '-' : ''}${minorUnits.abs() ~/ 100}.$cents';
   }
 
+  /// Formats minor units as whole units, rounded to the nearest, such as
+  /// "1,235" for 123,456. Halves round away from zero.
+  static String formatWhole(int minorUnits) {
+    final negative = minorUnits < 0;
+    final units = (minorUnits.abs() + 50) ~/ 100;
+    final text = format(units * 100);
+    // Drop the ".00" that format adds.
+    final whole = text.substring(0, text.length - 3);
+    return negative && units != 0 ? '-$whole' : whole;
+  }
+
   /// Formats minor units as "1,234.56".
   static String format(int minorUnits) {
     final negative = minorUnits < 0;

@@ -16,10 +16,14 @@ import '../core/links/url_launcher_link_opener.dart';
 import '../core/utils/currency.dart';
 import '../core/theme/app_theme.dart';
 import '../features/backup/data/crypto/cryptography_backup_cipher.dart';
+import '../features/backup/data/repositories/backup_history_impl.dart';
 import '../features/backup/data/repositories/backup_repository_impl.dart';
 import '../features/backup/data/repositories/file_selector_backup_picker.dart';
+import '../features/backup/data/repositories/shared_preferences_reset.dart';
 import '../features/backup/domain/backup_codec.dart';
 import '../features/backup/domain/repositories/backup_file_picker.dart';
+import '../features/backup/domain/repositories/backup_history.dart';
+import '../features/backup/domain/usecases/erase_all_data.dart';
 import '../features/backup/domain/repositories/backup_repository.dart';
 import '../features/backup/domain/usecases/create_backup.dart';
 import '../features/backup/domain/usecases/restore_backup.dart';
@@ -44,6 +48,9 @@ import '../features/export/data/writers/csv_report_writer.dart';
 import '../features/export/data/writers/pdf_report_writer.dart';
 import '../features/export/domain/usecases/export_month.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
+import '../features/profile/data/repositories/profile_repository_impl.dart';
+import '../features/profile/domain/repositories/profile_repository.dart';
+import '../features/profile/presentation/cubit/profile_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/mpesa/domain/usecases/import_mpesa.dart';
 import '../features/quick_add/domain/usecases/quick_add.dart';
@@ -148,10 +155,18 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
     widget.database,
   );
   late final BackupCodec _backupCodec = BackupCodec(CryptographyBackupCipher());
+  late final BackupHistory _backupHistory = BackupHistoryImpl(
+    widget.preferences,
+  );
+  late final EraseAllData _eraseAllData = EraseAllData(
+    _backupRepository,
+    SharedPreferencesReset(widget.preferences),
+  );
   late final CreateBackup _createBackup = CreateBackup(
     repository: _backupRepository,
     codec: _backupCodec,
     sharer: const SharePlusReportSharer(),
+    history: _backupHistory,
     currencyCode: () {
       final code = _settings.currency.code;
       return code.isEmpty ? null : code;
@@ -160,6 +175,9 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
   late final RestoreBackup _restoreBackup = RestoreBackup(
     _backupRepository,
     _backupCodec,
+  );
+  late final ProfileRepository _profile = ProfileRepositoryImpl(
+    widget.preferences,
   );
   late final AppLifecycleListener _lifecycle;
 
@@ -206,7 +224,10 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
         RepositoryProvider<AppVersion>.value(value: widget.appVersion),
+        RepositoryProvider<ProfileRepository>.value(value: _profile),
         RepositoryProvider<CreateBackup>.value(value: _createBackup),
+        RepositoryProvider<BackupHistory>.value(value: _backupHistory),
+        RepositoryProvider<EraseAllData>.value(value: _eraseAllData),
         RepositoryProvider<RestoreBackup>.value(value: _restoreBackup),
         RepositoryProvider<BackupFilePicker>(
           create: (_) => const FileSelectorBackupPicker(),
@@ -272,6 +293,7 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
       child: MultiBlocProvider(
         providers: [
           BlocProvider(create: (_) => SettingsCubit(_settings)),
+          BlocProvider(create: (_) => ProfileCubit(_profile)),
           BlocProvider(
             create: (_) => SecurityCubit(
               _security,

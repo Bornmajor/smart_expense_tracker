@@ -19,14 +19,27 @@ class MonthSwitcher extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
           tooltip: 'Previous month',
           onPressed: onPrevious,
           icon: const Icon(Icons.chevron_left),
         ),
-        Text(DateFormat.yMMMM().format(month), style: context.text.titleMedium),
+        // Takes the room between the arrows and shrinks to fit it, so a long month
+        // name, a wide font or a large text size never overflows the row.
+        Expanded(
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                DateFormat.yMMMM().format(month),
+                maxLines: 1,
+                softWrap: false,
+                style: context.text.titleMedium,
+              ),
+            ),
+          ),
+        ),
         IconButton(
           tooltip: 'Next month',
           onPressed: onNext,

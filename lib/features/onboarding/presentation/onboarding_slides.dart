@@ -24,24 +24,24 @@ const onboardingSlides = [
   OnboardingSlide(
     title: 'Add expenses your way',
     description:
-        'Scan a receipt and SpendWise IQ reads the vendor, date, and total. '
-        'Or type it in yourself. Either way, you check it before it\'s saved.',
+        'Scan a receipt or a PDF, type it in one line like "lunch 350 at Java", '
+        'or paste an M-Pesa message. You always check it before it\'s saved.',
     image: 'assets/illustrations/onboarding_scan.png',
     color: Color(0xFFFFE14D), // Yellow
   ),
   OnboardingSlide(
     title: 'See where your money goes',
     description:
-        'Spending by category and a clear summary of your month, '
-        'all in one place.',
+        'Your month at a glance: spending by category, your budgets, and what '
+        'is safe to spend each day, with a heads-up when something looks off.',
     image: 'assets/illustrations/onboarding_track.png',
     color: Color(0xFFDCC4FB), // Lavender
   ),
   OnboardingSlide(
     title: 'Private by design',
     description:
-        'Everything stays on your phone and works offline. '
-        'Lock the app with your fingerprint or face, and export a monthly '
+        'Everything stays on your phone and works offline. Lock the app with '
+        'your fingerprint or face, back it up to a file, and export a monthly '
         'PDF or CSV.',
     image: 'assets/illustrations/onboarding_private.webp',
     color: Color(0xFF8FEBBE), // Mint (13.7:1 contrast with black)

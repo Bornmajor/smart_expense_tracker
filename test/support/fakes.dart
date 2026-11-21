@@ -1,3 +1,4 @@
+import 'package:smart_expense_tracker/features/profile/domain/repositories/profile_repository.dart';
 import 'package:smart_expense_tracker/features/insights/domain/repositories/alert_dismissals.dart';
 import 'package:smart_expense_tracker/features/currency_conversion/domain/entities/exchange_rates.dart';
 import 'package:smart_expense_tracker/features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
@@ -530,4 +531,17 @@ class FakeAlertDismissals implements AlertDismissals {
 
   @override
   Future<void> dismiss(String id) async => closed.add(id);
+}
+
+/// Holds the first name in memory.
+class FakeProfileRepository implements ProfileRepository {
+  FakeProfileRepository([this.stored = '']);
+
+  String stored;
+
+  @override
+  String get name => stored;
+
+  @override
+  Future<void> setName(String name) async => stored = name.trim();
 }

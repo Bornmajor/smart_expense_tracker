@@ -7,6 +7,10 @@ import '../features/budgets/domain/repositories/budget_repository.dart';
 import '../features/budgets/domain/usecases/remove_budget.dart';
 import '../features/budgets/domain/usecases/set_budget.dart';
 import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/backup/domain/repositories/backup_history.dart';
+import '../features/backup/domain/usecases/erase_all_data.dart';
+import '../features/backup/presentation/cubit/erase_data_cubit.dart';
+import '../features/backup/presentation/pages/erase_data_page.dart';
 import '../features/backup/domain/repositories/backup_file_picker.dart';
 import '../features/backup/domain/usecases/create_backup.dart';
 import '../features/backup/domain/usecases/restore_backup.dart';
@@ -58,7 +62,10 @@ import '../features/scan/domain/repositories/receipt_text_reader.dart';
 import '../features/scan/domain/usecases/scan_receipt.dart';
 import '../features/scan/presentation/cubit/scan_cubit.dart';
 import '../features/scan/presentation/pages/scan_page.dart';
+import '../features/home/presentation/cubit/home_cubit.dart';
+import '../features/home/presentation/pages/home_page.dart';
 import '../features/onboarding/presentation/cubit/onboarding_cubit.dart';
+import '../features/profile/domain/repositories/profile_repository.dart';
 import '../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../features/onboarding/presentation/pages/welcome_page.dart';
 import '../features/security/domain/repositories/biometric_authenticator.dart';
@@ -79,7 +86,7 @@ GoRouter createRouter({
   required OnboardingRepository onboarding,
   required LockSession lockSession,
 }) => GoRouter(
-  initialLocation: AppRoutes.expenses,
+  initialLocation: AppRoutes.home,
   refreshListenable: lockSession,
   redirect: (context, state) {
     final location = state.matchedLocation;
@@ -91,7 +98,7 @@ GoRouter createRouter({
     if (lockSession.isLocked) {
       return location == AppRoutes.lock ? null : AppRoutes.lock;
     }
-    if (inIntro || location == AppRoutes.lock) return AppRoutes.expenses;
+    if (inIntro || location == AppRoutes.lock) return AppRoutes.home;
     return null;
   },
   routes: [
@@ -102,7 +109,10 @@ GoRouter createRouter({
     GoRoute(
       path: AppRoutes.onboarding,
       builder: (context, state) => BlocProvider(
-        create: (_) => OnboardingCubit(context.read<OnboardingRepository>()),
+        create: (_) => OnboardingCubit(
+          context.read<OnboardingRepository>(),
+          context.read<ProfileRepository>(),
+        ),
         child: const OnboardingPage(),
       ),
     ),
@@ -118,6 +128,35 @@ GoRouter createRouter({
       builder: (context, state, navigationShell) =>
           AppShell(navigationShell: navigationShell),
       branches: [
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
+              path: AppRoutes.home,
+              builder: (context, state) => MultiBlocProvider(
+                providers: [
+                  BlocProvider(
+                    create: (_) => HomeCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<BudgetRepository>(),
+                      context.read<RecurringRepository>(),
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (_) => AlertsCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<AlertDismissals>(),
+                    ),
+                  ),
+                  BlocProvider(
+                    create: (_) =>
+                        CategoriesCubit(context.read<CategoryRepository>()),
+                  ),
+                ],
+                child: const HomePage(),
+              ),
+            ),
+          ],
+        ),
         StatefulShellBranch(
           routes: [
             GoRoute(
@@ -216,6 +255,17 @@ GoRouter createRouter({
                 filter: filter,
               ),
             ),
+            // For the budget at the top of a category's page.
+            BlocProvider(
+              create: (_) {
+                final budgets = context.read<BudgetRepository>();
+                return BudgetsCubit(
+                  budgets,
+                  setBudget: SetBudget(budgets),
+                  removeBudget: RemoveBudget(budgets),
+                );
+              },
+            ),
             BlocProvider(
               create: (_) =>
                   CategoriesCubit(context.read<CategoryRepository>()),
@@ -224,6 +274,16 @@ GoRouter createRouter({
           child: ExpenseListPage(filter: filter),
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.eraseData,
+      builder: (context, state) => BlocProvider(
+        create: (_) => EraseDataCubit(
+          context.read<EraseAllData>(),
+          context.read<BackupHistory>(),
+        ),
+        child: const EraseDataPage(),
+      ),
     ),
     GoRoute(
       path: AppRoutes.backup,

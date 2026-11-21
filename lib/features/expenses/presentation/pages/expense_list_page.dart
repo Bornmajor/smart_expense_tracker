@@ -16,6 +16,10 @@ import '../../../categories/presentation/cubit/categories_state.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/expense.dart';
 import '../../domain/entities/expense_day_group.dart';
+import '../../../budgets/presentation/cubit/budgets_cubit.dart';
+import '../../../budgets/presentation/cubit/budgets_state.dart';
+import '../../../budgets/presentation/edit_budget.dart';
+import '../../../budgets/presentation/widgets/category_budget_strip.dart';
 import '../../domain/entities/expense_filter.dart';
 import '../cubit/expense_list_cubit.dart';
 import '../cubit/expense_list_state.dart';
@@ -189,10 +193,12 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
             groups: groups,
             onDelete: (expense) => _delete(context, expense),
             summary: fixed != null
-                ? _FilterSummary(
+                ? _FixedSummary(
+                    filter: fixed,
                     month: month,
                     count: expenses.length,
                     totalMinor: _total(expenses),
+                    categoryName: _title(context, fixed),
                   )
                 : state.filter.isEmpty
                 ? null
@@ -236,12 +242,93 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
     return const EmptyState(
       icon: Icons.receipt_long_outlined,
       title: 'Add your first expense',
-      message: 'Tap the button below to record what you spent.',
+      message:
+          'Tap Add expense below to scan a receipt, type it in one line, paste '
+          'an M-Pesa message, or enter it by hand. Everything stays on your '
+          'phone.',
     );
   }
 
   static int _total(List<Expense> expenses) =>
       expenses.fold(0, (sum, e) => sum + e.amountMinor);
+}
+
+/// The top of a category's page (or a month's): the month, how many expenses
+/// and what they add up to, and, for a category, its budget.
+class _FixedSummary extends StatelessWidget {
+  const _FixedSummary({
+    required this.filter,
+    required this.month,
+    required this.count,
+    required this.totalMinor,
+    required this.categoryName,
+  });
+
+  final ExpenseFilter filter;
+  final String? month;
+  final int count;
+  final int totalMinor;
+  final String categoryName;
+
+  @override
+  Widget build(BuildContext context) {
+    final categoryId = filter.categoryId;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _FilterSummary(month: month, count: count, totalMinor: totalMinor),
+        // A budget is monthly, so it belongs to a category in a month.
+        if (categoryId != null && filter.month != null)
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+            child: _CategoryBudget(
+              categoryId: categoryId,
+              categoryName: categoryName,
+              spentMinor: totalMinor,
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+/// Reads the category's budget and opens the sheet to set or change it.
+class _CategoryBudget extends StatelessWidget {
+  const _CategoryBudget({
+    required this.categoryId,
+    required this.categoryName,
+    required this.spentMinor,
+  });
+
+  final String categoryId;
+  final String categoryName;
+  final int spentMinor;
+
+  @override
+  Widget build(BuildContext context) {
+    final budgets = context.watch<BudgetsCubit>().state;
+    // Until the budgets are read there is nothing true to say.
+    if (budgets is! BudgetsLoaded) return const SizedBox.shrink();
+    final currency = context.select<SettingsCubit, Currency>(
+      (cubit) => cubit.state.currency,
+    );
+    final existing = budgets.byScope[categoryId];
+    return CategoryBudgetStrip(
+      categoryName: categoryName,
+      spentMinor: spentMinor,
+      currency: currency,
+      budget: existing,
+      onTap: () => editBudget(
+        context,
+        cubit: context.read<BudgetsCubit>(),
+        scopeId: categoryId,
+        title: '$categoryName budget',
+        existing: existing,
+        currency: currency,
+        hint: 'This month: ${currency.format(spentMinor)}',
+      ),
+    );
+  }
 }
 
 /// "November 2026 · 5 expenses · KSh 12,300" above a filtered list.

@@ -35,7 +35,7 @@ class TotalCard extends StatelessWidget {
             ),
             const Gap(AppSpacing.sm),
             Text(
-              currency.format(totalMinor),
+              currency.formatGlance(totalMinor),
               style: context.text.headlineMedium?.copyWith(
                 color: onPrimary,
                 fontSize: 34,

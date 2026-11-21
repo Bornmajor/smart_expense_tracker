@@ -5,7 +5,9 @@ import 'package:smart_expense_tracker/features/backup/domain/backup_codec.dart';
 import 'package:smart_expense_tracker/features/backup/domain/backup_exception.dart';
 import 'package:smart_expense_tracker/features/backup/domain/entities/backup_data.dart';
 import 'package:smart_expense_tracker/features/backup/domain/repositories/backup_file_picker.dart';
+import 'package:smart_expense_tracker/features/backup/domain/repositories/backup_history.dart';
 import 'package:smart_expense_tracker/features/backup/domain/repositories/backup_repository.dart';
+import 'package:smart_expense_tracker/features/backup/domain/repositories/local_state_reset.dart';
 import 'package:smart_expense_tracker/features/backup/domain/usecases/create_backup.dart';
 import 'package:smart_expense_tracker/features/backup/domain/usecases/restore_backup.dart';
 import 'package:smart_expense_tracker/features/backup/presentation/cubit/backup_cubit.dart';
@@ -26,6 +28,19 @@ class FakeBackupRepository implements BackupRepository {
 
   @override
   Future<BackupData> read() async => data;
+
+  /// Set to make `eraseAll` throw it.
+  Object? eraseError;
+
+  /// How many times `eraseAll` worked.
+  int erased = 0;
+
+  @override
+  Future<void> eraseAll() async {
+    final error = eraseError;
+    if (error != null) throw error;
+    erased++;
+  }
 
   @override
   Future<void> replaceAll(BackupData data) async {
@@ -83,6 +98,7 @@ class BackupHarness {
         codec: codec,
         sharer: sharer,
         currencyCode: () => currency,
+        history: history,
       ),
       restore,
       picker,
@@ -92,6 +108,7 @@ class BackupHarness {
   final FakeBackupRepository repository;
   final BackupCodec codec;
   final sharer = FakeReportSharer();
+  final history = FakeBackupHistory();
   final picker = FakeBackupFilePicker();
   late final BackupCubit cubit;
 }
@@ -106,3 +123,22 @@ BackupData sampleDataWithCurrency(BackupData data, String code) => BackupData(
   budgets: data.budgets,
   recurringRules: data.recurringRules,
 );
+
+/// Remembers the last backup in memory.
+class FakeBackupHistory implements BackupHistory {
+  DateTime? last;
+
+  @override
+  DateTime? lastBackupAt() => last;
+
+  @override
+  Future<void> record(DateTime when) async => last = when;
+}
+
+/// Counts how often the app's remembered state was cleared.
+class FakeLocalStateReset implements LocalStateReset {
+  int cleared = 0;
+
+  @override
+  Future<void> clear() async => cleared++;
+}

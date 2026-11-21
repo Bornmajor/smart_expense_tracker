@@ -13,9 +13,12 @@ import '../onboarding_slides.dart';
 /// size) needs more room, it grows and the illustration shrinks, so the text
 /// never runs under the buttons.
 class OnboardingSlideView extends StatelessWidget {
-  const OnboardingSlideView({super.key, required this.slide});
+  const OnboardingSlideView({super.key, required this.slide, this.footer});
 
   final OnboardingSlide slide;
+
+  /// Something under the description, such as the name field on the last slide.
+  final Widget? footer;
 
   /// Room kept free at the top for the back button and progress bar.
   static const topBarSpace = 72.0;
@@ -57,7 +60,13 @@ class OnboardingSlideView extends StatelessWidget {
               ),
             ),
             ConstrainedBox(
-              constraints: BoxConstraints(minHeight: constraints.maxHeight / 2),
+              // At least half the screen, and never more than the screen: if the
+              // text, a large font or the keyboard needs more room than there is,
+              // this part scrolls instead of overflowing.
+              constraints: BoxConstraints(
+                minHeight: constraints.maxHeight / 2,
+                maxHeight: constraints.maxHeight,
+              ),
               // Sides only: the bottom is already kept clear for the buttons.
               child: SafeArea(
                 top: false,
@@ -69,27 +78,33 @@ class OnboardingSlideView extends StatelessWidget {
                   // phone set to a large font shows huge text here.
                   child: MediaQuery.withClampedTextScaling(
                     maxScaleFactor: maxTextScale,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          slide.title,
-                          textAlign: TextAlign.center,
-                          style: context.text.headlineMedium?.copyWith(
-                            color: onboardingInk,
-                            fontSize: 32,
-                            height: 1.15,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            slide.title,
+                            textAlign: TextAlign.center,
+                            style: context.text.headlineMedium?.copyWith(
+                              color: onboardingInk,
+                              fontSize: 32,
+                              height: 1.15,
+                            ),
                           ),
-                        ),
-                        const Gap(AppSpacing.md),
-                        Text(
-                          slide.description,
-                          textAlign: TextAlign.center,
-                          style: context.text.bodyLarge?.copyWith(
-                            color: onboardingInk.withValues(alpha: 0.85),
+                          const Gap(AppSpacing.md),
+                          Text(
+                            slide.description,
+                            textAlign: TextAlign.center,
+                            style: context.text.bodyLarge?.copyWith(
+                              color: onboardingInk.withValues(alpha: 0.85),
+                            ),
                           ),
-                        ),
-                      ],
+                          if (footer != null) ...[
+                            const Gap(AppSpacing.lg),
+                            footer!,
+                          ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

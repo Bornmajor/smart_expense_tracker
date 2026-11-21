@@ -85,13 +85,13 @@ void main() {
 
       await goToTab(tester, 'Summary');
 
-      expect(find.text('20.00'), findsOneWidget);
+      expect(find.text('20'), findsOneWidget);
       expect(find.text('2 expenses'), findsOneWidget);
       expect(find.text('Food'), findsOneWidget);
-      expect(find.text('15.00'), findsOneWidget);
-      expect(find.text('75%'), findsOneWidget);
+      expect(find.text('15'), findsOneWidget);
+      expect(find.text('75% of spending'), findsOneWidget);
       expect(find.text('Transport'), findsOneWidget);
-      expect(find.text('25%'), findsOneWidget);
+      expect(find.text('25% of spending'), findsOneWidget);
     });
 
     testWidgets('goes to the previous month, and not past the current one', (
