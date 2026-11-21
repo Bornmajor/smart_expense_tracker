@@ -7,6 +7,11 @@ import '../features/budgets/domain/repositories/budget_repository.dart';
 import '../features/budgets/domain/usecases/remove_budget.dart';
 import '../features/budgets/domain/usecases/set_budget.dart';
 import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/backup/domain/repositories/backup_file_picker.dart';
+import '../features/backup/domain/usecases/create_backup.dart';
+import '../features/backup/domain/usecases/restore_backup.dart';
+import '../features/backup/presentation/cubit/backup_cubit.dart';
+import '../features/backup/presentation/pages/backup_page.dart';
 import '../features/budgets/presentation/pages/budgets_page.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/categories/domain/usecases/create_category.dart';
@@ -19,6 +24,7 @@ import '../features/categories/presentation/pages/categories_page.dart';
 import '../features/dashboard/presentation/cubit/summary_cubit.dart';
 import '../features/dashboard/presentation/pages/summary_page.dart';
 import '../features/expenses/domain/entities/expense.dart';
+import '../features/expenses/domain/entities/expense_filter.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/save_expense.dart';
 import '../features/expenses/domain/usecases/update_expense.dart';
@@ -32,6 +38,8 @@ import '../features/export/presentation/cubit/export_cubit.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
 import '../features/recurring/domain/entities/recurring_rule.dart';
 import '../features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
+import '../features/insights/domain/repositories/alert_dismissals.dart';
+import '../features/insights/presentation/cubit/alerts_cubit.dart';
 import '../features/recurring/domain/repositories/recurring_repository.dart';
 import '../features/recurring/domain/usecases/generate_due_expenses.dart';
 import '../features/recurring/domain/usecases/save_recurring_rule.dart';
@@ -40,6 +48,7 @@ import '../features/recurring/presentation/cubit/recurring_cubit.dart';
 import '../features/recurring/presentation/cubit/recurring_form_cubit.dart';
 import '../features/recurring/presentation/pages/recurring_form_page.dart';
 import '../features/recurring/presentation/pages/recurring_page.dart';
+import '../features/quick_add/domain/entities/quick_add_result.dart';
 import '../features/scan/debug/ocr_debug_page.dart';
 import '../features/scan/domain/entities/recovered_photo.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
@@ -140,10 +149,17 @@ GoRouter createRouter({
                     create: (_) => SummaryCubit(
                       context.read<ExpenseRepository>(),
                       context.read<BudgetRepository>(),
+                      context.read<RecurringRepository>(),
                     ),
                   ),
                   BlocProvider(
                     create: (_) => ExportCubit(context.read<ExportMonth>()),
+                  ),
+                  BlocProvider(
+                    create: (_) => AlertsCubit(
+                      context.read<ExpenseRepository>(),
+                      context.read<AlertDismissals>(),
+                    ),
                   ),
                   BlocProvider(
                     create: (_) =>
@@ -184,6 +200,41 @@ GoRouter createRouter({
           child: const CategoriesPage(),
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.filteredExpenses,
+      // The filter arrives as `extra`; without it there is nothing to show.
+      redirect: (context, state) =>
+          state.extra is ExpenseFilter ? null : AppRoutes.expenses,
+      builder: (context, state) {
+        final filter = state.extra! as ExpenseFilter;
+        return MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => ExpenseListCubit(
+                context.read<ExpenseRepository>(),
+                filter: filter,
+              ),
+            ),
+            BlocProvider(
+              create: (_) =>
+                  CategoriesCubit(context.read<CategoryRepository>()),
+            ),
+          ],
+          child: ExpenseListPage(filter: filter),
+        );
+      },
+    ),
+    GoRoute(
+      path: AppRoutes.backup,
+      builder: (context, state) => BlocProvider(
+        create: (_) => BackupCubit(
+          context.read<CreateBackup>(),
+          context.read<RestoreBackup>(),
+          context.read<BackupFilePicker>(),
+        ),
+        child: const BackupPage(),
+      ),
     ),
     GoRoute(
       path: AppRoutes.recurring,
@@ -275,6 +326,9 @@ GoRouter createRouter({
       builder: (context, state) => _expenseForm(
         context,
         scan: state.extra is ScanResult ? state.extra! as ScanResult : null,
+        quick: state.extra is QuickAddResult
+            ? state.extra! as QuickAddResult
+            : null,
       ),
     ),
     GoRoute(
@@ -303,6 +357,7 @@ Widget _expenseForm(
   BuildContext context, {
   Expense? original,
   ScanResult? scan,
+  QuickAddResult? quick,
 }) {
   final expenses = context.read<ExpenseRepository>();
   final categories = context.read<CategoryRepository>();
@@ -327,6 +382,7 @@ Widget _expenseForm(
     child: ExpenseFormPage(
       original: original,
       scan: scan,
+      quick: quick,
       // The receipt photo is only for comparing, so it goes when the form does.
       discardPhoto: scan == null
           ? null

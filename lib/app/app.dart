@@ -8,12 +8,21 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/database/app_database.dart';
+import '../core/info/app_version.dart';
 import '../core/debug/test_clock.dart';
 import '../core/links/app_links.dart';
 import '../core/links/link_opener.dart';
 import '../core/links/url_launcher_link_opener.dart';
 import '../core/utils/currency.dart';
 import '../core/theme/app_theme.dart';
+import '../features/backup/data/crypto/cryptography_backup_cipher.dart';
+import '../features/backup/data/repositories/backup_repository_impl.dart';
+import '../features/backup/data/repositories/file_selector_backup_picker.dart';
+import '../features/backup/domain/backup_codec.dart';
+import '../features/backup/domain/repositories/backup_file_picker.dart';
+import '../features/backup/domain/repositories/backup_repository.dart';
+import '../features/backup/domain/usecases/create_backup.dart';
+import '../features/backup/domain/usecases/restore_backup.dart';
 import '../features/budgets/data/repositories/budget_repository_impl.dart';
 import '../features/currency_conversion/data/datasources/http_rates_source.dart';
 import '../features/currency_conversion/data/repositories/exchange_rate_repository_impl.dart';
@@ -27,6 +36,8 @@ import '../features/expenses/domain/usecases/vendor_category_memory.dart';
 
 import 'package:http/http.dart' as http;
 
+import '../features/insights/data/repositories/alert_dismissals_impl.dart';
+import '../features/insights/domain/repositories/alert_dismissals.dart';
 import '../features/export/data/repositories/share_plus_report_sharer.dart';
 import '../features/export/data/writers/bundled_fonts.dart';
 import '../features/export/data/writers/csv_report_writer.dart';
@@ -34,6 +45,8 @@ import '../features/export/data/writers/pdf_report_writer.dart';
 import '../features/export/domain/usecases/export_month.dart';
 import '../features/onboarding/data/repositories/onboarding_repository_impl.dart';
 import '../features/onboarding/domain/repositories/onboarding_repository.dart';
+import '../features/mpesa/domain/usecases/import_mpesa.dart';
+import '../features/quick_add/domain/usecases/quick_add.dart';
 import '../features/scan/data/datasources/file_selector_chooser.dart';
 import '../features/scan/data/datasources/pdfx_page_renderer.dart';
 import '../features/scan/data/repositories/file_receipt_photo_source.dart';
@@ -67,6 +80,7 @@ class SpendWiseApp extends StatefulWidget {
     this.biometricAuthenticator,
     this.fallbackCurrency,
     this.exchangeRates,
+    this.appVersion = AppVersion.unknown,
   });
 
   final AppDatabase database;
@@ -80,6 +94,9 @@ class SpendWiseApp extends StatefulWidget {
 
   /// Replaced in tests; defaults to the real service.
   final ExchangeRateRepository? exchangeRates;
+
+  /// The installed version, shown in Settings. Replaced in tests.
+  final AppVersion appVersion;
 
   @override
   State<SpendWiseApp> createState() => _SpendWiseAppState();
@@ -124,6 +141,26 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         widget.preferences,
         HttpRatesSource(http.Client()),
       );
+  late final AlertDismissals _alertDismissals = AlertDismissalsImpl(
+    widget.preferences,
+  );
+  late final BackupRepository _backupRepository = BackupRepositoryImpl(
+    widget.database,
+  );
+  late final BackupCodec _backupCodec = BackupCodec(CryptographyBackupCipher());
+  late final CreateBackup _createBackup = CreateBackup(
+    repository: _backupRepository,
+    codec: _backupCodec,
+    sharer: const SharePlusReportSharer(),
+    currencyCode: () {
+      final code = _settings.currency.code;
+      return code.isEmpty ? null : code;
+    },
+  );
+  late final RestoreBackup _restoreBackup = RestoreBackup(
+    _backupRepository,
+    _backupCodec,
+  );
   late final AppLifecycleListener _lifecycle;
 
   @override
@@ -168,6 +205,13 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<RecurringRepository>.value(value: _recurring),
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
+        RepositoryProvider<AppVersion>.value(value: widget.appVersion),
+        RepositoryProvider<CreateBackup>.value(value: _createBackup),
+        RepositoryProvider<RestoreBackup>.value(value: _restoreBackup),
+        RepositoryProvider<BackupFilePicker>(
+          create: (_) => const FileSelectorBackupPicker(),
+        ),
+        RepositoryProvider<AlertDismissals>.value(value: _alertDismissals),
         RepositoryProvider<BudgetRepository>(
           create: (_) => BudgetRepositoryImpl(widget.database),
         ),
@@ -183,6 +227,21 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<VendorCategoryMemory>(
           create: (context) =>
               VendorCategoryMemory(context.read<ExpenseRepository>()),
+        ),
+        // Turns a pasted M-Pesa message into a filled-in form.
+        RepositoryProvider<ImportMpesa>(
+          create: (context) => ImportMpesa(
+            expenses: context.read<ExpenseRepository>(),
+            categories: context.read<CategoryRepository>(),
+            memory: context.read<VendorCategoryMemory>(),
+          ),
+        ),
+        // Turns a typed line into a filled-in form.
+        RepositoryProvider<QuickAdd>(
+          create: (context) => QuickAdd(
+            categories: context.read<CategoryRepository>(),
+            memory: context.read<VendorCategoryMemory>(),
+          ),
         ),
         // Monthly report export. The fonts are read when a PDF is made.
         RepositoryProvider<ExportMonth>(

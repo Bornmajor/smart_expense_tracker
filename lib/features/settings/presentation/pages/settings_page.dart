@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/app_routes.dart';
 import '../../../../core/debug/test_clock.dart';
+import '../../../../core/info/app_version.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../shared/widgets/app_logo.dart';
 import '../../../../shared/widgets/section_header.dart';
@@ -16,6 +17,27 @@ import '../widgets/exchange_rates_credit_tile.dart';
 import '../widgets/privacy_policy_tile.dart';
 import '../widgets/test_date_tile.dart';
 import '../widgets/theme_mode_selector.dart';
+
+/// Which version of the app is installed.
+class _VersionTile extends StatelessWidget {
+  const _VersionTile();
+
+  @override
+  Widget build(BuildContext context) {
+    final label = context.read<AppVersion>().label;
+    if (label == null) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: AppSpacing.sm),
+      child: Card(
+        child: ListTile(
+          leading: const Icon(Icons.info_outline),
+          title: const Text('Version'),
+          subtitle: Text(label),
+        ),
+      ),
+    );
+  }
+}
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -81,6 +103,19 @@ class SettingsPage extends StatelessWidget {
           const SectionHeader('Security'),
           const Card(child: BiometricSwitchTile()),
           const Gap(AppSpacing.xl),
+          const SectionHeader('Your data'),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.backup_outlined),
+              title: const Text('Back up and restore'),
+              subtitle: const Text(
+                'Save everything to a file, or bring it back',
+              ),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push(AppRoutes.backup),
+            ),
+          ),
+          const Gap(AppSpacing.xl),
           const SectionHeader('About'),
           Card(
             child: ListTile(
@@ -91,6 +126,7 @@ class SettingsPage extends StatelessWidget {
               onTap: () => showAboutDialog(
                 context: context,
                 applicationName: 'SpendWise IQ',
+                applicationVersion: context.read<AppVersion>().label,
                 applicationIcon: const AppLogo(size: 48),
                 children: const [
                   Text(
@@ -101,6 +137,7 @@ class SettingsPage extends StatelessWidget {
               ),
             ),
           ),
+          const _VersionTile(),
           const PrivacyPolicyTile(),
           const ExchangeRatesCreditTile(),
           // TEMPORARY developer tools, only in debug builds and the dev flavor.

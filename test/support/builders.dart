@@ -10,6 +10,7 @@ Expense buildExpense({
   DateTime? createdAt,
   int? originalAmountMinor,
   String? originalCurrency,
+  String? transactionCode,
 }) {
   final day = date ?? DateTime(2026, 11, 16);
   return Expense(
@@ -23,5 +24,6 @@ Expense buildExpense({
     updatedAt: day,
     originalAmountMinor: originalAmountMinor,
     originalCurrency: originalCurrency,
+    transactionCode: transactionCode,
   );
 }

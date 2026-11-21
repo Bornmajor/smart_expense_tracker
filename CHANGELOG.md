@@ -32,5 +32,14 @@ First release. Nothing has been published to Google Play yet.
 - Recurring expenses: add rent, a subscription or a bill once, weekly, monthly or yearly, and an expense is added on its own each time it comes due. Expenses missed while the app was closed are added too, on their own dates, and you can edit or delete any of them
 - A "Repeat this expense" box when adding an expense, so a bill you just scanned or typed can repeat from then on (weekly, monthly or yearly). The expense you save is the first one
 - Enter an amount in another currency ("Different currency?" under the amount) and it is converted to your currency with the latest daily rate. The rate and its date are shown, and what you paid is kept with the expense. Rates are downloaded once a day and saved, so it also works offline
+- A "Safe to spend" card on the Summary for the current month: what you can spend each day for the rest of the month, worked out from your overall budget, what you have spent, and the recurring bills still to come. It turns red when the budget is already spoken for
+- Heads-up cards on the Summary, worked out on your phone: a possible duplicate charge, an unusually large expense for its category, and a category running well above a usual month. Each can be dismissed and does not come back
+- The app version is shown in Settings, so you can tell which one you have installed
+- Back up and restore: save everything (expenses, categories, budgets, recurring expenses) to one file, optionally locked with a password, and restore it on this or a new phone. A restore shows what is in the file and asks before it replaces anything
+- After a scan, the receipt can be opened large from a "View receipt" button at the top of the form (even when scrolled down), as well as from its thumbnail, with pinch and double-tap zoom. The thumbnail now shows that it can be enlarged
+- Tap a category (or a budget) on the Summary to see the expenses behind it for that month, with the month, count and total on top. You can edit or delete them from there
+- Search the expense list by vendor or title (every word has to match), and filter it by category, dates and amount. Active filters show as chips you can remove, with how many expenses match and what they add up to
+- Type an expense in one line, such as "lunch 350 at Java yesterday" or "ksh 1,200 airtime". The amount, date, vendor and title are read on your phone (also in Swahili: leo, jana, juzi), a category is suggested, and the expense form opens filled in for you to check
+- Paste an M-Pesa confirmation message and the expense form is filled in: the amount (with the transaction cost), who or what was paid, the date and the transaction code. The same message is noticed if you paste it twice. The app never reads your text messages
 - Your currency now starts as the Kenyan shilling
 - A budget that is passed shows how much it is over (for example "KSh 1,510 over") instead of a percentage above 100

@@ -248,6 +248,56 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(InteractiveViewer), findsNothing);
     });
+
+    testWidgets('the top bar button opens it from anywhere on the form', (
+      tester,
+    ) async {
+      await openApp(tester);
+      await chooseReceiptPhoto(tester);
+      // Scroll the receipt card out of sight, as when filling in the category.
+      await tester.drag(find.byType(ListView).first, const Offset(0, -600));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('View receipt'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InteractiveViewer), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Close'));
+      await tester.pumpAndSettle();
+
+      // Back on the same form, with what was filled in still there.
+      expect(find.text('Add expense'), findsOneWidget);
+      expect(find.byType(InteractiveViewer), findsNothing);
+    });
+
+    testWidgets('a double-tap zooms in, and another zooms back out', (
+      tester,
+    ) async {
+      await openApp(tester);
+      await chooseReceiptPhoto(tester);
+      await tester.tap(receiptPhoto());
+      await tester.pumpAndSettle();
+      final viewer = find.byType(InteractiveViewer);
+      double scale() => tester
+          .widget<InteractiveViewer>(viewer)
+          .transformationController!
+          .value
+          .getMaxScaleOnAxis();
+      expect(scale(), 1);
+
+      Future<void> doubleTap() async {
+        await tester.tap(viewer);
+        await tester.pump(const Duration(milliseconds: 50));
+        await tester.tap(viewer);
+        await tester.pumpAndSettle();
+      }
+
+      await doubleTap();
+      expect(scale(), greaterThan(2));
+
+      await doubleTap();
+      expect(scale(), 1);
+    });
   });
 
   group('when the user backs out or something fails', () {

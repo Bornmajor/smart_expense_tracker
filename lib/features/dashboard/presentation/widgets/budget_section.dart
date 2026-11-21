@@ -16,9 +16,14 @@ class BudgetSection extends StatelessWidget {
     required this.progress,
     required this.categoryNames,
     required this.currency,
+    this.onOpen,
   });
 
   final List<BudgetProgress> progress;
+
+  /// Opens the expenses behind a budget: the category id, or null for the
+  /// overall budget (the whole month).
+  final void Function(String? categoryId)? onOpen;
 
   /// Category id -> name. A budget whose category is not in here is left out.
   final Map<String, String> categoryNames;
@@ -68,6 +73,11 @@ class BudgetSection extends StatelessWidget {
                     : categoryNames[item.budget.scopeId]!,
                 progress: item,
                 currency: currency,
+                onTap: onOpen == null
+                    ? null
+                    : () => onOpen!(
+                        item.budget.isOverall ? null : item.budget.scopeId,
+                      ),
               ),
             ),
       ],

@@ -13,7 +13,10 @@ import '../../../categories/domain/entities/category.dart';
 import '../../../categories/presentation/category_validation_messages.dart';
 import '../../../categories/presentation/cubit/category_actions_cubit.dart';
 import '../../../categories/presentation/widgets/category_name_sheet.dart';
+import '../../../quick_add/domain/entities/quick_add_result.dart';
+import '../../../quick_add/presentation/widgets/quick_add_note.dart';
 import '../../../scan/domain/entities/scan_result.dart';
+import '../../../scan/presentation/widgets/receipt_viewer.dart';
 import '../../../scan/presentation/widgets/scan_review_panel.dart';
 import '../../../currency_conversion/domain/entities/exchange_rates.dart';
 import '../../../currency_conversion/domain/repositories/exchange_rate_repository.dart';
@@ -37,6 +40,7 @@ class ExpenseFormPage extends StatefulWidget {
     super.key,
     this.original,
     this.scan,
+    this.quick,
     this.discardPhoto,
   });
 
@@ -44,6 +48,9 @@ class ExpenseFormPage extends StatefulWidget {
 
   /// A scanned receipt that fills in the fields. Only used when adding.
   final ScanResult? scan;
+
+  /// A typed line, understood, that fills in the fields. Only used when adding.
+  final QuickAddResult? quick;
 
   /// Deletes the receipt photo. Called when the form closes, whether the
   /// expense was saved or not, because the photo is only for comparing.
@@ -85,16 +92,18 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     final original = widget.original;
     final scan = widget.scan;
     final draft = scan?.draft;
-    _title = TextEditingController(text: original?.title ?? '');
+    final quick = widget.quick;
+    final typed = quick?.draft;
+    _title = TextEditingController(text: original?.title ?? typed?.title ?? '');
     // A blank vendor is stored as "Unknown"; show it blank again when editing.
     _vendor = TextEditingController(
       text: original != null
           ? (original.vendor == ExpenseRules.unknownVendor
                 ? ''
                 : original.vendor)
-          : draft?.vendor ?? '',
+          : draft?.vendor ?? typed?.vendor ?? '',
     );
-    final scannedTotal = draft?.totalMinor;
+    final scannedTotal = draft?.totalMinor ?? typed?.amountMinor;
     _amount = TextEditingController(
       text: original != null
           ? Money.toInputText(original.amountMinor)
@@ -102,10 +111,18 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
           ? ''
           : Money.toInputText(scannedTotal),
     );
-    _date = original?.date ?? draft?.date ?? DateTime.now();
-    _categoryId = original?.categoryId ?? scan?.suggestedCategoryId;
-    // A suggestion from the scan can be replaced if the user fixes the vendor.
-    _categoryIsAuto = scan?.suggestedCategoryId != null;
+    _date = original?.date ?? draft?.date ?? typed?.date ?? DateTime.now();
+    _categoryId =
+        original?.categoryId ??
+        scan?.suggestedCategoryId ??
+        quick?.suggestedCategoryId;
+    // A suggestion from the scan or the typed line can be replaced if the user
+    // fixes the vendor.
+    _categoryIsAuto =
+        scan?.suggestedCategoryId != null || quick?.suggestedCategoryId != null;
+    if (quick != null && quick.categoryFromHistory && typed != null) {
+      _categoryHint = 'Chosen from your earlier expenses at ${typed.vendor}.';
+    }
     if (!_isEditing) _vendorFocus.addListener(_onVendorFocusChanged);
   }
 
@@ -176,6 +193,7 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       repeat: _repeat ? _frequency : null,
       fromCurrency: _from?.code,
       toCurrency: context.read<SettingsCubit>().state.currency.code,
+      transactionCode: widget.quick?.transactionCode,
     );
   }
 
@@ -281,6 +299,15 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
           appBar: AppBar(
             title: Text(_isEditing ? 'Edit expense' : 'Add expense'),
             actions: [
+              // After a scan: the receipt is one tap away, even when the form has
+              // been scrolled down to the category or the Save button.
+              if (widget.scan != null)
+                IconButton(
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  tooltip: 'View receipt',
+                  onPressed: () =>
+                      showReceiptViewer(context, widget.scan!.photoPath),
+                ),
               if (_isEditing)
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
@@ -306,6 +333,14 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       // After a scan: the receipt photo and what to check.
                       if (widget.scan != null) ...[
                         ScanReviewPanel(scan: widget.scan!),
+                        const Gap(AppSpacing.lg),
+                      ],
+                      // After a typed line: what was typed, and to check it.
+                      if (widget.quick != null) ...[
+                        QuickAddNote(
+                          heading: widget.quick!.heading,
+                          text: widget.quick!.text,
+                        ),
                         const Gap(AppSpacing.lg),
                       ],
                       TextField(

@@ -40,6 +40,14 @@ The picture the app reads is a temporary copy. It is deleted when you close the 
 
 When you enter an amount in another currency, the app converts it using exchange rates. It downloads the rates from a public service, ExchangeRate-API, at most once a day, and keeps them on your phone so conversion works offline. The request contains no expenses, amounts or personal details. Like any website, the service can see your device's IP address. If you never use another currency, the rates are still downloaded in the background, but nothing about you is sent.
 
+## Backup files you create
+
+You can save everything in the app (expenses, categories, budgets and recurring expenses) to one backup file, and restore from it later. The file is made on your phone and handed to Android's share sheet. It goes only where you choose to send it, such as your Google Drive. The app does not upload it, and the developer does not receive it. You can lock the file with a password; it is then encrypted on your phone (AES-256), and if you forget the password nobody, including the developer, can open it. Restoring replaces what is on the phone with the contents of the file, after you confirm.
+
+## M-Pesa messages you paste
+
+You can paste an M-Pesa confirmation message to fill in an expense. The app does not read your text messages and has no permission to do so: a message is only used when you copy and paste it yourself. It is read on your phone to find the amount, who was paid and the date, and the message text is not kept. Only what you save in the expense is stored, together with the M-Pesa transaction code, so the same message is not added twice. Nothing is uploaded.
+
 ## Exporting reports
 
 You can export a month of your expenses as a PDF or a CSV file. The file is made on your phone and handed to Android's share sheet. It goes only where you choose to send it, such as your Google Drive or a message to someone. The app does not upload it, and the developer does not receive it.

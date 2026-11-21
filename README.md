@@ -74,6 +74,13 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Monthly budgets for each category and overall, with progress bars on the Summary that turn amber near the limit and red when passed
 - [x] Recurring expenses and subscriptions, added automatically when they come due (weekly, monthly or yearly), with what they add up to each month. A "Repeat this expense" box on the add form turns a scanned or typed bill into one
 - [x] Convert an amount in another currency with the latest daily rate (downloaded once a day, saved on the phone, rate and date shown)
+- [x] "Safe to spend" on the Summary: an amount a day for the rest of the month, after spending so far and upcoming recurring bills (needs an overall budget)
+- [x] Heads-up cards on the Summary: possible duplicate charge, unusually large expense, a category above a usual month (rules on the phone, nothing sent anywhere)
+- [x] Back up everything to a file (optionally password-protected with AES-256) and restore it, with a confirmation that shows what is in the backup
+- [x] Tap a Summary category or budget to open the expenses behind it for that month
+- [x] Search expenses by vendor or title and filter them by category, dates and amount
+- [x] Type an expense in one line ("lunch 350 at Java yesterday"); a plain on-device parser fills in the form for you to check
+- [x] Paste an M-Pesa confirmation message to fill in an expense (no SMS permission; the same message is not added twice)
 
 ### Planned
 
@@ -105,6 +112,8 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 | Export | `pdf`, `share_plus` (CSV is written by hand) | In use |
 | Receipt files | `file_selector` (Files app), `pdfx` (draws a PDF page) | In use |
 | Exchange rates | `http` (one daily request to ExchangeRate-API) | In use |
+| App version | `package_info_plus` | In use |
+| Backup encryption | `cryptography` (PBKDF2 + AES-256-GCM) | In use |
 
 ## Architecture
 

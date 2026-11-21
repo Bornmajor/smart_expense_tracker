@@ -75,6 +75,40 @@ final class ExportFailure extends AppFailure {
   List<Object?> get props => [problem];
 }
 
+/// Why a backup or a restore did not work.
+enum BackupProblem {
+  /// The chosen file is not a SpendWise IQ backup.
+  notABackup,
+
+  /// Made by a newer version of the app than this one.
+  newerVersion,
+
+  /// The backup is protected and no password was given.
+  passwordRequired,
+
+  /// The password does not open the backup.
+  wrongPassword,
+
+  /// The file is a backup but its contents are damaged or incomplete.
+  damaged,
+
+  /// The file could not be read.
+  couldNotRead,
+
+  /// The share sheet could not be opened.
+  couldNotShare,
+}
+
+/// Backing up or restoring failed.
+final class BackupFailure extends AppFailure {
+  const BackupFailure(this.problem);
+
+  final BackupProblem problem;
+
+  @override
+  List<Object?> get props => [problem];
+}
+
 /// The device has no usable biometrics (none enrolled, or not supported).
 final class BiometricUnavailableFailure extends AppFailure {
   const BiometricUnavailableFailure();
