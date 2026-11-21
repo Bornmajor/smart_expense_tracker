@@ -44,7 +44,15 @@ class FileReceiptPhotoSource implements ReceiptPhotoSource {
   Future<String?> pick(ReceiptSource source) async {
     assert(source == ReceiptSource.file, 'This source only picks files');
 
-    final chosen = await _chooser.chooseFile();
+    // Left behind if Android closes the app while the Files app is open, so the
+    // next start knows the choice was lost.
+    await _writeMarker();
+    final String? chosen;
+    try {
+      chosen = await _chooser.chooseFile();
+    } finally {
+      await _delete(_markerPath);
+    }
     if (chosen == null) return null;
 
     try {
@@ -66,9 +74,32 @@ class FileReceiptPhotoSource implements ReceiptPhotoSource {
   Future<String?> recoverLost() async => null;
 
   @override
+  Future<bool> pickWasInterrupted() async {
+    final marker = File(_markerPath);
+    try {
+      if (!await marker.exists()) return false;
+      await marker.delete();
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  @override
   Future<void> discard(String path) async {
     if (!_isOwn(path)) return;
     await _delete(path);
+  }
+
+  String get _markerPath =>
+      '${_tempDirectory.path}${Platform.pathSeparator}spendwise_picking_file';
+
+  Future<void> _writeMarker() async {
+    try {
+      await File(_markerPath).writeAsString('');
+    } on Exception {
+      // Only a courtesy message depends on it, so carry on without.
+    }
   }
 
   /// The first bytes of the file, enough to tell what it is.

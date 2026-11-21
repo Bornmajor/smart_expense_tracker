@@ -193,6 +193,16 @@ class FakeReceiptPhotoSource implements ReceiptPhotoSource {
     return found;
   }
 
+  /// Set to make `pickWasInterrupted` report an interruption once.
+  bool interrupted = false;
+
+  @override
+  Future<bool> pickWasInterrupted() async {
+    final found = interrupted;
+    interrupted = false;
+    return found;
+  }
+
   @override
   Future<void> discard(String path) async => discarded.add(path);
 }

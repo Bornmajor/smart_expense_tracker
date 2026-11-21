@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../shared/widgets/app_snack_bar.dart';
+
 import '../features/expenses/presentation/widgets/add_expense_sheet.dart';
 import '../features/scan/domain/entities/recovered_photo.dart';
 import '../features/scan/domain/entities/receipt_source.dart';
@@ -33,9 +35,19 @@ class _AppShellState extends State<AppShell> {
   /// memory. The photo is kept, so open the scan screen on it instead of
   /// leaving the user on the list with nothing said.
   Future<void> _recoverLostPhoto() async {
-    final path = await context.read<ReceiptPhotoSource>().recoverLost();
-    if (path == null || !mounted) return;
-    context.push(AppRoutes.scan, extra: RecoveredPhoto(path));
+    final photos = context.read<ReceiptPhotoSource>();
+    final path = await photos.recoverLost();
+    if (!mounted) return;
+    if (path != null) {
+      context.push(AppRoutes.scan, extra: RecoveredPhoto(path));
+      return;
+    }
+    if (await photos.pickWasInterrupted() && mounted) {
+      context.showWarning(
+        'Android closed the app while you were choosing the file. '
+        'Please try again.',
+      );
+    }
   }
 
   Future<void> _onAdd(BuildContext context) async {

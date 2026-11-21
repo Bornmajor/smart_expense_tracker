@@ -15,6 +15,10 @@ class RoutingReceiptPhotoSource implements ReceiptPhotoSource {
     ReceiptSource.file => file.pick(source),
   };
 
+  /// Only choosing a file can be cut short without leaving anything behind.
+  @override
+  Future<bool> pickWasInterrupted() => file.pickWasInterrupted();
+
   /// Only the camera can lose a photo to an app restart.
   @override
   Future<String?> recoverLost() => camera.recoverLost();

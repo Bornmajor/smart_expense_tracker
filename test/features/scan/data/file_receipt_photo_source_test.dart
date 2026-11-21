@@ -49,6 +49,12 @@ class RecordingSource implements ReceiptPhotoSource {
   }
 
   @override
+  Future<bool> pickWasInterrupted() async {
+    calls.add('interrupted');
+    return false;
+  }
+
+  @override
   Future<void> discard(String path) async => calls.add('discard $path');
 }
 
@@ -159,6 +165,29 @@ void main() {
       chooser.error = const ScanException(ScanProblem.cannotOpenFile);
 
       expect(await failureOf(), ScanProblem.cannotOpenFile);
+    });
+  });
+
+  group('FileReceiptPhotoSource interrupted picks', () {
+    test('is not reported after a normal pick or a back-out', () async {
+      await source.pick(ReceiptSource.file);
+
+      expect(await source.pickWasInterrupted(), isFalse);
+    });
+
+    test('is not reported after a pick that failed', () async {
+      chooser.error = const ScanException(ScanProblem.cannotOpenFile);
+      await failureOf();
+
+      expect(await source.pickWasInterrupted(), isFalse);
+    });
+
+    test('is reported once when the app was closed during a pick', () async {
+      // What the first pick left behind before Android closed the app.
+      File('${temp.path}/spendwise_picking_file').writeAsStringSync('');
+
+      expect(await source.pickWasInterrupted(), isTrue);
+      expect(await source.pickWasInterrupted(), isFalse);
     });
   });
 
