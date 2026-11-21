@@ -41,8 +41,9 @@ class _AppShellState extends State<AppShell> {
     }
     if (await photos.pickWasInterrupted() && mounted) {
       context.showWarning(
-        'Android closed the app while you were choosing the file. '
-        'Please try again.',
+        'Your phone seems to have run low on memory while you were choosing '
+        'the file, so the app had to close. Closing a few other apps first '
+        'can help. Please try again.',
       );
     }
   }
