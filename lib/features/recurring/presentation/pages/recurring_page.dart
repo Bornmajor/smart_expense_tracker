@@ -52,17 +52,12 @@ class RecurringPage extends StatelessWidget {
             title: 'Couldn\'t load your recurring expenses',
             message: 'Close the app and open it again.',
           ),
-          RecurringLoaded(:final rules) when rules.isEmpty => EmptyState(
+          RecurringLoaded(:final rules) when rules.isEmpty => const EmptyState(
             icon: Icons.repeat,
             title: 'Nothing repeats yet',
             message:
                 'Add rent, a subscription or a bill, and it is added to your '
                 'expenses on its own each time it comes around.',
-            action: FilledButton.icon(
-              onPressed: () => context.push(AppRoutes.recurringForm),
-              icon: const Icon(Icons.add),
-              label: const Text('Add a recurring expense'),
-            ),
           ),
           RecurringLoaded() => _RuleList(
             state: state,

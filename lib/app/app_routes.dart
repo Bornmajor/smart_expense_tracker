@@ -22,6 +22,7 @@ abstract final class AppRoutes {
   static const recurring = '/recurring';
   static const recurringForm = '/recurring/form';
   static const backup = '/backup';
+  static const eraseData = '/erase-data';
 
   /// TEMPORARY, debug builds only: see what the scanner reads.
   static const ocrDebug = '/debug/ocr';

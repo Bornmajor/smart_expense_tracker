@@ -7,6 +7,10 @@ import '../features/budgets/domain/repositories/budget_repository.dart';
 import '../features/budgets/domain/usecases/remove_budget.dart';
 import '../features/budgets/domain/usecases/set_budget.dart';
 import '../features/budgets/presentation/cubit/budgets_cubit.dart';
+import '../features/backup/domain/repositories/backup_history.dart';
+import '../features/backup/domain/usecases/erase_all_data.dart';
+import '../features/backup/presentation/cubit/erase_data_cubit.dart';
+import '../features/backup/presentation/pages/erase_data_page.dart';
 import '../features/backup/domain/repositories/backup_file_picker.dart';
 import '../features/backup/domain/usecases/create_backup.dart';
 import '../features/backup/domain/usecases/restore_backup.dart';
@@ -224,6 +228,16 @@ GoRouter createRouter({
           child: ExpenseListPage(filter: filter),
         );
       },
+    ),
+    GoRoute(
+      path: AppRoutes.eraseData,
+      builder: (context, state) => BlocProvider(
+        create: (_) => EraseDataCubit(
+          context.read<EraseAllData>(),
+          context.read<BackupHistory>(),
+        ),
+        child: const EraseDataPage(),
+      ),
     ),
     GoRoute(
       path: AppRoutes.backup,

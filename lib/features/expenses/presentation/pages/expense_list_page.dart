@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../../app/add_expense_flow.dart';
 import '../../../../app/app_routes.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/theme_x.dart';
@@ -234,17 +233,13 @@ class _ExpenseListPageState extends State<ExpenseListPage> {
         ),
       );
     }
-    return EmptyState(
+    return const EmptyState(
       icon: Icons.receipt_long_outlined,
       title: 'Add your first expense',
       message:
-          'Scan a receipt, type it in one line, paste an M-Pesa message, or '
-          'enter it by hand. Everything stays on your phone.',
-      action: FilledButton.icon(
-        onPressed: () => startAddExpense(context),
-        icon: const Icon(Icons.add),
-        label: const Text('Add an expense'),
-      ),
+          'Tap Add expense below to scan a receipt, type it in one line, paste '
+          'an M-Pesa message, or enter it by hand. Everything stays on your '
+          'phone.',
     );
   }
 

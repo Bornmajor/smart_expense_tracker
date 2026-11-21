@@ -1,3 +1,11 @@
+import 'package:smart_expense_tracker/features/backup/domain/repositories/backup_file_picker.dart';
+import 'package:smart_expense_tracker/features/backup/domain/repositories/backup_history.dart';
+import 'package:smart_expense_tracker/features/backup/domain/usecases/create_backup.dart';
+import 'package:smart_expense_tracker/features/backup/domain/usecases/erase_all_data.dart';
+import 'package:smart_expense_tracker/features/backup/domain/usecases/restore_backup.dart';
+
+import '../features/backup/backup_fakes.dart';
+
 import 'package:smart_expense_tracker/features/mpesa/domain/usecases/import_mpesa.dart';
 import 'package:smart_expense_tracker/features/quick_add/domain/usecases/parse_quick_add.dart';
 import 'package:smart_expense_tracker/features/quick_add/domain/usecases/quick_add.dart';
@@ -37,6 +45,9 @@ Future<LockSession> pumpRouterApp(
   FakeExpenseRepository? expenses,
   FakeBudgetRepository? budgets,
   FakeRecurringRepository? recurring,
+  FakeBackupRepository? backupRepository,
+  FakeBackupHistory? backupHistory,
+  FakeLocalStateReset? localStateReset,
   FakeExchangeRateRepository? rates,
   FakeCategoryRepository? categories,
   FakeReceiptPhotoSource? photos,
@@ -71,6 +82,10 @@ Future<LockSession> pumpRouterApp(
   final expenseRepo = expenses ?? FakeExpenseRepository();
   final categoryRepo = categories ?? FakeCategoryRepository();
   final recurringRepo = recurring ?? FakeRecurringRepository();
+  final backupRepo = backupRepository ?? FakeBackupRepository();
+  final history = backupHistory ?? FakeBackupHistory();
+  final stateReset = localStateReset ?? FakeLocalStateReset();
+  final dismissals = FakeAlertDismissals();
   final securityRepo = security ?? FakeSecurityRepository();
   final auth = authenticator ?? FakeBiometricAuthenticator();
   final settingsRepo = settings ?? FakeSettingsRepository();
@@ -93,7 +108,26 @@ Future<LockSession> pumpRouterApp(
         RepositoryProvider<ExchangeRateRepository>.value(
           value: rates ?? FakeExchangeRateRepository(),
         ),
-        RepositoryProvider<AlertDismissals>.value(value: FakeAlertDismissals()),
+        RepositoryProvider<AlertDismissals>.value(value: dismissals),
+        RepositoryProvider<BackupHistory>.value(value: history),
+        RepositoryProvider<EraseAllData>.value(
+          value: EraseAllData(backupRepo, stateReset),
+        ),
+        RepositoryProvider<CreateBackup>.value(
+          value: CreateBackup(
+            repository: backupRepo,
+            codec: testCodec(),
+            sharer: FakeReportSharer(),
+            currencyCode: () => null,
+            history: history,
+          ),
+        ),
+        RepositoryProvider<RestoreBackup>.value(
+          value: RestoreBackup(backupRepo, testCodec()),
+        ),
+        RepositoryProvider<BackupFilePicker>.value(
+          value: FakeBackupFilePicker(),
+        ),
         RepositoryProvider<ImportMpesa>.value(
           value: ImportMpesa(
             expenses: expenseRepo,

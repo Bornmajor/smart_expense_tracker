@@ -7,6 +7,7 @@ import '../../../../app/app_routes.dart';
 import '../../../../core/debug/test_clock.dart';
 import '../../../../core/info/app_version.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/theme_x.dart';
 import '../../../../shared/widgets/app_logo.dart';
 import '../../../../shared/widgets/section_header.dart';
 import '../cubit/settings_cubit.dart';
@@ -105,14 +106,32 @@ class SettingsPage extends StatelessWidget {
           const Gap(AppSpacing.xl),
           const SectionHeader('Your data'),
           Card(
-            child: ListTile(
-              leading: const Icon(Icons.backup_outlined),
-              title: const Text('Back up and restore'),
-              subtitle: const Text(
-                'Save everything to a file, or bring it back',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => context.push(AppRoutes.backup),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.backup_outlined),
+                  title: const Text('Back up and restore'),
+                  subtitle: const Text(
+                    'Save everything to a file, or bring it back',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.backup),
+                ),
+                const Divider(),
+                ListTile(
+                  leading: Icon(
+                    Icons.delete_forever_outlined,
+                    color: context.semantic.danger,
+                  ),
+                  title: Text(
+                    'Delete all my data',
+                    style: TextStyle(color: context.semantic.danger),
+                  ),
+                  subtitle: const Text('Back up first, then start again'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push(AppRoutes.eraseData),
+                ),
+              ],
             ),
           ),
           const Gap(AppSpacing.xl),

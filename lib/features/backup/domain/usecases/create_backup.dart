@@ -9,6 +9,7 @@ import '../../../export/domain/repositories/report_sharer.dart';
 import '../backup_codec.dart';
 import '../backup_exception.dart';
 import '../entities/backup_data.dart';
+import '../repositories/backup_history.dart';
 import '../repositories/backup_repository.dart';
 
 /// Makes a backup file of everything in the app and opens the share sheet with
@@ -19,11 +20,13 @@ class CreateBackup {
     required this._codec,
     required this._sharer,
     required this._currencyCode,
+    required this._history,
   });
 
   final BackupRepository _repository;
   final BackupCodec _codec;
   final ReportSharer _sharer;
+  final BackupHistory _history;
 
   /// The currency on screen right now (such as "KES"), or null for plain
   /// numbers. Read each time because the user can change it.
@@ -53,6 +56,7 @@ class CreateBackup {
       await _sharer.share(
         ReportFile(name: name, mimeType: 'application/json', bytes: bytes),
       );
+      await _history.record(read.createdAt);
       return const Success(null);
     } on StorageException {
       return const Failure(StorageFailure());

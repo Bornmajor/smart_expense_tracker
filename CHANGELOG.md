@@ -36,6 +36,7 @@ First release. Nothing has been published to Google Play yet.
 - Heads-up cards on the Summary, worked out on your phone: a possible duplicate charge, an unusually large expense for its category, and a category running well above a usual month. Each can be dismissed and does not come back
 - The app version is shown in Settings, so you can tell which one you have installed
 - Back up and restore: save everything (expenses, categories, budgets, recurring expenses) to one file, optionally locked with a password, and restore it on this or a new phone. A restore shows what is in the file and asks before it replaces anything
+- Delete all my data (Settings, Your data): removes everything and starts the app again as if it had just been installed (the standard categories, the standard settings and the welcome screen), after a warning, a reminder to back up first (with when you last did), and typing DELETE to confirm
 - After a scan, the receipt can be opened large from a "View receipt" button at the top of the form (even when scrolled down), as well as from its thumbnail, with pinch and double-tap zoom. The thumbnail now shows that it can be enlarged
 - Tap a category (or a budget) on the Summary to see the expenses behind it for that month, with the month, count and total on top. You can edit or delete them from there
 - Search the expense list by vendor or title (every word has to match), and filter it by category, dates and amount. Active filters show as chips you can remove, with how many expenses match and what they add up to

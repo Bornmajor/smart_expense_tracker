@@ -16,10 +16,14 @@ import '../core/links/url_launcher_link_opener.dart';
 import '../core/utils/currency.dart';
 import '../core/theme/app_theme.dart';
 import '../features/backup/data/crypto/cryptography_backup_cipher.dart';
+import '../features/backup/data/repositories/backup_history_impl.dart';
 import '../features/backup/data/repositories/backup_repository_impl.dart';
 import '../features/backup/data/repositories/file_selector_backup_picker.dart';
+import '../features/backup/data/repositories/shared_preferences_reset.dart';
 import '../features/backup/domain/backup_codec.dart';
 import '../features/backup/domain/repositories/backup_file_picker.dart';
+import '../features/backup/domain/repositories/backup_history.dart';
+import '../features/backup/domain/usecases/erase_all_data.dart';
 import '../features/backup/domain/repositories/backup_repository.dart';
 import '../features/backup/domain/usecases/create_backup.dart';
 import '../features/backup/domain/usecases/restore_backup.dart';
@@ -148,10 +152,18 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
     widget.database,
   );
   late final BackupCodec _backupCodec = BackupCodec(CryptographyBackupCipher());
+  late final BackupHistory _backupHistory = BackupHistoryImpl(
+    widget.preferences,
+  );
+  late final EraseAllData _eraseAllData = EraseAllData(
+    _backupRepository,
+    SharedPreferencesReset(widget.preferences),
+  );
   late final CreateBackup _createBackup = CreateBackup(
     repository: _backupRepository,
     codec: _backupCodec,
     sharer: const SharePlusReportSharer(),
+    history: _backupHistory,
     currencyCode: () {
       final code = _settings.currency.code;
       return code.isEmpty ? null : code;
@@ -207,6 +219,8 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
         RepositoryProvider<AppVersion>.value(value: widget.appVersion),
         RepositoryProvider<CreateBackup>.value(value: _createBackup),
+        RepositoryProvider<BackupHistory>.value(value: _backupHistory),
+        RepositoryProvider<EraseAllData>.value(value: _eraseAllData),
         RepositoryProvider<RestoreBackup>.value(value: _restoreBackup),
         RepositoryProvider<BackupFilePicker>(
           create: (_) => const FileSelectorBackupPicker(),

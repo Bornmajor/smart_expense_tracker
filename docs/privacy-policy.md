@@ -68,7 +68,7 @@ If device backup is turned on, Android may include the app's data in your phone'
 
 ## Keeping and deleting your data
 
-Your data stays on your phone until you remove it. You can delete expenses and categories inside the app. Uninstalling the app removes all the data it stored on your phone. Copies in a device backup are separate and are managed in your Google account settings.
+Your data stays on your phone until you remove it. You can delete expenses and categories inside the app, or everything at once with "Delete all my data" in Settings, which also puts the settings back to the start. It is deleted from your phone at once and cannot be undone; the developer has no copy to delete because nothing is uploaded. Backup files you made earlier, and anything you shared, stay where you saved them until you delete them yourself. Uninstalling the app removes all the data it stored on your phone. Copies in a device backup are separate and are managed in your Google account settings.
 
 ## Sharing and selling
 
