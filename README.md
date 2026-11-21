@@ -102,7 +102,7 @@ Choose a receipt photo or PDF and the vendor, date and total are read on the pho
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/scan-add-sheet.jpg" width="180" alt="Add expense sheet: enter manually or choose a receipt photo"><br><sub>1. Choose how to add</sub></td>
+    <td align="center"><img src="docs/screenshots/scan-add-sheet.jpg" width="180" alt="Add expense sheet: enter manually, type one line, paste an M-Pesa message, choose a receipt file or take a photo"><br><sub>1. Choose how to add</sub></td>
     <td align="center"><img src="docs/screenshots/scan-pick.jpg" width="180" alt="The phone's photo picker, with the photos blurred"><br><sub>2. Pick a receipt photo</sub></td>
     <td align="center"><img src="docs/screenshots/scan-review.jpg" width="180" alt="Add expense form filled in from a receipt, with a note to check the amount"><br><sub>3. Check what was read</sub></td>
     <td align="center"><img src="docs/screenshots/scan-saved.jpg" width="180" alt="The expense saved in the list"><br><sub>4. Saved</sub></td>
