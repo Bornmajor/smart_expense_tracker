@@ -63,6 +63,8 @@ class SaveRepeatingExpense {
       createdAt: now,
       updatedAt: now,
       recurringRuleId: ruleId,
+      originalAmountMinor: draft.originalAmountMinor,
+      originalCurrency: draft.originalCurrency,
     );
 
     try {

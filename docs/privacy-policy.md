@@ -13,6 +13,7 @@
 - Your expenses stay on your phone. The developer does not receive them, and the app does not upload them.
 - Receipt photos are read on your phone and then deleted.
 - There are no ads, no tracking and no selling of data.
+- The app downloads public exchange rates once a day to convert amounts. No personal data is sent for this.
 - One part of the app, Google's ML Kit text reader, may send anonymous performance information to Google. Details are in "Google components" below.
 
 ## What the app stores on your phone
@@ -34,6 +35,10 @@ SpendWise IQ does not ask for or collect your name, email address, phone number,
 When you choose a photo or a PDF of a receipt, the app receives only that file, through Android's file picker. For a PDF it draws the first page as a picture. It reads the text in the picture on your phone, using Google's ML Kit on-device text recognition, and fills in the expense form for you to check.
 
 The picture the app reads is a temporary copy. It is deleted when you close the form, whether or not you saved the expense, and it is also deleted if reading the photo fails. The app does not upload the photo or the text it reads. Only what you save in the expense is kept.
+
+## Exchange rates
+
+When you enter an amount in another currency, the app converts it using exchange rates. It downloads the rates from a public service, ExchangeRate-API, at most once a day, and keeps them on your phone so conversion works offline. The request contains no expenses, amounts or personal details. Like any website, the service can see your device's IP address. If you never use another currency, the rates are still downloaded in the background, but nothing about you is sent.
 
 ## Exporting reports
 

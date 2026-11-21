@@ -14,7 +14,7 @@ class AppDatabase extends _$AppDatabase {
       AppDatabase(driftDatabase(name: 'spendwise_iq'));
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -32,6 +32,12 @@ class AppDatabase extends _$AppDatabase {
       if (from < 4) {
         await migrator.createTable(recurringRules);
         await migrator.addColumn(expenses, expenses.recurringRuleId);
+      }
+      // Version 5 added the original amount of a converted expense. Existing
+      // expenses were all entered in the one currency, so both stay empty.
+      if (from < 5) {
+        await migrator.addColumn(expenses, expenses.originalAmountMinor);
+        await migrator.addColumn(expenses, expenses.originalCurrency);
       }
     },
     beforeOpen: (details) => customStatement('PRAGMA foreign_keys = ON'),

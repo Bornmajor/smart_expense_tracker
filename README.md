@@ -73,6 +73,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 - [x] Remember the category you use for each vendor, so the next expense or scan starts with it
 - [x] Monthly budgets for each category and overall, with progress bars on the Summary that turn amber near the limit and red when passed
 - [x] Recurring expenses and subscriptions, added automatically when they come due (weekly, monthly or yearly), with what they add up to each month. A "Repeat this expense" box on the add form turns a scanned or typed bill into one
+- [x] Convert an amount in another currency with the latest daily rate (downloaded once a day, saved on the phone, rate and date shown)
 
 ### Planned
 
@@ -103,6 +104,7 @@ Status: `[x]` implemented, `[ ]` planned. Planned items that are never built wil
 | Charts | `fl_chart` (if a chart is added) | Planned |
 | Export | `pdf`, `share_plus` (CSV is written by hand) | In use |
 | Receipt files | `file_selector` (Files app), `pdfx` (draws a PDF page) | In use |
+| Exchange rates | `http` (one daily request to ExchangeRate-API) | In use |
 
 ## Architecture
 

@@ -15,12 +15,18 @@ import '../core/links/url_launcher_link_opener.dart';
 import '../core/utils/currency.dart';
 import '../core/theme/app_theme.dart';
 import '../features/budgets/data/repositories/budget_repository_impl.dart';
+import '../features/currency_conversion/data/datasources/http_rates_source.dart';
+import '../features/currency_conversion/data/repositories/exchange_rate_repository_impl.dart';
+import '../features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
 import '../features/budgets/domain/repositories/budget_repository.dart';
 import '../features/categories/data/repositories/category_repository_impl.dart';
 import '../features/categories/domain/repositories/category_repository.dart';
 import '../features/expenses/data/repositories/expense_repository_impl.dart';
 import '../features/expenses/domain/repositories/expense_repository.dart';
 import '../features/expenses/domain/usecases/vendor_category_memory.dart';
+
+import 'package:http/http.dart' as http;
+
 import '../features/export/data/repositories/share_plus_report_sharer.dart';
 import '../features/export/data/writers/bundled_fonts.dart';
 import '../features/export/data/writers/csv_report_writer.dart';
@@ -60,6 +66,7 @@ class SpendWiseApp extends StatefulWidget {
     required this.preferences,
     this.biometricAuthenticator,
     this.fallbackCurrency,
+    this.exchangeRates,
   });
 
   final AppDatabase database;
@@ -70,6 +77,9 @@ class SpendWiseApp extends StatefulWidget {
 
   /// Replaced in tests; defaults to the currency for the phone's country.
   final Currency? fallbackCurrency;
+
+  /// Replaced in tests; defaults to the real service.
+  final ExchangeRateRepository? exchangeRates;
 
   @override
   State<SpendWiseApp> createState() => _SpendWiseAppState();
@@ -108,18 +118,27 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
     onboarding: _onboarding,
     lockSession: _lockSession,
   );
+  late final ExchangeRateRepository _exchangeRates =
+      widget.exchangeRates ??
+      ExchangeRateRepositoryImpl(
+        widget.preferences,
+        HttpRatesSource(http.Client()),
+      );
   late final AppLifecycleListener _lifecycle;
 
   @override
   void initState() {
     super.initState();
     unawaited(_generateDue());
+    // Rates are fetched at most once a day, and a failure changes nothing.
+    unawaited(_exchangeRates.refresh());
     _lifecycle = AppLifecycleListener(
       onHide: _lockSession.didEnterBackground,
       onShow: () {
         _lockSession.didReturnToForeground();
         // A new day may have started while the app was in the background.
         unawaited(_generateDue());
+        unawaited(_exchangeRates.refresh());
       },
     );
   }
@@ -148,6 +167,7 @@ class _SpendWiseAppState extends State<SpendWiseApp> {
         ),
         RepositoryProvider<RecurringRepository>.value(value: _recurring),
         RepositoryProvider<GenerateDueExpenses>.value(value: _generateDue),
+        RepositoryProvider<ExchangeRateRepository>.value(value: _exchangeRates),
         RepositoryProvider<BudgetRepository>(
           create: (_) => BudgetRepositoryImpl(widget.database),
         ),

@@ -15,6 +15,8 @@ import '../../../categories/presentation/cubit/category_actions_cubit.dart';
 import '../../../categories/presentation/widgets/category_name_sheet.dart';
 import '../../../scan/domain/entities/scan_result.dart';
 import '../../../scan/presentation/widgets/scan_review_panel.dart';
+import '../../../currency_conversion/domain/entities/exchange_rates.dart';
+import '../../../currency_conversion/domain/repositories/exchange_rate_repository.dart';
 import '../../../recurring/domain/entities/recurrence_frequency.dart';
 import '../../../settings/presentation/cubit/settings_cubit.dart';
 import '../../domain/entities/expense.dart';
@@ -25,6 +27,7 @@ import '../cubit/expense_form_cubit.dart';
 import '../cubit/expense_form_state.dart';
 import '../validation_messages.dart';
 import '../widgets/category_picker.dart';
+import '../widgets/currency_converter.dart';
 import '../widgets/date_field.dart';
 
 /// The form for adding an expense, or editing one when [original] is given.
@@ -58,6 +61,10 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
   late String? _categoryId;
 
   /// True when the user wants this expense to repeat. Only offered when adding.
+  /// The other currency the amount is written in, or null for the app's own.
+  Currency? _from;
+  ExchangeRates? _rates;
+
   bool _repeat = false;
   RecurrenceFrequency _frequency = RecurrenceFrequency.monthly;
   final _vendorFocus = FocusNode();
@@ -144,6 +151,21 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     });
   }
 
+  Future<void> _chooseCurrency(Currency appCurrency) async {
+    final repository = context.read<ExchangeRateRepository>();
+    final picked = await showOtherCurrencySheet(
+      context,
+      appCurrency: appCurrency,
+    );
+    if (picked == null || !mounted) return;
+    setState(() => _from = picked);
+    // Shows the saved rates at once, then newer ones if they arrive.
+    final saved = await repository.saved();
+    if (mounted) setState(() => _rates = saved);
+    final fresh = await repository.refresh();
+    if (mounted) setState(() => _rates = fresh);
+  }
+
   void _submit() {
     context.read<ExpenseFormCubit>().submit(
       title: _title.text,
@@ -152,6 +174,8 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
       date: _date,
       categoryId: _categoryId,
       repeat: _repeat ? _frequency : null,
+      fromCurrency: _from?.code,
+      toCurrency: context.read<SettingsCubit>().state.currency.code,
     );
   }
 
@@ -227,6 +251,18 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
     }
   }
 
+  /// For an expense that was converted: what was actually paid.
+  String? _originalNote() {
+    final original = widget.original;
+    final minor = original?.originalAmountMinor;
+    final code = original?.originalCurrency;
+    if (minor == null || code == null) return null;
+    final text =
+        Currency.byCode(code)?.formatWithCode(minor) ??
+        '$code ${Money.format(minor)}';
+    return 'Originally $text';
+  }
+
   String? _error(ExpenseFormState state, String field) {
     final code = state.fieldErrors[field];
     return code == null ? null : expenseErrorMessage(code);
@@ -299,6 +335,9 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                       const Gap(AppSpacing.md),
                       TextField(
                         controller: _amount,
+                        onChanged: _from == null
+                            ? null
+                            : (_) => setState(() {}),
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
@@ -306,12 +345,26 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
                           FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                         ],
                         decoration: InputDecoration(
-                          labelText: currency.code.isEmpty
+                          labelText: _from != null
+                              ? 'Amount (${_from!.code})'
+                              : currency.code.isEmpty
                               ? 'Amount'
                               : 'Amount (${currency.code})',
                           errorText: _error(state, ExpenseField.amount),
+                          helperText: _originalNote(),
                         ),
                       ),
+                      // Needs a currency of its own to convert into, and is for new
+                      // expenses only: an edit keeps the figure it already has.
+                      if (!_isEditing && currency.code.isNotEmpty)
+                        CurrencyConverter(
+                          appCurrency: currency,
+                          from: _from,
+                          rates: _rates,
+                          amountText: _amount.text,
+                          onChoose: () => _chooseCurrency(currency),
+                          onClear: () => setState(() => _from = null),
+                        ),
                       const Gap(AppSpacing.md),
                       DateField(
                         date: _date,

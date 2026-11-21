@@ -34,6 +34,7 @@
       <li>Your expenses stay on your phone. The developer does not receive them, and the app does not upload them.</li>
       <li>Receipt photos are read on your phone and then deleted.</li>
       <li>There are no ads, no tracking and no selling of data.</li>
+    <li>The app downloads public exchange rates once a day to convert amounts. No personal data is sent for this.</li>
       <li>One part of the app, Google's ML Kit text reader, may send anonymous performance information to Google. Details are in "Google components" below.</li>
     </ul>
   </div>
@@ -53,6 +54,9 @@
   <h2>Receipt photos</h2>
   <p>When you choose a photo or a PDF of a receipt, the app receives only that file, through Android's file picker. For a PDF it draws the first page as a picture. It reads the text in the picture on your phone, using Google's ML Kit on-device text recognition, and fills in the expense form for you to check.</p>
   <p>The picture the app reads is a temporary copy. It is deleted when you close the form, whether or not you saved the expense, and it is also deleted if reading the photo fails. The app does not upload the photo or the text it reads. Only what you save in the expense is kept.</p>
+
+  <h2>Exchange rates</h2>
+  <p>When you enter an amount in another currency, the app converts it using exchange rates. It downloads the rates from a public service, ExchangeRate-API, at most once a day, and keeps them on your phone so conversion works offline. The request contains no expenses, amounts or personal details. Like any website, the service can see your device's IP address. If you never use another currency, the rates are still downloaded in the background, but nothing about you is sent.</p>
 
   <h2>Exporting reports</h2>
   <p>You can export a month of your expenses as a PDF or a CSV file. The file is made on your phone and handed to Android's share sheet. It goes only where you choose to send it, such as your Google Drive or a message to someone. The app does not upload it, and the developer does not receive it.</p>

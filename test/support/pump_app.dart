@@ -1,3 +1,4 @@
+import 'package:smart_expense_tracker/features/currency_conversion/domain/repositories/exchange_rate_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +32,7 @@ Future<LockSession> pumpRouterApp(
   FakeExpenseRepository? expenses,
   FakeBudgetRepository? budgets,
   FakeRecurringRepository? recurring,
+  FakeExchangeRateRepository? rates,
   FakeCategoryRepository? categories,
   FakeReceiptPhotoSource? photos,
   FakeReceiptTextReader? reader,
@@ -83,6 +85,9 @@ Future<LockSession> pumpRouterApp(
           value: budgets ?? FakeBudgetRepository(),
         ),
         RepositoryProvider<RecurringRepository>.value(value: recurringRepo),
+        RepositoryProvider<ExchangeRateRepository>.value(
+          value: rates ?? FakeExchangeRateRepository(),
+        ),
         RepositoryProvider<GenerateDueExpenses>.value(
           value: GenerateDueExpenses(recurringRepo),
         ),

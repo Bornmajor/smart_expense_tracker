@@ -12,6 +12,7 @@ import '../cubit/settings_cubit.dart';
 import '../cubit/settings_state.dart';
 import '../widgets/biometric_switch_tile.dart';
 import '../widgets/currency_tile.dart';
+import '../widgets/exchange_rates_credit_tile.dart';
 import '../widgets/privacy_policy_tile.dart';
 import '../widgets/test_date_tile.dart';
 import '../widgets/theme_mode_selector.dart';
@@ -101,6 +102,7 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const PrivacyPolicyTile(),
+          const ExchangeRatesCreditTile(),
           // TEMPORARY developer tools, only in debug builds and the dev flavor.
           if (developerToolsEnabled) ...[
             const Gap(AppSpacing.xl),
