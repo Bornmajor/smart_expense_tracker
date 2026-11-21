@@ -20,12 +20,11 @@ Push, merge to `dev`, promote to `uat`, and try the build on a few phones. Then 
 
 All of it is plain Dart on the phone: exact numbers worked out in code, shown with written text. A language model could be added later behind a switch, on phones that support it.
 
-1. **CSV import** (backup and restore to a file is built). Bring expenses in from a spreadsheet or another app.
-2. **Search and filters** on the expense list: by text (vendor, title), category, date range and amount. The first thing a real user misses once there are many expenses.
-3. **Typed quick add.** Type one line such as "lunch 350 cafe yesterday" and get the form filled in. A plain Dart parser finds the amount (including "1.5k"), the date words (today, yesterday, a weekday, "on 12 Nov") and the vendor after "at"; the rest becomes the title. The category comes from vendor memory, then the word list used for scanning. It guesses, so the form still shows. English only to start; Swahili words such as "jana" could be added. Effort: small to medium.
-4. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
-5. **Better insights.** A spending-trend chart, this month against last month (and the biggest change), and an alert for a subscription that changed price. The heads-up cards and Safe to spend are built; these make the insights easier to see at a glance.
-6. **Polish.** Use the bundled Inter font in the app itself (the files are already in `assets/fonts` for the PDF; set `AppTypography.fontFamily` and declare them under `fonts:` in `pubspec.yaml`), the app PIN below as a fallback to biometrics, and a pass over empty states and onboarding.
+1. **Search and filters** on the expense list: by text (vendor, title), category, date range and amount. The first thing a real user misses once there are many expenses. **Start with the Summary link:** tapping a category on the Summary (in the "By category" list, and a budget row) opens the expense list for that category and that month, so the expenses behind a total can be seen, edited or deleted without going back and remembering which ones were under Bills. It reuses the list, with the month and category shown as removable filter chips; swipe delete with undo and tap to edit keep working. The same filters then become the general filter bar.
+2. **Typed quick add.** Type one line such as "lunch 350 cafe yesterday" and get the form filled in. A plain Dart parser finds the amount (including "1.5k"), the date words (today, yesterday, a weekday, "on 12 Nov") and the vendor after "at"; the rest becomes the title. The category comes from vendor memory, then the word list used for scanning. It guesses, so the form still shows. English only to start; Swahili words such as "jana" could be added. Effort: small to medium.
+3. **M-Pesa paste or share capture.** Share a confirmation message to the app, or paste it, and a plain Dart parser pre-fills the add-expense form (amount, who or what was paid, date, transaction code). The user checks it before saving. It needs no SMS permission: Google Play restricts SMS access to the default SMS app apart from narrow exceptions that need a declaration and review. The transaction code is stored on the expense (a new column) so the same message cannot be added twice. Needs real sample messages, with names and numbers removed, to build and test the parser.
+4. **Better insights.** A spending-trend chart, this month against last month (and the biggest change), and an alert for a subscription that changed price. The heads-up cards and Safe to spend are built; these make the insights easier to see at a glance.
+5. **Polish.** Use the bundled Inter font in the app itself (the files are already in `assets/fonts` for the PDF; set `AppTypography.fontFamily` and declare them under `fonts:` in `pubspec.yaml`), the app PIN below as a fallback to biometrics, and a pass over empty states and onboarding.
 
 ## Portfolio showcase (cheap, high value)
 
@@ -107,6 +106,7 @@ A bottom sheet that tells the user about a feature they have not tried, or a tas
 
 **More later ideas**
 
+- **CSV import.** Bring expenses in from a spreadsheet or another app (backup and restore to a file is built; this is separate).
 - Auto-open the converter when a scan sees "$" or "USD" in the receipt.
 - A different currency on each expense (today one currency is used for all amounts, with the original amount kept on a converted expense).
 - Optional receipt attachment.

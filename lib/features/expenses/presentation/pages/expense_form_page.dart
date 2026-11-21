@@ -14,6 +14,7 @@ import '../../../categories/presentation/category_validation_messages.dart';
 import '../../../categories/presentation/cubit/category_actions_cubit.dart';
 import '../../../categories/presentation/widgets/category_name_sheet.dart';
 import '../../../scan/domain/entities/scan_result.dart';
+import '../../../scan/presentation/widgets/receipt_viewer.dart';
 import '../../../scan/presentation/widgets/scan_review_panel.dart';
 import '../../../currency_conversion/domain/entities/exchange_rates.dart';
 import '../../../currency_conversion/domain/repositories/exchange_rate_repository.dart';
@@ -281,6 +282,15 @@ class _ExpenseFormPageState extends State<ExpenseFormPage> {
           appBar: AppBar(
             title: Text(_isEditing ? 'Edit expense' : 'Add expense'),
             actions: [
+              // After a scan: the receipt is one tap away, even when the form has
+              // been scrolled down to the category or the Save button.
+              if (widget.scan != null)
+                IconButton(
+                  icon: const Icon(Icons.receipt_long_outlined),
+                  tooltip: 'View receipt',
+                  onPressed: () =>
+                      showReceiptViewer(context, widget.scan!.photoPath),
+                ),
               if (_isEditing)
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
