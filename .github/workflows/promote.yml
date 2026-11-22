@@ -1,0 +1,67 @@
+name: Promote on Google Play
+
+# Moves a release already on Google Play to the next track, without building
+# again (so the testers get the very same file, with the same version code).
+#
+#   internal -> closed       (closed testing is the "alpha" track in the API)
+#   closed   -> production
+#
+# Start it by hand from the Actions tab: Run workflow, then choose the two
+# tracks. Promoting to production waits for your approval, like the release
+# workflow does, and is a draft unless the repository variables say otherwise.
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: Promote from this track
+        type: choice
+        options: [internal, alpha, production]
+        default: internal
+      to:
+        description: Promote to this track (alpha is closed testing)
+        type: choice
+        options: [alpha, production]
+        default: alpha
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Promote ${{ inputs.from }} to ${{ inputs.to }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # Same gate as a production release: required reviewers on "production".
+    environment: ${{ inputs.to == 'production' && 'production' || 'internal' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+          working-directory: android
+
+      - name: Write the Play key from the secret
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]; then
+            echo "::error::Missing repository secret PLAY_SERVICE_ACCOUNT_JSON"
+            exit 1
+          fi
+          echo "$PLAY_SERVICE_ACCOUNT_JSON" > android/play-service-account.json
+
+      - name: Promote with Fastlane
+        working-directory: android
+        env:
+          PLAY_JSON_KEY_FILE: play-service-account.json
+          # Closed testing can go straight to testers; production is a draft
+          # until you press Roll out, unless PLAY_PRODUCTION_STATUS says so.
+          PLAY_RELEASE_STATUS: ${{ inputs.to == 'production' && (vars.PLAY_PRODUCTION_STATUS || 'draft') || 'completed' }}
+          PLAY_ROLLOUT: ${{ vars.PLAY_PRODUCTION_ROLLOUT }}
+        run: bundle exec fastlane promote from:${{ inputs.from }} to:${{ inputs.to }}
