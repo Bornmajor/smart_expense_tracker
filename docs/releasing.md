@@ -205,6 +205,15 @@ PLAY_JSON_KEY_FILE=play-service-account.json bundle exec fastlane promote from:i
 
 Fastlane needs Ruby, which is awkward on Windows. It works in WSL or any Linux or Mac shell.
 
+### Promote from GitHub, with no Ruby on your machine
+
+The **Promote on Google Play** workflow does the same thing from the Actions tab (Run workflow). Pick the tracks:
+
+- `internal` to `alpha` sends the internal build to closed testing (closed testing is called `alpha` in the Play API).
+- `alpha` to `production` sends the closed-testing build to production. It waits for your approval, and is a draft until you press Roll out, unless `PLAY_PRODUCTION_STATUS` says otherwise.
+
+Nothing is built again, so testers get the same file and version code. If the closed track has a different name in Play Console (a custom closed track), use that track's name in `android/fastlane/Fastfile` instead of `alpha`.
+
 ## First production release
 
 Google has required new personal developer accounts to run a **closed test with at least 12 testers for 14 days** before they can apply for production access. Check the current rules in Play Console, because Google changes them. Start the closed test early. Production also needs the store listing, privacy policy, content rating and data safety form to be complete, and the first review can take days.
